@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Guarantee something is visible even if Tailwind or JS is slow/broken */
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+body {
+  @apply bg-war-bg text-war-white antialiased font-sans font-normal;
+}
+
+/* Fallback so content is never invisible */
+body {
+  background-color: #020806;
+  color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-medium tracking-tight;
+}
+
+::selection {
+  background: rgba(110, 231, 183, 0.28);
+  color: #fff;
+}
+
+.app-shell::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  opacity: 0.32;
+  background:
+    linear-gradient(
+      102deg,
+      transparent 0 13%,
+      rgba(52, 211, 153, 0.12) 13.08% 13.14%,
+      transparent 13.22% 100%
+    ),
+    linear-gradient(
+      176deg,
+      transparent 0 29%,
+      rgba(16, 185, 129, 0.1) 29.08% 29.16%,
+      transparent 29.3% 100%
+    ),
+    linear-gradient(
+      92deg,
+      transparent 0 71%,
+      rgba(110, 231, 183, 0.08) 71.08% 71.13%,
+      transparent 71.2% 100%
+    );
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+.app-shell::after {
+  position: absolute;
+  top: 82px;
+  right: -12vw;
+  width: 72vw;
+  height: 1px;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(52, 211, 153, 0.75),
+    rgba(52, 211, 153, 0.08),
+    transparent
+  );
+  box-shadow: 0 0 18px rgba(52, 211, 153, 0.22);
+  transform: rotate(-4deg);
+  transform-origin: right center;
+}
+
+.signal-frame::before {
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  width: 8rem;
+  height: 2px;
+  content: "";
+  background: #6ee7b7;
+  box-shadow: 0 0 18px rgba(110, 231, 183, 0.7);
+}
+
+.globe-field {
+  background-image:
+    radial-gradient(
+      circle at 18% 24%,
+      rgba(110, 231, 183, 0.55) 0 0.6px,
+      transparent 0.9px
+    ),
+    radial-gradient(
+      circle at 72% 66%,
+      rgba(148, 163, 184, 0.45) 0 0.6px,
+      transparent 0.9px
+    ),
+    radial-gradient(
+      circle at 42% 82%,
+      rgba(52, 211, 153, 0.35) 0 0.5px,
+      transparent 0.8px
+    ),
+    radial-gradient(ellipse at 50% 50%, rgba(5, 46, 35, 0.28), transparent 68%);
+  background-size:
+    173px 137px,
+    211px 187px,
+    263px 229px,
+    100% 100%;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 211, 153, 0.26) transparent;
+}
