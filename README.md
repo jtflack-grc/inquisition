@@ -2,6 +2,8 @@
 
 **Interrogate the loss story.**
 
+**Live casebook:** https://jtflack-grc.github.io/inquisition/
+
 INQUISITION is a public, browser-based casebook for examining the financial shape of public cyber incidents. Choose from 34 documented cases, inspect the evidence record, challenge the assumptions behind each loss category, and simulate how the materiality range changes.
 
 The application is intentionally retrospective. It does not scrape live sources, make legal materiality determinations, or disguise teaching assumptions as measured losses.
