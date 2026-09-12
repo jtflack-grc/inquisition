@@ -15,6 +15,7 @@ import {
   selectSelectedIncident,
   useIncidentStore,
 } from "../store/incidentStore";
+import { TimelinePlaybackControls } from "./TimelinePlaybackControls";
 
 const EVIDENCE_GROUP_ORDER: {
   key: "sec" | "lawsuit" | "regulator" | "news";
@@ -501,6 +502,7 @@ export function IncidentIntelPanel() {
                         timeline). Compare gaps between intrusion narrative,
                         public story, and issuer/regulator artifacts.
                       </p>
+                      <TimelinePlaybackControls incident={selected} />
                       <ol className="space-y-2.5 list-decimal list-inside marker:text-sky-500/80">
                         {selected.disclosureTimeline.map((ev, idx) => (
                           <li

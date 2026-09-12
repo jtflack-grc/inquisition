@@ -11,34 +11,36 @@ interface TimelinePlaybackState {
   reset: () => void;
 }
 
-export const useTimelinePlaybackStore = create<TimelinePlaybackState>((set) => ({
-  incidentId: null,
-  step: null,
-  playing: false,
-  stepStartedAt: 0,
+export const useTimelinePlaybackStore = create<TimelinePlaybackState>(
+  (set) => ({
+    incidentId: null,
+    step: null,
+    playing: false,
+    stepStartedAt: 0,
 
-  start: (incidentId, step = 0) =>
-    set({
-      incidentId,
-      step,
-      playing: true,
-      stepStartedAt: Date.now(),
-    }),
+    start: (incidentId, step = 0) =>
+      set({
+        incidentId,
+        step,
+        playing: true,
+        stepStartedAt: Date.now(),
+      }),
 
-  pause: () => set({ playing: false }),
+    pause: () => set({ playing: false }),
 
-  setStep: (incidentId, step) =>
-    set({
-      incidentId,
-      step,
-      stepStartedAt: Date.now(),
-    }),
+    setStep: (incidentId, step) =>
+      set({
+        incidentId,
+        step,
+        stepStartedAt: Date.now(),
+      }),
 
-  reset: () =>
-    set({
-      incidentId: null,
-      step: null,
-      playing: false,
-      stepStartedAt: 0,
-    }),
-}));
+    reset: () =>
+      set({
+        incidentId: null,
+        step: null,
+        playing: false,
+        stepStartedAt: 0,
+      }),
+  })
+);
