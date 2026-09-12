@@ -88,7 +88,9 @@ export function ScenarioGlobe() {
   const clickHandlerRef = useRef<any>(null);
   const [showPopup, setShowPopup] = useState(true);
   const [ready, setReady] = useState(false);
-  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(null);
+  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(
+    null
+  );
   const [terrainState, setTerrainState] = useState<
     "loading" | "streaming" | "fallback" | "error"
   >("loading");
@@ -104,7 +106,8 @@ export function ScenarioGlobe() {
   );
 
   const hoveredIncident = useMemo(
-    () => incidents.find((incident) => incident.id === hoveredIncidentId) ?? null,
+    () =>
+      incidents.find((incident) => incident.id === hoveredIncidentId) ?? null,
     [hoveredIncidentId, incidents]
   );
 
@@ -121,12 +124,16 @@ export function ScenarioGlobe() {
 
       let terrainProvider: any;
       try {
-        terrainProvider = await Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(
-          ARCGIS_TERRAIN_URL
-        );
+        terrainProvider =
+          await Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(
+            ARCGIS_TERRAIN_URL
+          );
         if (!disposed) setTerrainState("streaming");
       } catch (error) {
-        console.warn("Cesium terrain unavailable; using ellipsoid fallback.", error);
+        console.warn(
+          "Cesium terrain unavailable; using ellipsoid fallback.",
+          error
+        );
         terrainProvider = new Cesium.EllipsoidTerrainProvider();
         if (!disposed) setTerrainState("fallback");
       }
@@ -158,11 +165,13 @@ export function ScenarioGlobe() {
       viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
 
       try {
-        const imageryProvider = await Cesium.ArcGisMapServerImageryProvider.fromUrl(
-          ARCGIS_IMAGERY_URL
-        );
+        const imageryProvider =
+          await Cesium.ArcGisMapServerImageryProvider.fromUrl(
+            ARCGIS_IMAGERY_URL
+          );
         if (!disposed && viewer && !viewer.isDestroyed()) {
-          const layer = viewer.imageryLayers.addImageryProvider(imageryProvider);
+          const layer =
+            viewer.imageryLayers.addImageryProvider(imageryProvider);
           layer.brightness = 0.8;
           layer.contrast = 1.07;
           layer.saturation = 0.78;
@@ -205,7 +214,9 @@ export function ScenarioGlobe() {
         const picked = viewer.scene.pick(movement.endPosition);
         const incidentId = picked?.id?.__inquisitionIncidentId;
         const nextId = incidentId ? String(incidentId) : null;
-        setHoveredIncidentId((current) => (current === nextId ? current : nextId));
+        setHoveredIncidentId((current) =>
+          current === nextId ? current : nextId
+        );
         viewer.scene.canvas.style.cursor = nextId ? "pointer" : "default";
       }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
@@ -282,7 +293,8 @@ export function ScenarioGlobe() {
         semiMinorAxis: 70_000,
         material: Cesium.Color.fromCssColorString("#d0a668").withAlpha(0.12),
         outline: true,
-        outlineColor: Cesium.Color.fromCssColorString("#d0a668").withAlpha(0.82),
+        outlineColor:
+          Cesium.Color.fromCssColorString("#d0a668").withAlpha(0.82),
         height: 0,
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
@@ -347,7 +359,8 @@ export function ScenarioGlobe() {
       <div className="absolute inset-0" />
 
       <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
-        {hotspots.length} cases · {terrainState === "streaming" ? "terrain streamed" : terrainState}
+        {hotspots.length} cases ·{" "}
+        {terrainState === "streaming" ? "terrain streamed" : terrainState}
       </div>
 
       {hoveredIncident && hoveredIncident.id !== selectedId && (
@@ -427,10 +440,14 @@ export function ScenarioGlobe() {
             </div>
 
             <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3">
-              <h3 className="text-xs font-semibold text-war-muted mb-2">Company</h3>
+              <h3 className="text-xs font-semibold text-war-muted mb-2">
+                Company
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <div className="text-war-muted text-[10px] mb-0.5">Headquarters</div>
+                  <div className="text-war-muted text-[10px] mb-0.5">
+                    Headquarters
+                  </div>
                   <div className="text-war-white font-medium text-[11px] leading-snug">
                     {selected.company.headquartersLabel}
                   </div>
@@ -443,7 +460,9 @@ export function ScenarioGlobe() {
                 </div>
                 {selected.company.employeeCount != null && (
                   <div>
-                    <div className="text-war-muted text-[10px] mb-0.5">Employees</div>
+                    <div className="text-war-muted text-[10px] mb-0.5">
+                      Employees
+                    </div>
                     <div className="text-war-white font-medium">
                       {selected.company.employeeCount.toLocaleString()}
                     </div>
@@ -451,7 +470,9 @@ export function ScenarioGlobe() {
                 )}
                 {selected.company.foundedYear != null && (
                   <div>
-                    <div className="text-war-muted text-[10px] mb-0.5">Founded</div>
+                    <div className="text-war-muted text-[10px] mb-0.5">
+                      Founded
+                    </div>
                     <div className="text-war-white font-medium">
                       {selected.company.foundedYear}
                     </div>
@@ -459,7 +480,9 @@ export function ScenarioGlobe() {
                 )}
                 {selected.company.secCik && (
                   <div className="col-span-2">
-                    <div className="text-war-muted text-[10px] mb-0.5">SEC CIK</div>
+                    <div className="text-war-muted text-[10px] mb-0.5">
+                      SEC CIK
+                    </div>
                     <div className="text-war-white font-medium font-mono text-[11px]">
                       {selected.company.secCik}
                     </div>
@@ -469,10 +492,13 @@ export function ScenarioGlobe() {
             </div>
 
             <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3">
-              <h3 className="text-xs font-semibold text-war-muted mb-3">Financial snapshot</h3>
+              <h3 className="text-xs font-semibold text-war-muted mb-3">
+                Financial snapshot
+              </h3>
               {fin?.isIllustrative && (
                 <div className="mb-2 rounded-lg border border-amber-500/40 bg-amber-950/25 px-2 py-1.5 text-[9px] text-amber-100/90">
-                  Illustrative scale for materiality teaching—not filed cyber loss lines. Confirm in {fin.filingForm ?? "SEC"} filings.
+                  Illustrative scale for materiality teaching—not filed cyber
+                  loss lines. Confirm in {fin.filingForm ?? "SEC"} filings.
                 </div>
               )}
               {fin?.fiscalYearLabel && (
@@ -519,7 +545,9 @@ export function ScenarioGlobe() {
                   </div>
                 </div>
                 <div className="rounded-lg bg-black/40 p-2 border border-war-border/30 col-span-2">
-                  <div className="text-war-muted text-[10px] mb-1">Net income</div>
+                  <div className="text-war-muted text-[10px] mb-1">
+                    Net income
+                  </div>
                   <div className="text-base font-semibold font-mono text-war-white">
                     {fin?.netIncomeUSDm != null
                       ? `$${fin.netIncomeUSDm.toLocaleString()}M`
@@ -555,7 +583,9 @@ export function ScenarioGlobe() {
                 </h3>
                 {globeLesson.identification.length > 0 && (
                   <div>
-                    <div className="text-[9px] text-war-muted mb-1">Identification & detection</div>
+                    <div className="text-[9px] text-war-muted mb-1">
+                      Identification & detection
+                    </div>
                     <ul className="list-disc list-inside space-y-1 text-[10px] text-sky-100/90 leading-relaxed">
                       {globeLesson.identification.map((line, index) => (
                         <li key={index}>{line}</li>
@@ -565,7 +595,9 @@ export function ScenarioGlobe() {
                 )}
                 {globeLesson.prevention.length > 0 && (
                   <div>
-                    <div className="text-[9px] text-war-muted mb-1">Prevention & hardening</div>
+                    <div className="text-[9px] text-war-muted mb-1">
+                      Prevention & hardening
+                    </div>
                     <ul className="list-disc list-inside space-y-1 text-[10px] text-emerald-100/90 leading-relaxed">
                       {globeLesson.prevention.map((line, index) => (
                         <li key={index}>{line}</li>
