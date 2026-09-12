@@ -38,7 +38,7 @@ Use the same foundation as IMPACT:
 
 # Inquisition-specific identity
 
-Muted green is the evidence/provenance accent, not a general decoration color. Amber indicates caution or illustrative assumptions. Red marks adverse materiality or selected-country risk context. Steel blue is informational. Muted violet may distinguish research/taxonomy material when useful.
+Muted green is the evidence/provenance accent, not a general decoration color. Amber indicates caution or illustrative assumptions. Red marks adverse materiality, selected-country risk context, and the incident currently under interrogation. Steel blue is informational. Muted violet may distinguish research/taxonomy material when useful.
 
 Do not turn the whole interface green. The casebook should look neutral enough that provenance colors remain meaningful.
 
@@ -55,8 +55,9 @@ The rails share state. Selecting a case from the evidence rail or a map hotspot 
 The case map is interactive navigation, not decoration.
 
 - Every incident with valid headquarters coordinates remains a selectable hotspot.
-- Unselected hotspots use the quiet information color.
-- The selected hotspot uses muted amber, a larger point, a local ring, and a company label.
+- Unselected hotspots use the quiet steel-blue information color.
+- The selected hotspot becomes a red incident beacon: the point itself breathes in size while two expanding, fading red rings throb outward from the location.
+- The active company label remains attached to the selected point so the red pulse communicates focus, not an unlabeled alarm.
 - Hovering an unselected hotspot reveals company and incident identity without opening a modal.
 - Clicking a hotspot changes the shared incident selection and opens the case briefing.
 - The selected country may receive a subtle translucent risk overlay.
@@ -92,7 +93,7 @@ Dialogs should be concise operating surfaces. The first-run introduction can exp
 # Avoid
 
 - Hacker-terminal green as a page-wide aesthetic.
-- Pulsing dots that do not communicate actual activity.
+- Pulsing or animated dots that do not communicate a real active state.
 - Card-on-card nesting.
 - Wide tracking on ordinary body copy.
 - Pill-shaped buttons for ordinary actions.
