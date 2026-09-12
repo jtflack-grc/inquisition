@@ -57,7 +57,7 @@ export function TimelinePlaybackControls({ incident }: { incident: Incident }) {
   };
 
   const move = (delta: number) => {
-    const base = currentStep ?? 0;
+    const base = currentStep ?? (delta > 0 ? -1 : 0);
     const next = Math.max(0, Math.min(timeline.length - 1, base + delta));
     pause();
     setStep(incident.id, next);
