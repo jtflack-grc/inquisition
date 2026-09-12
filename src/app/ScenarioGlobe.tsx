@@ -297,15 +297,15 @@ export function ScenarioGlobe() {
     const selectedRed = Cesium.Color.fromCssColorString("#e06b6b");
     for (const phaseOffset of [0, 0.5]) {
       const radius = new Cesium.CallbackProperty(() => {
-        const phase = ((Date.now() / 1800 + phaseOffset) % 1 + 1) % 1;
+        const phase = (((Date.now() / 1800 + phaseOffset) % 1) + 1) % 1;
         return 55_000 + phase * 145_000;
       }, false);
       const ringColor = new Cesium.CallbackProperty(() => {
-        const phase = ((Date.now() / 1800 + phaseOffset) % 1 + 1) % 1;
+        const phase = (((Date.now() / 1800 + phaseOffset) % 1) + 1) % 1;
         return selectedRed.withAlpha(Math.max(0.06, 0.9 - phase * 0.84));
       }, false);
       const fillColor = new Cesium.CallbackProperty(() => {
-        const phase = ((Date.now() / 1800 + phaseOffset) % 1 + 1) % 1;
+        const phase = (((Date.now() / 1800 + phaseOffset) % 1) + 1) % 1;
         return selectedRed.withAlpha(Math.max(0.015, 0.13 - phase * 0.11));
       }, false);
 
