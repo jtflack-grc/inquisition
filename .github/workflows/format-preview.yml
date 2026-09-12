@@ -1,0 +1,28 @@
+name: Format preview
+
+on:
+  push:
+    branches: [feat/three-rail-visual-system]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write index.html src/app/ScenarioGlobe.tsx
+      - name: Show formatted files
+        run: |
+          echo '--- INDEX_HTML_BEGIN ---'
+          cat index.html
+          echo '--- INDEX_HTML_END ---'
+          echo '--- SCENARIO_GLOBE_BEGIN ---'
+          cat src/app/ScenarioGlobe.tsx
+          echo '--- SCENARIO_GLOBE_END ---'
