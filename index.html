@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws://localhost:* ws://127.0.0.1:*; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'; worker-src 'self' blob:; manifest-src 'self'"
+      content="default-src 'self'; script-src 'self' https://cesium.com; style-src 'self' 'unsafe-inline' https://cesium.com https://fonts.googleapis.com; img-src 'self' data: blob: https://services.arcgisonline.com https://*.arcgisonline.com; connect-src 'self' ws://localhost:* ws://127.0.0.1:* https://elevation3d.arcgis.com https://services.arcgisonline.com https://*.arcgisonline.com https://cesium.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'; worker-src 'self' blob: https://cesium.com; manifest-src 'self'"
     />
     <meta name="referrer" content="no-referrer" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -14,8 +14,24 @@
       name="description"
       content="Interrogate the loss story across 34 public cyber incidents with cited evidence, transparent assumptions, FAIR-informed loss decomposition, and bounded simulation."
     />
-    <meta name="theme-color" content="#020806" />
+    <meta name="theme-color" content="#07090b" />
     <link rel="canonical" href="%SITE_ORIGIN%/" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      window.CESIUM_BASE_URL = "https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/";
+    </script>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/Cesium.js"></script>
+    <link
+      href="https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/Widgets/widgets.css"
+      rel="stylesheet"
+    />
 
     <!-- Open Graph / Twitter: %SITE_ORIGIN% replaced at build time (see VITE_SITE_ORIGIN in README). -->
     <meta property="og:type" content="website" />
