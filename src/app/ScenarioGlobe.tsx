@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
-import type { Incident } from "../inquisition/types";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
 import {
   selectSelectedIncident,
