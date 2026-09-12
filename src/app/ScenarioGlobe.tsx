@@ -8,6 +8,7 @@ import {
   selectSelectedIncident,
   useIncidentStore,
 } from "../store/incidentStore";
+import { useTimelinePlaybackStore } from "../store/timelinePlaybackStore";
 
 declare global {
   interface Window {
@@ -83,11 +84,18 @@ export function ScenarioGlobe() {
     (s) => s.setSelectedIncidentId
   );
   const selected = useIncidentStore(selectSelectedIncident);
+  const playbackIncidentId = useTimelinePlaybackStore((s) => s.incidentId);
+  const playbackStep = useTimelinePlaybackStore((s) => s.step);
+  const playbackPlaying = useTimelinePlaybackStore((s) => s.playing);
+  const playbackStepStartedAt = useTimelinePlaybackStore(
+    (s) => s.stepStartedAt
+  );
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<any>(null);
   const countrySourceRef = useRef<any>(null);
   const clickHandlerRef = useRef<any>(null);
+  const lastCameraIncidentRef = useRef<string | null>(null);
   const [showPopup, setShowPopup] = useState(true);
   const [ready, setReady] = useState(false);
   const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(
@@ -112,6 +120,20 @@ export function ScenarioGlobe() {
       incidents.find((incident) => incident.id === hoveredIncidentId) ?? null,
     [hoveredIncidentId, incidents]
   );
+
+  const playbackEvent = useMemo(() => {
+    if (
+      !selected ||
+      playbackIncidentId !== selected.id ||
+      playbackStep == null
+    ) {
+      return null;
+    }
+    const timeline = selected.disclosureTimeline ?? [];
+    const event = timeline[playbackStep];
+    if (!event) return null;
+    return { event, index: playbackStep, total: timeline.length };
+  }, [playbackIncidentId, playbackStep, selected]);
 
   useEffect(() => {
     let disposed = false;
@@ -261,8 +283,9 @@ export function ScenarioGlobe() {
         point: {
           pixelSize: isSelected
             ? new Cesium.CallbackProperty(() => {
-                const pulse = (Math.sin(Date.now() / 260) + 1) / 2;
-                return 11 + pulse * 6;
+                const pulseDivisor = playbackEvent ? 180 : 260;
+                const pulse = (Math.sin(Date.now() / pulseDivisor) + 1) / 2;
+                return playbackEvent ? 14 + pulse * 8 : 11 + pulse * 6;
               }, false)
             : 7,
           color: Cesium.Color.fromCssColorString(
@@ -295,17 +318,23 @@ export function ScenarioGlobe() {
     }
 
     const selectedRed = Cesium.Color.fromCssColorString("#e06b6b");
+    const selectedRingPeriod = playbackEvent ? 1350 : 1800;
     for (const phaseOffset of [0, 0.5]) {
       const radius = new Cesium.CallbackProperty(() => {
-        const phase = (((Date.now() / 1800 + phaseOffset) % 1) + 1) % 1;
-        return 55_000 + phase * 145_000;
+        const phase =
+          (((Date.now() / selectedRingPeriod + phaseOffset) % 1) + 1) % 1;
+        return playbackEvent
+          ? 65_000 + phase * 185_000
+          : 55_000 + phase * 145_000;
       }, false);
       const ringColor = new Cesium.CallbackProperty(() => {
-        const phase = (((Date.now() / 1800 + phaseOffset) % 1) + 1) % 1;
+        const phase =
+          (((Date.now() / selectedRingPeriod + phaseOffset) % 1) + 1) % 1;
         return selectedRed.withAlpha(Math.max(0.06, 0.9 - phase * 0.84));
       }, false);
       const fillColor = new Cesium.CallbackProperty(() => {
-        const phase = (((Date.now() / 1800 + phaseOffset) % 1) + 1) % 1;
+        const phase =
+          (((Date.now() / selectedRingPeriod + phaseOffset) % 1) + 1) % 1;
         return selectedRed.withAlpha(Math.max(0.015, 0.13 - phase * 0.11));
       }, false);
 
@@ -327,6 +356,40 @@ export function ScenarioGlobe() {
       selectedPulse.__inquisitionIncidentId = selected.id;
     }
 
+    if (playbackEvent) {
+      const eventRadius = new Cesium.CallbackProperty(() => {
+        const elapsed = Math.max(0, Date.now() - playbackStepStartedAt);
+        const phase = Math.min(1, elapsed / 1500);
+        return 75_000 + phase * 360_000;
+      }, false);
+      const eventOutline = new Cesium.CallbackProperty(() => {
+        const elapsed = Math.max(0, Date.now() - playbackStepStartedAt);
+        const phase = Math.min(1, elapsed / 1500);
+        return selectedRed.withAlpha(Math.max(0.03, 0.95 - phase * 0.92));
+      }, false);
+      const eventFill = new Cesium.CallbackProperty(() => {
+        const elapsed = Math.max(0, Date.now() - playbackStepStartedAt);
+        const phase = Math.min(1, elapsed / 1500);
+        return selectedRed.withAlpha(Math.max(0.005, 0.12 - phase * 0.115));
+      }, false);
+      const eventWave = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(
+          selected.company.hqLon,
+          selected.company.hqLat
+        ),
+        ellipse: {
+          semiMajorAxis: eventRadius,
+          semiMinorAxis: eventRadius,
+          material: new Cesium.ColorMaterialProperty(eventFill),
+          outline: true,
+          outlineColor: eventOutline,
+          height: 0,
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        },
+      });
+      eventWave.__inquisitionIncidentId = selected.id;
+    }
+
     const countrySource = countrySourceRef.current;
     if (countrySource) {
       for (const entity of countrySource.entities.values) {
@@ -339,7 +402,9 @@ export function ScenarioGlobe() {
         entity.__inquisitionSelectedCountry = isSelectedCountry;
         if (entity.polygon) {
           entity.polygon.material = isSelectedCountry
-            ? Cesium.Color.fromCssColorString("#e06b6b").withAlpha(0.18)
+            ? Cesium.Color.fromCssColorString("#e06b6b").withAlpha(
+                playbackEvent ? 0.24 : 0.18
+              )
             : Cesium.Color.TRANSPARENT;
           entity.polygon.outline = isSelectedCountry;
           entity.polygon.outlineColor = isSelectedCountry
@@ -349,21 +414,34 @@ export function ScenarioGlobe() {
       }
     }
 
-    setShowPopup(true);
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(
-        selected.company.hqLon,
-        selected.company.hqLat,
-        10_500_000
-      ),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch: Cesium.Math.toRadians(-90),
-        roll: 0,
-      },
-      duration: 1.4,
-    });
-  }, [hotspots, ready, selected, selectedId]);
+    setShowPopup(!playbackEvent);
+    if (lastCameraIncidentRef.current !== selected.id) {
+      lastCameraIncidentRef.current = selected.id;
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+          selected.company.hqLon,
+          selected.company.hqLat,
+          10_500_000
+        ),
+        orientation: {
+          heading: Cesium.Math.toRadians(0),
+          pitch: Cesium.Math.toRadians(-90),
+          roll: 0,
+        },
+        duration: 1.4,
+      });
+    }
+  }, [
+    hotspots,
+    playbackEvent,
+    playbackIncidentId,
+    playbackPlaying,
+    playbackStep,
+    playbackStepStartedAt,
+    ready,
+    selected,
+    selectedId,
+  ]);
 
   useEffect(() => {
     if (!showPopup) return;
@@ -394,6 +472,28 @@ export function ScenarioGlobe() {
           <div className="mt-0.5 text-[10px] text-slate-400">
             {hoveredIncident.incidentTitle}
           </div>
+        </div>
+      )}
+
+      {playbackEvent && (
+        <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3 shadow-2xl">
+          <div className="flex items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.14em] text-rose-300/85">
+            <span>
+              Case replay · {playbackEvent.index + 1}/{playbackEvent.total}
+            </span>
+            <span>{playbackPlaying ? "Playing" : "Paused"}</span>
+          </div>
+          <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">
+            {playbackEvent.event.dateLabel}
+          </div>
+          <div className="mt-0.5 text-sm font-semibold text-white">
+            {playbackEvent.event.label}
+          </div>
+          {playbackEvent.event.detail && (
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
+              {playbackEvent.event.detail}
+            </p>
+          )}
         </div>
       )}
 
