@@ -355,11 +355,8 @@ export function ScenarioGlobe() {
   const globeLesson = selected ? resolveGlobeSecurityLesson(selected) : null;
 
   return (
-    <div
-      ref={containerRef}
-      className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden"
-    >
-      <div className="absolute inset-0" />
+    <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
+      <div ref={containerRef} className="absolute inset-0" />
 
       <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
         {hotspots.length} cases ·{" "}
