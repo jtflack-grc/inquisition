@@ -16,6 +16,8 @@ declare global {
   }
 }
 
+const CESIUM_BASE_URL =
+  "https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/";
 const ARCGIS_TERRAIN_URL =
   "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
 const ARCGIS_IMAGERY_URL =
@@ -116,6 +118,7 @@ export function ScenarioGlobe() {
     let viewer: any = null;
 
     const initialize = async () => {
+      window.CESIUM_BASE_URL = CESIUM_BASE_URL;
       const Cesium = window.Cesium;
       if (!Cesium || !containerRef.current) {
         setTerrainState("error");
