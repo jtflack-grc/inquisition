@@ -1,0 +1,33 @@
+name: Format selected incident pulse
+
+on:
+  push:
+    branches:
+      - fix/pulse-selected-incident
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/pulse-selected-incident
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write src/app/ScenarioGlobe.tsx
+      - name: Commit formatting
+        run: |
+          if git diff --quiet -- src/app/ScenarioGlobe.tsx; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/ScenarioGlobe.tsx
+          git commit -m "Format selected incident pulse"
+          git push origin HEAD:fix/pulse-selected-incident
