@@ -5,24 +5,29 @@ on:
     branches: [feat/three-rail-visual-system]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: feat/three-rail-visual-system
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
       - run: npx prettier --write index.html src/app/ScenarioGlobe.tsx
-      - name: Show formatted files
+      - name: Commit formatting if needed
         run: |
-          echo '--- INDEX_HTML_BEGIN ---'
-          cat index.html
-          echo '--- INDEX_HTML_END ---'
-          echo '--- SCENARIO_GLOBE_BEGIN ---'
-          cat src/app/ScenarioGlobe.tsx
-          echo '--- SCENARIO_GLOBE_END ---'
+          if git diff --quiet -- index.html src/app/ScenarioGlobe.tsx; then
+            echo "Already formatted"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src/app/ScenarioGlobe.tsx
+          git commit -m "Format Cesium case map"
+          git push origin HEAD:feat/three-rail-visual-system
