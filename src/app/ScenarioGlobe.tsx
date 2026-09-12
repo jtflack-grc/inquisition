@@ -1,14 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useRef, useState } from "react";
-import Globe from "react-globe.gl";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
-import type { Incident } from "../inquisition/types";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
 import {
   selectSelectedIncident,
   useIncidentStore,
 } from "../store/incidentStore";
+
+declare global {
+  interface Window {
+    Cesium: any;
+    CESIUM_BASE_URL?: string;
+  }
+}
+
+const CESIUM_BASE_URL =
+  "https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/";
+const ARCGIS_TERRAIN_URL =
+  "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
+const ARCGIS_IMAGERY_URL =
+  "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer";
 
 interface CountryFeature {
   type: "Feature";
@@ -27,7 +40,6 @@ const COUNTRY_FEATURES = feature(
   countriesTopology.objects.countries
 ).features as CountryFeature[];
 
-/** ISO 3166-1 alpha-2 → GeoJSON `properties.name` variants (subset). */
 const COUNTRY_ALIASES: Record<string, string[]> = {
   US: ["United States of America", "United States", "USA"],
   GB: [
@@ -46,26 +58,22 @@ const COUNTRY_ALIASES: Record<string, string[]> = {
   DK: ["Denmark"],
 };
 
-type GlobePoint = {
-  lat: number;
-  lng: number;
-  id: string;
-  label: string;
-  incident: Incident;
-};
-
-function isHighlightCountry(
-  feature: CountryFeature,
+function isHighlightCountryName(
+  name: string,
   code: string | undefined,
   canonicalHint: string
 ): boolean {
   if (!code) return false;
-  const name = feature.properties.name;
   const aliases = COUNTRY_ALIASES[code] ?? [canonicalHint].filter(Boolean);
-  if (aliases.length === 0) return false;
   return aliases.some(
     (alias) => alias === name || name.includes(alias) || alias.includes(name)
   );
+}
+
+function getEntityCountryName(entity: any): string {
+  const property = entity?.properties?.name;
+  const value = property?.getValue ? property.getValue() : property;
+  return String(value ?? entity?.name ?? "");
 }
 
 export function ScenarioGlobe() {
@@ -76,87 +84,268 @@ export function ScenarioGlobe() {
   );
   const selected = useIncidentStore(selectSelectedIncident);
 
-  // react-globe.gl ref typing expects library GlobeMethods; keep loose ref for pointOfView access
-  const globeRef = useRef<{
-    pointOfView: (
-      pos: { lat: number; lng: number; altitude: number },
-      ms?: number
-    ) => void;
-  } | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dims, setDims] = useState({ w: 640, h: 480 });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const viewerRef = useRef<any>(null);
+  const countrySourceRef = useRef<any>(null);
+  const clickHandlerRef = useRef<any>(null);
   const [showPopup, setShowPopup] = useState(true);
+  const [ready, setReady] = useState(false);
+  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(
+    null
+  );
+  const [terrainState, setTerrainState] = useState<
+    "loading" | "streaming" | "fallback" | "error"
+  >("loading");
 
-  const pointsData = useMemo<GlobePoint[]>(() => {
-    return incidents
-      .filter(
-        (i) =>
-          Number.isFinite(i.company.hqLat) && Number.isFinite(i.company.hqLon)
-      )
-      .map((i) => ({
-        lat: i.company.hqLat,
-        lng: i.company.hqLon,
-        id: i.id,
-        label: i.company.name,
-        incident: i,
-      }));
-  }, [incidents]);
+  const hotspots = useMemo(
+    () =>
+      incidents.filter(
+        (incident) =>
+          Number.isFinite(incident.company.hqLat) &&
+          Number.isFinite(incident.company.hqLon)
+      ),
+    [incidents]
+  );
 
-  const ringsData = useMemo(() => {
-    if (!selected) return [];
-    return [
-      {
-        lat: selected.company.hqLat,
-        lng: selected.company.hqLon,
-        maxRadius: 2,
-        propagationSpeed: 0.5,
+  const hoveredIncident = useMemo(
+    () =>
+      incidents.find((incident) => incident.id === hoveredIncidentId) ?? null,
+    [hoveredIncidentId, incidents]
+  );
+
+  useEffect(() => {
+    let disposed = false;
+    let viewer: any = null;
+
+    const initialize = async () => {
+      window.CESIUM_BASE_URL = CESIUM_BASE_URL;
+      const Cesium = window.Cesium;
+      if (!Cesium || !containerRef.current) {
+        setTerrainState("error");
+        return;
+      }
+
+      let terrainProvider: any;
+      try {
+        terrainProvider =
+          await Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(
+            ARCGIS_TERRAIN_URL
+          );
+        if (!disposed) setTerrainState("streaming");
+      } catch (error) {
+        console.warn(
+          "Cesium terrain unavailable; using ellipsoid fallback.",
+          error
+        );
+        terrainProvider = new Cesium.EllipsoidTerrainProvider();
+        if (!disposed) setTerrainState("fallback");
+      }
+
+      if (disposed || !containerRef.current) return;
+
+      viewer = new Cesium.Viewer(containerRef.current, {
+        animation: false,
+        baseLayer: false,
+        baseLayerPicker: false,
+        fullscreenButton: false,
+        geocoder: false,
+        homeButton: false,
+        infoBox: false,
+        navigationHelpButton: false,
+        sceneModePicker: false,
+        selectionIndicator: false,
+        timeline: false,
+        terrainProvider,
+      });
+      viewerRef.current = viewer;
+
+      viewer.scene.globe.enableLighting = false;
+      viewer.scene.globe.depthTestAgainstTerrain = true;
+      viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#07111b");
+      viewer.scene.highDynamicRange = true;
+      viewer.scene.screenSpaceCameraController.minimumZoomDistance = 100;
+      viewer.scene.screenSpaceCameraController.maximumZoomDistance = 30_000_000;
+      viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
+
+      try {
+        const imageryProvider =
+          await Cesium.ArcGisMapServerImageryProvider.fromUrl(
+            ARCGIS_IMAGERY_URL
+          );
+        if (!disposed && viewer && !viewer.isDestroyed()) {
+          const layer =
+            viewer.imageryLayers.addImageryProvider(imageryProvider);
+          layer.brightness = 0.8;
+          layer.contrast = 1.07;
+          layer.saturation = 0.78;
+        }
+      } catch (error) {
+        console.warn("ArcGIS World Imagery could not be loaded.", error);
+      }
+
+      try {
+        const countries = await Cesium.GeoJsonDataSource.load(
+          { type: "FeatureCollection", features: COUNTRY_FEATURES },
+          { clampToGround: true }
+        );
+        if (!disposed && viewer && !viewer.isDestroyed()) {
+          viewer.dataSources.add(countries);
+          countrySourceRef.current = countries;
+        }
+      } catch (error) {
+        console.warn("Country overlay could not be loaded.", error);
+      }
+
+      if (disposed || !viewer || viewer.isDestroyed()) return;
+
+      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+      handler.setInputAction((movement: any) => {
+        const picked = viewer.scene.pick(movement.position);
+        const entity = picked?.id;
+        const incidentId = entity?.__inquisitionIncidentId;
+        if (incidentId) {
+          setSelectedIncidentId(String(incidentId));
+          setShowPopup(true);
+          return;
+        }
+        if (entity?.__inquisitionSelectedCountry) {
+          setShowPopup((previous) => !previous);
+        }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+      handler.setInputAction((movement: any) => {
+        const picked = viewer.scene.pick(movement.endPosition);
+        const incidentId = picked?.id?.__inquisitionIncidentId;
+        const nextId = incidentId ? String(incidentId) : null;
+        setHoveredIncidentId((current) =>
+          current === nextId ? current : nextId
+        );
+        viewer.scene.canvas.style.cursor = nextId ? "pointer" : "default";
+      }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+      clickHandlerRef.current = handler;
+      setReady(true);
+    };
+
+    void initialize();
+
+    return () => {
+      disposed = true;
+      if (clickHandlerRef.current && !clickHandlerRef.current.isDestroyed()) {
+        clickHandlerRef.current.destroy();
+      }
+      clickHandlerRef.current = null;
+      countrySourceRef.current = null;
+      viewerRef.current = null;
+      if (viewer && !viewer.isDestroyed()) viewer.destroy();
+    };
+  }, [setSelectedIncidentId]);
+
+  useEffect(() => {
+    if (!ready || !selected) return;
+
+    const Cesium = window.Cesium;
+    const viewer = viewerRef.current;
+    if (!Cesium || !viewer || viewer.isDestroyed()) return;
+
+    viewer.entities.removeAll();
+
+    for (const incident of hotspots) {
+      const isSelected = incident.id === selectedId;
+      const entity = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(
+          incident.company.hqLon,
+          incident.company.hqLat,
+          isSelected ? 1800 : 900
+        ),
+        point: {
+          pixelSize: isSelected ? 12 : 7,
+          color: Cesium.Color.fromCssColorString(
+            isSelected ? "#d0a668" : "#7ea4bf"
+          ),
+          outlineColor: Cesium.Color.fromCssColorString(
+            isSelected ? "#fff2d6" : "#11161b"
+          ),
+          outlineWidth: isSelected ? 2 : 1,
+          heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+        },
+        label: isSelected
+          ? {
+              text: incident.company.name,
+              font: "600 13px IBM Plex Sans, sans-serif",
+              fillColor: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 4,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              pixelOffset: new Cesium.Cartesian2(0, -22),
+              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+            }
+          : undefined,
+      });
+      entity.__inquisitionIncidentId = incident.id;
+    }
+
+    const selectedPulse = viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(
+        selected.company.hqLon,
+        selected.company.hqLat
+      ),
+      ellipse: {
+        semiMajorAxis: 70_000,
+        semiMinorAxis: 70_000,
+        material: Cesium.Color.fromCssColorString("#d0a668").withAlpha(0.12),
+        outline: true,
+        outlineColor:
+          Cesium.Color.fromCssColorString("#d0a668").withAlpha(0.82),
+        height: 0,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
-    ];
-  }, [selected]);
-
-  const countryCode = selected?.company.countryCode;
-  const countryHint = selected?.company.headquartersLabel ?? "";
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => {
-      const r = el.getBoundingClientRect();
-      const w = Math.max(200, Math.floor(r.width));
-      const h = Math.max(200, Math.floor(r.height));
-      setDims({ w, h });
     });
-    ro.observe(el);
-    const rect = el.getBoundingClientRect();
-    setDims({
-      w: Math.max(200, Math.floor(rect.width)),
-      h: Math.max(200, Math.floor(rect.height)),
-    });
-    return () => ro.disconnect();
-  }, []);
+    selectedPulse.__inquisitionIncidentId = selected.id;
 
-  useEffect(() => {
-    const globe = globeRef.current;
-    if (!globe?.pointOfView || !selected) return;
-    globe.pointOfView(
-      {
-        lat: selected.company.hqLat,
-        lng: selected.company.hqLon,
-        altitude: 2.0,
-      },
-      1000
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- POV when HQ coords / incident id change
-  }, [selected?.company.hqLat, selected?.company.hqLon, selected?.id]);
+    const countrySource = countrySourceRef.current;
+    if (countrySource) {
+      for (const entity of countrySource.entities.values) {
+        const countryName = getEntityCountryName(entity);
+        const isSelectedCountry = isHighlightCountryName(
+          countryName,
+          selected.company.countryCode,
+          selected.company.headquartersLabel
+        );
+        entity.__inquisitionSelectedCountry = isSelectedCountry;
+        if (entity.polygon) {
+          entity.polygon.material = isSelectedCountry
+            ? Cesium.Color.fromCssColorString("#e06b6b").withAlpha(0.18)
+            : Cesium.Color.TRANSPARENT;
+          entity.polygon.outline = isSelectedCountry;
+          entity.polygon.outlineColor = isSelectedCountry
+            ? Cesium.Color.fromCssColorString("#e89a9a")
+            : Cesium.Color.TRANSPARENT;
+        }
+      }
+    }
 
-  useEffect(() => {
     setShowPopup(true);
-  }, [selected?.id]);
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(
+        selected.company.hqLon,
+        selected.company.hqLat,
+        10_500_000
+      ),
+      orientation: {
+        heading: Cesium.Math.toRadians(0),
+        pitch: Cesium.Math.toRadians(-90),
+        roll: 0,
+      },
+      duration: 1.4,
+    });
+  }, [hotspots, ready, selected, selectedId]);
 
   useEffect(() => {
     if (!showPopup) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowPopup(false);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowPopup(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -168,80 +357,38 @@ export function ScenarioGlobe() {
   return (
     <div
       ref={containerRef}
-      className="globe-field relative w-full h-full min-h-[320px] bg-[#020806]"
+      className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden"
     >
-      <div className="relative z-10 w-full h-full">
-        <Globe
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- react-globe.gl ref is GlobeMethods
-          ref={globeRef as any}
-          width={dims.w}
-          height={dims.h}
-          backgroundColor="rgba(2,6,23,0)"
-          globeImageUrl="./earth-dark.svg"
-          polygonsData={COUNTRY_FEATURES}
-          polygonAltitude={(d: object) =>
-            isHighlightCountry(d as CountryFeature, countryCode, countryHint)
-              ? 0.06
-              : 0.01
-          }
-          polygonCapColor={(d: object) =>
-            isHighlightCountry(d as CountryFeature, countryCode, countryHint)
-              ? "rgba(239,68,68,0.95)"
-              : "rgba(30,64,175,0.65)"
-          }
-          polygonSideColor={() => "rgba(15,23,42,0.9)"}
-          polygonStrokeColor={() => "rgba(15,23,42,0.9)"}
-          atmosphereColor="rgb(96,165,250)"
-          atmosphereAltitude={0.18}
-          showAtmosphere
-          onPolygonClick={(d: object) => {
-            if (
-              isHighlightCountry(d as CountryFeature, countryCode, countryHint)
-            ) {
-              setShowPopup((prev) => !prev);
-            }
-          }}
-          pointsData={pointsData}
-          pointLat="lat"
-          pointLng="lng"
-          pointLabel="label"
-          pointColor={(d: object) =>
-            (d as GlobePoint).id === selectedId
-              ? "rgba(250,204,21,1)"
-              : "rgba(59,130,246,1)"
-          }
-          pointAltitude={0.15}
-          pointRadius={(d: object) =>
-            (d as GlobePoint).id === selectedId ? 0.65 : 0.45
-          }
-          pointResolution={16}
-          onPointClick={(point: object) => {
-            const p = point as GlobePoint;
-            setSelectedIncidentId(p.id);
-            setShowPopup(true);
-          }}
-          ringsData={ringsData}
-          ringLat="lat"
-          ringLng="lng"
-          ringMaxRadius="maxRadius"
-          ringPropagationSpeed="propagationSpeed"
-          ringColor={() => "rgba(96,165,250,0.6)"}
-          ringAltitude={0.12}
-        />
+      <div className="absolute inset-0" />
+
+      <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
+        {hotspots.length} cases ·{" "}
+        {terrainState === "streaming" ? "terrain streamed" : terrainState}
       </div>
+
+      {hoveredIncident && hoveredIncident.id !== selectedId && (
+        <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[260px] rounded border border-white/15 bg-black/80 px-3 py-2">
+          <div className="text-xs font-medium text-white">
+            {hoveredIncident.company.name}
+          </div>
+          <div className="mt-0.5 text-[10px] text-slate-400">
+            {hoveredIncident.incidentTitle}
+          </div>
+        </div>
+      )}
 
       {showPopup && selected && globeLesson && (
         <div
-          className="pointer-events-auto absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-[min(22rem,calc(100%-1rem))] max-h-[min(85vh,560px)] overflow-y-auto rounded-2xl bg-gradient-to-b from-black/95 to-[#020617]/95 border-2 border-war-border/80 px-4 py-4 sm:px-5 sm:py-5 backdrop-blur-xl shadow-2xl z-20"
+          className="pointer-events-auto absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-[min(22rem,calc(100%-1rem))] max-h-[min(85vh,560px)] overflow-y-auto rounded-2xl bg-black/95 border border-war-border px-4 py-4 sm:px-5 sm:py-5 z-20"
           role="dialog"
           aria-label="Incident and HQ details"
         >
           <div className="flex items-start justify-between gap-3 mb-4 pb-4 border-b border-war-border/50">
             <div className="flex-1 min-w-0">
-              <div className="text-[10px] tracking-[0.2em] uppercase text-emerald-400 mb-1 font-semibold truncate">
+              <div className="text-[10px] tracking-[0.12em] uppercase text-emerald-400 mb-1 font-semibold truncate">
                 {selected.company.headquartersLabel}
               </div>
-              <div className="text-xl font-bold text-war-white mb-1">
+              <div className="text-xl font-semibold text-war-white mb-1">
                 {selected.company.name}
               </div>
               <p className="text-xs text-war-muted">
@@ -275,9 +422,7 @@ export function ScenarioGlobe() {
 
           <div className="space-y-4 text-xs">
             <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3 space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-war-muted">
-                Summary
-              </h3>
+              <h3 className="text-xs font-semibold text-war-muted">Summary</h3>
               <div className="text-war-white/90 leading-relaxed text-[11px]">
                 {selected.incidentSummary}
               </div>
@@ -298,7 +443,7 @@ export function ScenarioGlobe() {
             </div>
 
             <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-war-muted mb-2">
+              <h3 className="text-xs font-semibold text-war-muted mb-2">
                 Company
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -350,7 +495,7 @@ export function ScenarioGlobe() {
             </div>
 
             <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-war-muted mb-3">
+              <h3 className="text-xs font-semibold text-war-muted mb-3">
                 Financial snapshot
               </h3>
               {fin?.isIllustrative && (
@@ -388,7 +533,7 @@ export function ScenarioGlobe() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
                   <div className="text-war-muted text-[10px] mb-1">Revenue</div>
-                  <div className="text-lg font-bold text-war-white">
+                  <div className="text-lg font-semibold font-mono text-war-white">
                     {fin?.revenueUSDm != null
                       ? `$${fin.revenueUSDm.toLocaleString()}M`
                       : "—"}
@@ -396,7 +541,7 @@ export function ScenarioGlobe() {
                 </div>
                 <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
                   <div className="text-war-muted text-[10px] mb-1">EBITDA</div>
-                  <div className="text-lg font-bold text-emerald-400">
+                  <div className="text-lg font-semibold font-mono text-emerald-400">
                     {fin?.ebitdaUSDm != null
                       ? `$${fin.ebitdaUSDm.toLocaleString()}M`
                       : "—"}
@@ -406,7 +551,7 @@ export function ScenarioGlobe() {
                   <div className="text-war-muted text-[10px] mb-1">
                     Net income
                   </div>
-                  <div className="text-base font-bold text-war-white">
+                  <div className="text-base font-semibold font-mono text-war-white">
                     {fin?.netIncomeUSDm != null
                       ? `$${fin.netIncomeUSDm.toLocaleString()}M`
                       : "—"}
@@ -416,8 +561,8 @@ export function ScenarioGlobe() {
             </div>
 
             <div className="rounded-xl border border-violet-500/35 bg-violet-950/20 px-3 py-3 space-y-2">
-              <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-violet-300/95">
-                Attack type &amp; mechanics
+              <h3 className="text-[10px] font-semibold text-violet-300/95">
+                Attack type & mechanics
               </h3>
               <p className="text-[11px] text-war-white/90 leading-relaxed">
                 {globeLesson.attackMechanism}
@@ -425,7 +570,7 @@ export function ScenarioGlobe() {
             </div>
 
             <div className="rounded-xl border border-amber-500/40 bg-amber-950/15 px-3 py-3 space-y-1.5">
-              <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-amber-200/95">
+              <h3 className="text-[10px] font-semibold text-amber-200/95">
                 Case-specific analysis
               </h3>
               <p className="text-[10px] text-amber-50/90 leading-relaxed">
@@ -436,29 +581,29 @@ export function ScenarioGlobe() {
             {(globeLesson.identification.length > 0 ||
               globeLesson.prevention.length > 0) && (
               <div className="rounded-xl border border-violet-500/35 bg-violet-950/20 px-3 py-3 space-y-2">
-                <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-violet-300/95">
-                  Detection &amp; prevention (taxonomy-backed)
+                <h3 className="text-[10px] font-semibold text-violet-300/95">
+                  Detection & prevention
                 </h3>
                 {globeLesson.identification.length > 0 && (
                   <div>
-                    <div className="text-[9px] uppercase tracking-wide text-war-muted mb-1">
-                      Identification &amp; detection
+                    <div className="text-[9px] text-war-muted mb-1">
+                      Identification & detection
                     </div>
                     <ul className="list-disc list-inside space-y-1 text-[10px] text-sky-100/90 leading-relaxed">
-                      {globeLesson.identification.map((line, i) => (
-                        <li key={i}>{line}</li>
+                      {globeLesson.identification.map((line, index) => (
+                        <li key={index}>{line}</li>
                       ))}
                     </ul>
                   </div>
                 )}
                 {globeLesson.prevention.length > 0 && (
                   <div>
-                    <div className="text-[9px] uppercase tracking-wide text-war-muted mb-1">
-                      Prevention &amp; hardening
+                    <div className="text-[9px] text-war-muted mb-1">
+                      Prevention & hardening
                     </div>
-                    <ul className="list-disc list-inside space-y-1 text-[10px] text-emerald-100/88 leading-relaxed">
-                      {globeLesson.prevention.map((line, i) => (
-                        <li key={i}>{line}</li>
+                    <ul className="list-disc list-inside space-y-1 text-[10px] text-emerald-100/90 leading-relaxed">
+                      {globeLesson.prevention.map((line, index) => (
+                        <li key={index}>{line}</li>
                       ))}
                     </ul>
                   </div>
@@ -467,16 +612,16 @@ export function ScenarioGlobe() {
             )}
 
             <div className="rounded-xl border border-sky-500/45 bg-sky-950/20 px-3 py-3 space-y-2">
-              <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-sky-200/95">
-                Response &amp; mitigation priorities
+              <h3 className="text-[10px] font-semibold text-sky-200/95">
+                Response & mitigation priorities
               </h3>
               <p className="text-[9px] text-war-muted/90 leading-relaxed">
                 Tailored to this incident profile—execute with your IR retainer,
                 legal, and business continuity leads.
               </p>
-              <ol className="list-decimal list-inside space-y-1.5 text-[10px] text-sky-50/92 leading-relaxed">
-                {globeLesson.mitigationPriority.map((line, i) => (
-                  <li key={i} className="pl-0.5 marker:text-sky-400/90">
+              <ol className="list-decimal list-inside space-y-1.5 text-[10px] text-sky-50/90 leading-relaxed">
+                {globeLesson.mitigationPriority.map((line, index) => (
+                  <li key={index} className="pl-0.5 marker:text-sky-400/90">
                     {line}
                   </li>
                 ))}
