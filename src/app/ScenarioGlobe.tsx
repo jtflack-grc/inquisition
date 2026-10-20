@@ -511,59 +511,58 @@ export function ScenarioGlobe() {
           ref={containerRef}
           className={mapError ? "hidden" : "absolute inset-0"}
         />
-      {mapError && (
-        <ScenarioGlobeFallback
-          hotspots={hotspots}
-          selectedId={selectedId}
-          onSelect={(id) => {
-            setSelectedIncidentId(id);
-            setShowPopup(true);
-          }}
-        />
-      )}
+        {mapError && (
+          <ScenarioGlobeFallback
+            hotspots={hotspots}
+            selectedId={selectedId}
+            onSelect={(id) => {
+              setSelectedIncidentId(id);
+              setShowPopup(true);
+            }}
+          />
+        )}
 
-      <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
-        {hotspots.length} cases ·{" "}
-        {mapError
-          ? "2D backup"
-          : imageryState === "satellite"
-            ? "satellite map"
-            : "vector globe"}
-      </div>
-
-      {hoveredIncident && hoveredIncident.id !== selectedId && (
-        <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[260px] rounded border border-white/15 bg-black/80 px-3 py-2">
-          <div className="text-xs font-medium text-white">
-            {hoveredIncident.company.name}
-          </div>
-          <div className="mt-0.5 text-[10px] text-slate-400">
-            {hoveredIncident.incidentTitle}
-          </div>
+        <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
+          {hotspots.length} cases ·{" "}
+          {mapError
+            ? "2D backup"
+            : imageryState === "satellite"
+              ? "satellite map"
+              : "vector globe"}
         </div>
-      )}
 
-      {playbackEvent && (
-        <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3 shadow-2xl">
-          <div className="flex items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.14em] text-rose-300/85">
-            <span>
-              Case replay · {playbackEvent.index + 1}/{playbackEvent.total}
-            </span>
-            <span>{playbackPlaying ? "Playing" : "Paused"}</span>
+        {hoveredIncident && hoveredIncident.id !== selectedId && (
+          <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[260px] rounded border border-white/15 bg-black/80 px-3 py-2">
+            <div className="text-xs font-medium text-white">
+              {hoveredIncident.company.name}
+            </div>
+            <div className="mt-0.5 text-[10px] text-slate-400">
+              {hoveredIncident.incidentTitle}
+            </div>
           </div>
-          <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">
-            {playbackEvent.event.dateLabel}
-          </div>
-          <div className="mt-0.5 text-sm font-semibold text-white">
-            {playbackEvent.event.label}
-          </div>
-          {playbackEvent.event.detail && (
-            <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
-              {playbackEvent.event.detail}
-            </p>
-          )}
-        </div>
-      )}
+        )}
 
+        {playbackEvent && (
+          <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3 shadow-2xl">
+            <div className="flex items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.14em] text-rose-300/85">
+              <span>
+                Case replay · {playbackEvent.index + 1}/{playbackEvent.total}
+              </span>
+              <span>{playbackPlaying ? "Playing" : "Paused"}</span>
+            </div>
+            <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">
+              {playbackEvent.event.dateLabel}
+            </div>
+            <div className="mt-0.5 text-sm font-semibold text-white">
+              {playbackEvent.event.label}
+            </div>
+            {playbackEvent.event.detail && (
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
+                {playbackEvent.event.detail}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {showPopup && selected && globeLesson && (
@@ -616,232 +615,241 @@ export function ScenarioGlobe() {
             <div className="case-briefing__grid">
               <div className="case-briefing__column">
                 <div className="case-briefing__section space-y-2">
-              <h3 className="text-xs font-semibold text-war-muted">Summary</h3>
-              <div className="text-war-white/90 leading-relaxed text-[11px]">
-                {selected.incidentSummary}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-war-border/30">
-                <div>
-                  <span className="text-war-muted">First reported: </span>
-                  <span className="text-war-white">
-                    {selected.firstReportedLabel}
-                  </span>
+                  <h3 className="text-xs font-semibold text-war-muted">
+                    Summary
+                  </h3>
+                  <div className="text-war-white/90 leading-relaxed text-[11px]">
+                    {selected.incidentSummary}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-war-border/30">
+                    <div>
+                      <span className="text-war-muted">First reported: </span>
+                      <span className="text-war-white">
+                        {selected.firstReportedLabel}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-war-muted">Updated: </span>
+                      <span className="text-war-white">
+                        {selected.lastUpdatedLabel}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-war-muted">Updated: </span>
-                  <span className="text-war-white">
-                    {selected.lastUpdatedLabel}
-                  </span>
-                </div>
-              </div>
-            </div>
 
                 <div className="case-briefing__section">
-              <h3 className="text-xs font-semibold text-war-muted mb-2">
-                Company
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="text-war-muted text-[10px] mb-0.5">
-                    Headquarters
-                  </div>
-                  <div className="text-war-white font-medium text-[11px] leading-snug">
-                    {selected.company.headquartersLabel}
+                  <h3 className="text-xs font-semibold text-war-muted mb-2">
+                    Company
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-war-muted text-[10px] mb-0.5">
+                        Headquarters
+                      </div>
+                      <div className="text-war-white font-medium text-[11px] leading-snug">
+                        {selected.company.headquartersLabel}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-war-muted text-[10px] mb-0.5">
+                        Type
+                      </div>
+                      <div className="text-war-white font-medium">
+                        {selected.company.type}
+                      </div>
+                    </div>
+                    {selected.company.employeeCount != null && (
+                      <div>
+                        <div className="text-war-muted text-[10px] mb-0.5">
+                          Employees
+                        </div>
+                        <div className="text-war-white font-medium">
+                          {selected.company.employeeCount.toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                    {selected.company.foundedYear != null && (
+                      <div>
+                        <div className="text-war-muted text-[10px] mb-0.5">
+                          Founded
+                        </div>
+                        <div className="text-war-white font-medium">
+                          {selected.company.foundedYear}
+                        </div>
+                      </div>
+                    )}
+                    {selected.company.secCik && (
+                      <div className="col-span-2">
+                        <div className="text-war-muted text-[10px] mb-0.5">
+                          SEC CIK
+                        </div>
+                        <div className="text-war-white font-medium font-mono text-[11px]">
+                          {selected.company.secCik}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div>
-                  <div className="text-war-muted text-[10px] mb-0.5">Type</div>
-                  <div className="text-war-white font-medium">
-                    {selected.company.type}
-                  </div>
-                </div>
-                {selected.company.employeeCount != null && (
-                  <div>
-                    <div className="text-war-muted text-[10px] mb-0.5">
-                      Employees
-                    </div>
-                    <div className="text-war-white font-medium">
-                      {selected.company.employeeCount.toLocaleString()}
-                    </div>
-                  </div>
-                )}
-                {selected.company.foundedYear != null && (
-                  <div>
-                    <div className="text-war-muted text-[10px] mb-0.5">
-                      Founded
-                    </div>
-                    <div className="text-war-white font-medium">
-                      {selected.company.foundedYear}
-                    </div>
-                  </div>
-                )}
-                {selected.company.secCik && (
-                  <div className="col-span-2">
-                    <div className="text-war-muted text-[10px] mb-0.5">
-                      SEC CIK
-                    </div>
-                    <div className="text-war-white font-medium font-mono text-[11px]">
-                      {selected.company.secCik}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
 
                 <div className="case-briefing__section">
-              <h3 className="text-xs font-semibold text-war-muted mb-3">
-                Financial snapshot
-              </h3>
-              {fin?.isIllustrative && (
-                <div className="mb-2 rounded-lg border border-amber-500/40 bg-amber-950/25 px-2 py-1.5 text-[9px] text-amber-100/90">
-                  Illustrative scale for materiality teaching—not filed cyber
-                  loss lines. Confirm in {fin.filingForm ?? "SEC"} filings.
-                </div>
-              )}
-              {fin?.fiscalYearLabel && (
-                <p className="text-[10px] text-war-muted mb-2">
-                  {fin.fiscalYearLabel}
-                  {!fin.isIllustrative ? " — from public filings (verify)" : ""}
-                </p>
-              )}
-              {fin?.statementNote && (
-                <p className="text-[9px] text-war-muted/90 mb-2 leading-relaxed">
-                  {fin.statementNote}
-                </p>
-              )}
-              {fin?.filingUrl && (
-                <a
-                  href={fin.filingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block text-[10px] text-sky-400 hover:text-sky-300 underline mb-2"
-                >
-                  Open cited filing index / document →
-                </a>
-              )}
-              {fin?.filingAccessionNumber && (
-                <p className="text-[9px] text-war-muted font-mono mb-2">
-                  Accession: {fin.filingAccessionNumber}
-                </p>
-              )}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
-                  <div className="text-war-muted text-[10px] mb-1">Revenue</div>
-                  <div className="text-lg font-semibold font-mono text-war-white">
-                    {fin?.revenueUSDm != null
-                      ? `$${fin.revenueUSDm.toLocaleString()}M`
-                      : "—"}
+                  <h3 className="text-xs font-semibold text-war-muted mb-3">
+                    Financial snapshot
+                  </h3>
+                  {fin?.isIllustrative && (
+                    <div className="mb-2 rounded-lg border border-amber-500/40 bg-amber-950/25 px-2 py-1.5 text-[9px] text-amber-100/90">
+                      Illustrative scale for materiality teaching—not filed
+                      cyber loss lines. Confirm in {fin.filingForm ?? "SEC"}{" "}
+                      filings.
+                    </div>
+                  )}
+                  {fin?.fiscalYearLabel && (
+                    <p className="text-[10px] text-war-muted mb-2">
+                      {fin.fiscalYearLabel}
+                      {!fin.isIllustrative
+                        ? " — from public filings (verify)"
+                        : ""}
+                    </p>
+                  )}
+                  {fin?.statementNote && (
+                    <p className="text-[9px] text-war-muted/90 mb-2 leading-relaxed">
+                      {fin.statementNote}
+                    </p>
+                  )}
+                  {fin?.filingUrl && (
+                    <a
+                      href={fin.filingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-[10px] text-sky-400 hover:text-sky-300 underline mb-2"
+                    >
+                      Open cited filing index / document →
+                    </a>
+                  )}
+                  {fin?.filingAccessionNumber && (
+                    <p className="text-[9px] text-war-muted font-mono mb-2">
+                      Accession: {fin.filingAccessionNumber}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
+                      <div className="text-war-muted text-[10px] mb-1">
+                        Revenue
+                      </div>
+                      <div className="text-lg font-semibold font-mono text-war-white">
+                        {fin?.revenueUSDm != null
+                          ? `$${fin.revenueUSDm.toLocaleString()}M`
+                          : "—"}
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
+                      <div className="text-war-muted text-[10px] mb-1">
+                        EBITDA
+                      </div>
+                      <div className="text-lg font-semibold font-mono text-emerald-400">
+                        {fin?.ebitdaUSDm != null
+                          ? `$${fin.ebitdaUSDm.toLocaleString()}M`
+                          : "—"}
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-black/40 p-2 border border-war-border/30 col-span-2">
+                      <div className="text-war-muted text-[10px] mb-1">
+                        Net income
+                      </div>
+                      <div className="text-base font-semibold font-mono text-war-white">
+                        {fin?.netIncomeUSDm != null
+                          ? `$${fin.netIncomeUSDm.toLocaleString()}M`
+                          : "—"}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
-                  <div className="text-war-muted text-[10px] mb-1">EBITDA</div>
-                  <div className="text-lg font-semibold font-mono text-emerald-400">
-                    {fin?.ebitdaUSDm != null
-                      ? `$${fin.ebitdaUSDm.toLocaleString()}M`
-                      : "—"}
-                  </div>
-                </div>
-                <div className="rounded-lg bg-black/40 p-2 border border-war-border/30 col-span-2">
-                  <div className="text-war-muted text-[10px] mb-1">
-                    Net income
-                  </div>
-                  <div className="text-base font-semibold font-mono text-war-white">
-                    {fin?.netIncomeUSDm != null
-                      ? `$${fin.netIncomeUSDm.toLocaleString()}M`
-                      : "—"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
               </div>
               <div className="case-briefing__column">
                 <div className="case-briefing__section space-y-2">
-              <h3 className="text-[10px] font-semibold text-violet-300/95">
-                Attack type & mechanics
-              </h3>
-              <p className="text-[11px] text-war-white/90 leading-relaxed">
-                {globeLesson.attackMechanism}
-              </p>
-            </div>
+                  <h3 className="text-[10px] font-semibold text-violet-300/95">
+                    Attack type & mechanics
+                  </h3>
+                  <p className="text-[11px] text-war-white/90 leading-relaxed">
+                    {globeLesson.attackMechanism}
+                  </p>
+                </div>
 
                 <div className="case-briefing__section space-y-1.5">
-              <h3 className="text-[10px] font-semibold text-amber-200/95">
-                Case-specific analysis
-              </h3>
-              <p className="text-[10px] text-amber-50/90 leading-relaxed">
-                {globeLesson.caseAnalysis}
-              </p>
-            </div>
-
+                  <h3 className="text-[10px] font-semibold text-amber-200/95">
+                    Case-specific analysis
+                  </h3>
+                  <p className="text-[10px] text-amber-50/90 leading-relaxed">
+                    {globeLesson.caseAnalysis}
+                  </p>
+                </div>
               </div>
               <div className="case-briefing__column">
-            {(globeLesson.identification.length > 0 ||
-              globeLesson.prevention.length > 0) && (
-                <div className="case-briefing__section space-y-2">
-                <h3 className="text-[10px] font-semibold text-violet-300/95">
-                  Detection & prevention
-                </h3>
-                {globeLesson.identification.length > 0 && (
-                  <div>
-                    <div className="text-[9px] text-war-muted mb-1">
-                      Identification & detection
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-[10px] text-sky-100/90 leading-relaxed">
-                      {globeLesson.identification.map((line, index) => (
-                        <li key={index}>{line}</li>
-                      ))}
-                    </ul>
+                {(globeLesson.identification.length > 0 ||
+                  globeLesson.prevention.length > 0) && (
+                  <div className="case-briefing__section space-y-2">
+                    <h3 className="text-[10px] font-semibold text-violet-300/95">
+                      Detection & prevention
+                    </h3>
+                    {globeLesson.identification.length > 0 && (
+                      <div>
+                        <div className="text-[9px] text-war-muted mb-1">
+                          Identification & detection
+                        </div>
+                        <ul className="list-disc list-inside space-y-1 text-[10px] text-sky-100/90 leading-relaxed">
+                          {globeLesson.identification.map((line, index) => (
+                            <li key={index}>{line}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {globeLesson.prevention.length > 0 && (
+                      <div>
+                        <div className="text-[9px] text-war-muted mb-1">
+                          Prevention & hardening
+                        </div>
+                        <ul className="list-disc list-inside space-y-1 text-[10px] text-emerald-100/90 leading-relaxed">
+                          {globeLesson.prevention.map((line, index) => (
+                            <li key={index}>{line}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
-                {globeLesson.prevention.length > 0 && (
-                  <div>
-                    <div className="text-[9px] text-war-muted mb-1">
-                      Prevention & hardening
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-[10px] text-emerald-100/90 leading-relaxed">
-                      {globeLesson.prevention.map((line, index) => (
-                        <li key={index}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
 
                 <div className="case-briefing__section space-y-2">
-              <h3 className="text-[10px] font-semibold text-sky-200/95">
-                Response & mitigation priorities
-              </h3>
-              <p className="text-[9px] text-war-muted/90 leading-relaxed">
-                Tailored to this incident profile—execute with your IR retainer,
-                legal, and business continuity leads.
-              </p>
-              <ol className="list-decimal list-inside space-y-1.5 text-[10px] text-sky-50/90 leading-relaxed">
-                {globeLesson.mitigationPriority.map((line, index) => (
-                  <li key={index} className="pl-0.5 marker:text-sky-400/90">
-                    {line}
-                  </li>
-                ))}
-              </ol>
-            </div>
+                  <h3 className="text-[10px] font-semibold text-sky-200/95">
+                    Response & mitigation priorities
+                  </h3>
+                  <p className="text-[9px] text-war-muted/90 leading-relaxed">
+                    Tailored to this incident profile—execute with your IR
+                    retainer, legal, and business continuity leads.
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1.5 text-[10px] text-sky-50/90 leading-relaxed">
+                    {globeLesson.mitigationPriority.map((line, index) => (
+                      <li key={index} className="pl-0.5 marker:text-sky-400/90">
+                        {line}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
 
                 <div className="case-briefing__section case-briefing__note space-y-1">
-              <p className="text-[9px] text-war-muted/85 leading-relaxed">
-                <span className="text-war-white/70 font-medium">
-                  Injection-style apps (SQL/LDAP/OS):{" "}
-                </span>
-                parameterized queries / safe APIs, input validation,
-                least-privilege data access, and WAF baselines — even when this
-                case was not injection-led.
-              </p>
-              {globeLesson.mergedTaxonomyHints && (
-                <p className="text-[9px] text-war-muted/70 italic">
-                  Identification/prevention lists include extra bullets from
-                  this incident&apos;s taxonomy tags (merged with any
-                  curator-written notes).
-                </p>
-              )}
+                  <p className="text-[9px] text-war-muted/85 leading-relaxed">
+                    <span className="text-war-white/70 font-medium">
+                      Injection-style apps (SQL/LDAP/OS):{" "}
+                    </span>
+                    parameterized queries / safe APIs, input validation,
+                    least-privilege data access, and WAF baselines — even when
+                    this case was not injection-led.
+                  </p>
+                  {globeLesson.mergedTaxonomyHints && (
+                    <p className="text-[9px] text-war-muted/70 italic">
+                      Identification/prevention lists include extra bullets from
+                      this incident&apos;s taxonomy tags (merged with any
+                      curator-written notes).
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

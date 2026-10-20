@@ -343,7 +343,9 @@ h3 {
   padding: 7px 9px;
   border: 1px solid var(--inq-line-strong);
   background: #111820;
-  font: 500 0.66rem "IBM Plex Mono", monospace;
+  font:
+    500 0.66rem "IBM Plex Mono",
+    monospace;
   white-space: nowrap;
   letter-spacing: 0.025em;
 }
