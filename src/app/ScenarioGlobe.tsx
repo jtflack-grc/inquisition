@@ -506,10 +506,11 @@ export function ScenarioGlobe() {
 
   return (
     <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
-      <div
-        ref={containerRef}
-        className={mapError ? "hidden" : "absolute inset-0"}
-      />
+      <div className="globe-map-stage">
+        <div
+          ref={containerRef}
+          className={mapError ? "hidden" : "absolute inset-0"}
+        />
       {mapError && (
         <ScenarioGlobeFallback
           hotspots={hotspots}
@@ -563,20 +564,24 @@ export function ScenarioGlobe() {
         </div>
       )}
 
+      </div>
+
       {showPopup && selected && globeLesson && (
         <div
-          className="pointer-events-auto absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-[min(22rem,calc(100%-1rem))] max-h-[min(85vh,560px)] overflow-y-auto rounded-2xl bg-black/95 border border-war-border px-4 py-4 sm:px-5 sm:py-5 z-20"
+          key={selected.id}
+          className="case-briefing pointer-events-auto"
           role="dialog"
-          aria-label="Incident and HQ details"
+          aria-label="Incident case briefing"
+          aria-modal="false"
         >
-          <div className="flex items-start justify-between gap-3 mb-4 pb-4 border-b border-war-border/50">
+          <div className="case-briefing__head flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-[10px] tracking-[0.12em] uppercase text-emerald-400 mb-1 font-semibold truncate">
-                {selected.company.headquartersLabel}
+              <div className="text-[10px] tracking-[0.12em] uppercase text-emerald-400 mb-1 font-semibold">
+                CASE BRIEFING / {selected.company.headquartersLabel}
               </div>
-              <div className="text-xl font-semibold text-war-white mb-1">
+              <h2 className="text-lg font-semibold text-war-white mb-1">
                 {selected.company.name}
-              </div>
+              </h2>
               <p className="text-xs text-war-muted">
                 {selected.company.sector ?? selected.company.type}
               </p>
@@ -587,8 +592,8 @@ export function ScenarioGlobe() {
             <button
               type="button"
               onClick={() => setShowPopup(false)}
-              className="text-war-muted hover:text-war-white transition-colors p-1 shrink-0"
-              aria-label="Close"
+              className="case-briefing__close text-war-muted hover:text-war-white transition-colors shrink-0"
+              aria-label="Close case briefing to expand globe"
             >
               <svg
                 className="w-5 h-5"
@@ -603,11 +608,14 @@ export function ScenarioGlobe() {
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
+              <span>Expand map</span>
             </button>
           </div>
 
-          <div className="space-y-4 text-xs">
-            <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3 space-y-2">
+          <div className="case-briefing__body text-xs">
+            <div className="case-briefing__grid">
+              <div className="case-briefing__column">
+                <div className="case-briefing__section space-y-2">
               <h3 className="text-xs font-semibold text-war-muted">Summary</h3>
               <div className="text-war-white/90 leading-relaxed text-[11px]">
                 {selected.incidentSummary}
@@ -628,7 +636,7 @@ export function ScenarioGlobe() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3">
+                <div className="case-briefing__section">
               <h3 className="text-xs font-semibold text-war-muted mb-2">
                 Company
               </h3>
@@ -680,7 +688,7 @@ export function ScenarioGlobe() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-war-border/60 bg-black/45 px-3 py-3">
+                <div className="case-briefing__section">
               <h3 className="text-xs font-semibold text-war-muted mb-3">
                 Financial snapshot
               </h3>
@@ -746,7 +754,9 @@ export function ScenarioGlobe() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-violet-500/35 bg-violet-950/20 px-3 py-3 space-y-2">
+              </div>
+              <div className="case-briefing__column">
+                <div className="case-briefing__section space-y-2">
               <h3 className="text-[10px] font-semibold text-violet-300/95">
                 Attack type & mechanics
               </h3>
@@ -755,7 +765,7 @@ export function ScenarioGlobe() {
               </p>
             </div>
 
-            <div className="rounded-xl border border-amber-500/40 bg-amber-950/15 px-3 py-3 space-y-1.5">
+                <div className="case-briefing__section space-y-1.5">
               <h3 className="text-[10px] font-semibold text-amber-200/95">
                 Case-specific analysis
               </h3>
@@ -764,9 +774,11 @@ export function ScenarioGlobe() {
               </p>
             </div>
 
+              </div>
+              <div className="case-briefing__column">
             {(globeLesson.identification.length > 0 ||
               globeLesson.prevention.length > 0) && (
-              <div className="rounded-xl border border-violet-500/35 bg-violet-950/20 px-3 py-3 space-y-2">
+                <div className="case-briefing__section space-y-2">
                 <h3 className="text-[10px] font-semibold text-violet-300/95">
                   Detection & prevention
                 </h3>
@@ -797,7 +809,7 @@ export function ScenarioGlobe() {
               </div>
             )}
 
-            <div className="rounded-xl border border-sky-500/45 bg-sky-950/20 px-3 py-3 space-y-2">
+                <div className="case-briefing__section space-y-2">
               <h3 className="text-[10px] font-semibold text-sky-200/95">
                 Response & mitigation priorities
               </h3>
@@ -814,7 +826,7 @@ export function ScenarioGlobe() {
               </ol>
             </div>
 
-            <div className="rounded-xl border border-war-border/50 bg-black/30 px-3 py-2.5 space-y-1">
+                <div className="case-briefing__section case-briefing__note space-y-1">
               <p className="text-[9px] text-war-muted/85 leading-relaxed">
                 <span className="text-war-white/70 font-medium">
                   Injection-style apps (SQL/LDAP/OS):{" "}
@@ -830,6 +842,8 @@ export function ScenarioGlobe() {
                   curator-written notes).
                 </p>
               )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
