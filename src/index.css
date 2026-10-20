@@ -471,6 +471,22 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
   backdrop-filter: none !important;
 }
 
+/* Global modal chrome must not turn the dock's header/body into inset cards. */
+.globe-rail .case-briefing > .case-briefing__head,
+.globe-rail .case-briefing > .case-briefing__body {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.globe-rail .case-briefing > .case-briefing__head {
+  border-bottom: 1px solid var(--inq-line) !important;
+}
+
+.globe-rail .case-briefing > .case-briefing__body {
+  background: transparent !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
