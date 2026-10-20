@@ -295,9 +295,148 @@ h3 {
   border-radius: 4px !important;
 }
 
-/* Globe chrome disappears behind the case map. */
+/* The case briefing is a dock, not a tall floating card over the case marker. */
 .globe-field {
   background: #000;
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+}
+
+.globe-map-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.case-briefing {
+  position: relative;
+  z-index: 20;
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  width: 100%;
+  height: min(57%, 600px);
+  min-height: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--inq-line-strong);
+  background: rgba(10, 13, 16, 0.98);
+}
+
+.case-briefing__head {
+  flex: 0 0 auto;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--inq-line);
+  background: #0d1115;
+}
+
+.case-briefing__head h2 {
+  line-height: 1.2;
+}
+
+.case-briefing__close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid var(--inq-line-strong);
+  background: #111820;
+  font: 500 0.66rem "IBM Plex Mono", monospace;
+  white-space: nowrap;
+  letter-spacing: 0.025em;
+}
+
+.case-briefing__close:focus-visible {
+  outline: 2px solid var(--inq-info, #7ea4bf);
+  outline-offset: 2px;
+}
+
+.case-briefing__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 14px 16px 20px;
+}
+
+.case-briefing__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.case-briefing__column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.case-briefing__section {
+  min-width: 0;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--inq-line);
+}
+
+.case-briefing__section:last-child {
+  border-bottom: 0;
+}
+
+.case-briefing__section h3 {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+}
+
+.case-briefing__note {
+  opacity: 0.84;
+}
+
+@container (min-width: 590px) {
+  .case-briefing__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .case-briefing__column:nth-child(3) {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 18px;
+  }
+
+  .case-briefing__note {
+    grid-column: 1 / -1;
+  }
+}
+
+@container (min-width: 800px) {
+  .case-briefing__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+  }
+
+  .case-briefing__column:nth-child(3) {
+    grid-column: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media (max-height: 650px) {
+  .case-briefing {
+    height: 53%;
+  }
+
+  .case-briefing__head {
+    padding-block: 8px;
+  }
 }
 
 .globe-rail [class*="backdrop-blur"] {
