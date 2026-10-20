@@ -25,15 +25,20 @@ function point(coordinates: number[]): [number, number] {
 }
 
 function ringPath(ring: number[][]): string {
-  return ring
-    .map((coordinates, index) => {
-      const [x, y] = point(coordinates);
-      return `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ") + " Z";
+  return (
+    ring
+      .map((coordinates, index) => {
+        const [x, y] = point(coordinates);
+        return `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ") + " Z"
+  );
 }
 
-function geometryPath(geometry: { type: string; coordinates?: unknown }): string {
+function geometryPath(geometry: {
+  type: string;
+  coordinates?: unknown;
+}): string {
   if (geometry.type === "Polygon") {
     return (geometry.coordinates as number[][][]).map(ringPath).join(" ");
   }
@@ -110,7 +115,9 @@ export function ScenarioGlobeFallback({
               }}
               className="cursor-pointer outline-none"
             >
-              <title>{incident.company.name} — {incident.incidentTitle}</title>
+              <title>
+                {incident.company.name} — {incident.incidentTitle}
+              </title>
               {active && (
                 <circle
                   cx={x}
@@ -133,25 +140,29 @@ export function ScenarioGlobeFallback({
             </g>
           );
         })}
-        {selected && (() => {
-          const [x, y] = point([selected.company.hqLon, selected.company.hqLat]);
-          return (
-            <text
-              x={x}
-              y={y > HEIGHT / 2 ? y - 17 : y + 23}
-              fill="#ffffff"
-              stroke="#07111b"
-              strokeWidth={3}
-              paintOrder="stroke"
-              fontSize={13}
-              fontFamily="IBM Plex Sans, sans-serif"
-              textAnchor="middle"
-              pointerEvents="none"
-            >
-              {selected.company.name}
-            </text>
-          );
-        })()}
+        {selected &&
+          (() => {
+            const [x, y] = point([
+              selected.company.hqLon,
+              selected.company.hqLat,
+            ]);
+            return (
+              <text
+                x={x}
+                y={y > HEIGHT / 2 ? y - 17 : y + 23}
+                fill="#ffffff"
+                stroke="#07111b"
+                strokeWidth={3}
+                paintOrder="stroke"
+                fontSize={13}
+                fontFamily="IBM Plex Sans, sans-serif"
+                textAnchor="middle"
+                pointerEvents="none"
+              >
+                {selected.company.name}
+              </text>
+            );
+          })()}
       </svg>
       <p className="absolute bottom-3 left-3 right-3 text-[10px] leading-relaxed text-slate-300">
         3D rendering unavailable in this browser. Case markers, evidence, and

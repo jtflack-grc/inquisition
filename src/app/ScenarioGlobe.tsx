@@ -171,7 +171,10 @@ export function ScenarioGlobe() {
 
         removeRenderError = viewer.scene.renderError.addEventListener(
           (_scene: unknown, error: unknown) => {
-            console.error("Cesium 3D rendering failed; switching to 2D map.", error);
+            console.error(
+              "Cesium 3D rendering failed; switching to 2D map.",
+              error
+            );
             if (!disposed) setMapError("Cesium rendering failed");
           }
         );
@@ -179,7 +182,8 @@ export function ScenarioGlobe() {
         viewer.scene.globe.enableLighting = false;
         // Prevent markers disappearing under the ground at changing tile LODs.
         viewer.scene.globe.depthTestAgainstTerrain = false;
-        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#07111b");
+        viewer.scene.globe.baseColor =
+          Cesium.Color.fromCssColorString("#07111b");
         viewer.scene.highDynamicRange = false;
         viewer.scene.screenSpaceCameraController.minimumZoomDistance = 100;
         viewer.scene.screenSpaceCameraController.maximumZoomDistance = 30_000_000;
@@ -217,9 +221,10 @@ export function ScenarioGlobe() {
         const loadImagery = async () => {
           let layer: any = null;
           try {
-            const provider = await Cesium.ArcGisMapServerImageryProvider.fromUrl(
-              ARCGIS_IMAGERY_URL
-            );
+            const provider =
+              await Cesium.ArcGisMapServerImageryProvider.fromUrl(
+                ARCGIS_IMAGERY_URL
+              );
             if (disposed || !viewer || viewer.isDestroyed()) return;
 
             let failed = false;
@@ -227,7 +232,10 @@ export function ScenarioGlobe() {
               (error: unknown) => {
                 if (failed || disposed) return;
                 failed = true;
-                console.warn("ArcGIS imagery tiles failed; using vector countries.", error);
+                console.warn(
+                  "ArcGIS imagery tiles failed; using vector countries.",
+                  error
+                );
                 if (viewer && !viewer.isDestroyed() && layer) {
                   viewer.imageryLayers.remove(layer, true);
                 }
@@ -240,7 +248,10 @@ export function ScenarioGlobe() {
             layer.saturation = 0.78;
             if (!failed) setImageryState("satellite");
           } catch (error) {
-            console.warn("ArcGIS World Imagery unavailable; using vector countries.", error);
+            console.warn(
+              "ArcGIS World Imagery unavailable; using vector countries.",
+              error
+            );
             if (!disposed) setImageryState("vector");
           }
         };
@@ -264,7 +275,10 @@ export function ScenarioGlobe() {
         void loadImagery();
         void loadCountries();
       } catch (error) {
-        console.error("Cesium initialization failed; switching to 2D map.", error);
+        console.error(
+          "Cesium initialization failed; switching to 2D map.",
+          error
+        );
         if (!disposed) setMapError("Cesium initialization failed");
       }
     };
@@ -492,7 +506,10 @@ export function ScenarioGlobe() {
 
   return (
     <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
-      <div ref={containerRef} className={mapError ? "hidden" : "absolute inset-0"} />
+      <div
+        ref={containerRef}
+        className={mapError ? "hidden" : "absolute inset-0"}
+      />
       {mapError && (
         <ScenarioGlobeFallback
           hotspots={hotspots}
@@ -506,7 +523,11 @@ export function ScenarioGlobe() {
 
       <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
         {hotspots.length} cases ·{" "}
-        {mapError ? "2D backup" : imageryState === "satellite" ? "satellite map" : "vector globe"}
+        {mapError
+          ? "2D backup"
+          : imageryState === "satellite"
+            ? "satellite map"
+            : "vector globe"}
       </div>
 
       {hoveredIncident && hoveredIncident.id !== selectedId && (
