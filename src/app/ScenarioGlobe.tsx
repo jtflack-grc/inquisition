@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
@@ -19,8 +20,6 @@ declare global {
 
 const CESIUM_BASE_URL =
   "https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/";
-const ARCGIS_TERRAIN_URL =
-  "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
 const ARCGIS_IMAGERY_URL =
   "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer";
 
@@ -101,9 +100,11 @@ export function ScenarioGlobe() {
   const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(
     null
   );
-  const [terrainState, setTerrainState] = useState<
-    "loading" | "streaming" | "fallback" | "error"
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [imageryState, setImageryState] = useState<
+    "loading" | "satellite" | "vector"
   >("loading");
+  const [countryReady, setCountryReady] = useState(false);
 
   const hotspots = useMemo(
     () =>
@@ -138,121 +139,142 @@ export function ScenarioGlobe() {
   useEffect(() => {
     let disposed = false;
     let viewer: any = null;
+    let removeRenderError: (() => void) | undefined;
+    let removeImageryError: (() => void) | undefined;
 
-    const initialize = async () => {
+    const initialize = () => {
       window.CESIUM_BASE_URL = CESIUM_BASE_URL;
       const Cesium = window.Cesium;
       if (!Cesium || !containerRef.current) {
-        setTerrainState("error");
+        if (!disposed) setMapError("Cesium failed to load");
         return;
       }
 
-      let terrainProvider: any;
       try {
-        terrainProvider =
-          await Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(
-            ARCGIS_TERRAIN_URL
+        // A distant case globe does not need a remote elevation service.
+        // Construct synchronously so a blocked ArcGIS request cannot block the map.
+        viewer = new Cesium.Viewer(containerRef.current, {
+          animation: false,
+          baseLayer: false,
+          baseLayerPicker: false,
+          fullscreenButton: false,
+          geocoder: false,
+          homeButton: false,
+          infoBox: false,
+          navigationHelpButton: false,
+          sceneModePicker: false,
+          selectionIndicator: false,
+          timeline: false,
+          terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+        });
+        viewerRef.current = viewer;
+
+        removeRenderError = viewer.scene.renderError.addEventListener(
+          (_scene: unknown, error: unknown) => {
+            console.error("Cesium 3D rendering failed; switching to 2D map.", error);
+            if (!disposed) setMapError("Cesium rendering failed");
+          }
+        );
+
+        viewer.scene.globe.enableLighting = false;
+        // Prevent markers disappearing under the ground at changing tile LODs.
+        viewer.scene.globe.depthTestAgainstTerrain = false;
+        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#07111b");
+        viewer.scene.highDynamicRange = false;
+        viewer.scene.screenSpaceCameraController.minimumZoomDistance = 100;
+        viewer.scene.screenSpaceCameraController.maximumZoomDistance = 30_000_000;
+        viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.25);
+
+        const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+        handler.setInputAction((movement: any) => {
+          const picked = viewer.scene.pick(movement.position);
+          const entity = picked?.id;
+          const incidentId = entity?.__inquisitionIncidentId;
+          if (incidentId) {
+            setSelectedIncidentId(String(incidentId));
+            setShowPopup(true);
+            return;
+          }
+          if (entity?.__inquisitionSelectedCountry) {
+            setShowPopup((previous) => !previous);
+          }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+        handler.setInputAction((movement: any) => {
+          const picked = viewer.scene.pick(movement.endPosition);
+          const incidentId = picked?.id?.__inquisitionIncidentId;
+          const nextId = incidentId ? String(incidentId) : null;
+          setHoveredIncidentId((current) =>
+            current === nextId ? current : nextId
           );
-        if (!disposed) setTerrainState("streaming");
+          viewer.scene.canvas.style.cursor = nextId ? "pointer" : "default";
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+        clickHandlerRef.current = handler;
+        setReady(true);
+
+        // Imagery is an enhancement, not a prerequisite for a usable globe.
+        const loadImagery = async () => {
+          let layer: any = null;
+          try {
+            const provider = await Cesium.ArcGisMapServerImageryProvider.fromUrl(
+              ARCGIS_IMAGERY_URL
+            );
+            if (disposed || !viewer || viewer.isDestroyed()) return;
+
+            let failed = false;
+            removeImageryError = provider.errorEvent.addEventListener(
+              (error: unknown) => {
+                if (failed || disposed) return;
+                failed = true;
+                console.warn("ArcGIS imagery tiles failed; using vector countries.", error);
+                if (viewer && !viewer.isDestroyed() && layer) {
+                  viewer.imageryLayers.remove(layer, true);
+                }
+                setImageryState("vector");
+              }
+            );
+            layer = viewer.imageryLayers.addImageryProvider(provider);
+            layer.brightness = 0.8;
+            layer.contrast = 1.07;
+            layer.saturation = 0.78;
+            if (!failed) setImageryState("satellite");
+          } catch (error) {
+            console.warn("ArcGIS World Imagery unavailable; using vector countries.", error);
+            if (!disposed) setImageryState("vector");
+          }
+        };
+
+        const loadCountries = async () => {
+          try {
+            const countries = await Cesium.GeoJsonDataSource.load(
+              { type: "FeatureCollection", features: COUNTRY_FEATURES },
+              { clampToGround: true }
+            );
+            if (disposed || !viewer || viewer.isDestroyed()) return;
+            await viewer.dataSources.add(countries);
+            if (disposed || viewer.isDestroyed()) return;
+            countrySourceRef.current = countries;
+            setCountryReady(true);
+          } catch (error) {
+            console.warn("Country overlay could not be loaded.", error);
+          }
+        };
+
+        void loadImagery();
+        void loadCountries();
       } catch (error) {
-        console.warn(
-          "Cesium terrain unavailable; using ellipsoid fallback.",
-          error
-        );
-        terrainProvider = new Cesium.EllipsoidTerrainProvider();
-        if (!disposed) setTerrainState("fallback");
+        console.error("Cesium initialization failed; switching to 2D map.", error);
+        if (!disposed) setMapError("Cesium initialization failed");
       }
-
-      if (disposed || !containerRef.current) return;
-
-      viewer = new Cesium.Viewer(containerRef.current, {
-        animation: false,
-        baseLayer: false,
-        baseLayerPicker: false,
-        fullscreenButton: false,
-        geocoder: false,
-        homeButton: false,
-        infoBox: false,
-        navigationHelpButton: false,
-        sceneModePicker: false,
-        selectionIndicator: false,
-        timeline: false,
-        terrainProvider,
-      });
-      viewerRef.current = viewer;
-
-      viewer.scene.globe.enableLighting = false;
-      viewer.scene.globe.depthTestAgainstTerrain = true;
-      viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#07111b");
-      viewer.scene.highDynamicRange = true;
-      viewer.scene.screenSpaceCameraController.minimumZoomDistance = 100;
-      viewer.scene.screenSpaceCameraController.maximumZoomDistance = 30_000_000;
-      viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
-
-      try {
-        const imageryProvider =
-          await Cesium.ArcGisMapServerImageryProvider.fromUrl(
-            ARCGIS_IMAGERY_URL
-          );
-        if (!disposed && viewer && !viewer.isDestroyed()) {
-          const layer =
-            viewer.imageryLayers.addImageryProvider(imageryProvider);
-          layer.brightness = 0.8;
-          layer.contrast = 1.07;
-          layer.saturation = 0.78;
-        }
-      } catch (error) {
-        console.warn("ArcGIS World Imagery could not be loaded.", error);
-      }
-
-      try {
-        const countries = await Cesium.GeoJsonDataSource.load(
-          { type: "FeatureCollection", features: COUNTRY_FEATURES },
-          { clampToGround: true }
-        );
-        if (!disposed && viewer && !viewer.isDestroyed()) {
-          viewer.dataSources.add(countries);
-          countrySourceRef.current = countries;
-        }
-      } catch (error) {
-        console.warn("Country overlay could not be loaded.", error);
-      }
-
-      if (disposed || !viewer || viewer.isDestroyed()) return;
-
-      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-      handler.setInputAction((movement: any) => {
-        const picked = viewer.scene.pick(movement.position);
-        const entity = picked?.id;
-        const incidentId = entity?.__inquisitionIncidentId;
-        if (incidentId) {
-          setSelectedIncidentId(String(incidentId));
-          setShowPopup(true);
-          return;
-        }
-        if (entity?.__inquisitionSelectedCountry) {
-          setShowPopup((previous) => !previous);
-        }
-      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
-      handler.setInputAction((movement: any) => {
-        const picked = viewer.scene.pick(movement.endPosition);
-        const incidentId = picked?.id?.__inquisitionIncidentId;
-        const nextId = incidentId ? String(incidentId) : null;
-        setHoveredIncidentId((current) =>
-          current === nextId ? current : nextId
-        );
-        viewer.scene.canvas.style.cursor = nextId ? "pointer" : "default";
-      }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
-      clickHandlerRef.current = handler;
-      setReady(true);
     };
 
-    void initialize();
+    initialize();
 
     return () => {
       disposed = true;
+      removeRenderError?.();
+      removeImageryError?.();
       if (clickHandlerRef.current && !clickHandlerRef.current.isDestroyed()) {
         clickHandlerRef.current.destroy();
       }
@@ -264,7 +286,15 @@ export function ScenarioGlobe() {
   }, [setSelectedIncidentId]);
 
   useEffect(() => {
-    if (!ready || !selected) return;
+    if (!mapError) return;
+    // Stop the broken render loop rather than repeatedly logging WebGL errors.
+    const viewer = viewerRef.current;
+    if (viewer && !viewer.isDestroyed()) viewer.destroy();
+    viewerRef.current = null;
+  }, [mapError]);
+
+  useEffect(() => {
+    if (!ready || !selected || mapError) return;
 
     const Cesium = window.Cesium;
     const viewer = viewerRef.current;
@@ -405,7 +435,9 @@ export function ScenarioGlobe() {
             ? Cesium.Color.fromCssColorString("#e06b6b").withAlpha(
                 playbackEvent ? 0.24 : 0.18
               )
-            : Cesium.Color.TRANSPARENT;
+            : imageryState === "satellite"
+              ? Cesium.Color.TRANSPARENT
+              : Cesium.Color.fromCssColorString("#1d353e").withAlpha(0.85);
           entity.polygon.outline = isSelectedCountry;
           entity.polygon.outlineColor = isSelectedCountry
             ? Cesium.Color.fromCssColorString("#e89a9a")
@@ -432,7 +464,10 @@ export function ScenarioGlobe() {
       });
     }
   }, [
+    countryReady,
     hotspots,
+    imageryState,
+    mapError,
     playbackEvent,
     playbackIncidentId,
     playbackPlaying,
@@ -457,11 +492,21 @@ export function ScenarioGlobe() {
 
   return (
     <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
-      <div ref={containerRef} className="absolute inset-0" />
+      <div ref={containerRef} className={mapError ? "hidden" : "absolute inset-0"} />
+      {mapError && (
+        <ScenarioGlobeFallback
+          hotspots={hotspots}
+          selectedId={selectedId}
+          onSelect={(id) => {
+            setSelectedIncidentId(id);
+            setShowPopup(true);
+          }}
+        />
+      )}
 
       <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
         {hotspots.length} cases ·{" "}
-        {terrainState === "streaming" ? "terrain streamed" : terrainState}
+        {mapError ? "2D backup" : imageryState === "satellite" ? "satellite map" : "vector globe"}
       </div>
 
       {hoveredIncident && hoveredIncident.id !== selectedId && (
