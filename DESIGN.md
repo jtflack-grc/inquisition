@@ -64,6 +64,18 @@ The case map is interactive navigation, not decoration.
 - Default camera framing should show a large, readable globe while keeping the selected hemisphere central.
 - Terrain and imagery may be realistic because geography contributes directly to case comprehension.
 
+## Case briefing dock
+
+A case selection may open a **horizontal briefing below the globe**, rather than a narrow overlay that obscures the active marker.
+
+- Keep the selected hemisphere visible above the briefing, with the map returning to full height when the briefing closes.
+- Group the existing narrative into three readings: incident/company/financial context, attack mechanics/case analysis, and detection/response priorities.
+- Use the globe's **container width**, not the overall browser viewport, to move from one to two to three columns.
+- Preserve all case-specific details, evidence caveats, source links, and teaching limitations. Never turn illustrative financial figures into reported cyber loss.
+- Keep the case identity and an explicit expand-map control visible; confine overflow scrolling to the briefing body so selecting another incident starts at the top.
+- Avoid glass, neon, and stacked card chrome. The briefing should read like a compact research dossier.
+
+
 Do not replace hotspots with a single selected marker. That would remove a core Inquisition navigation behavior.
 
 # Evidence rail
