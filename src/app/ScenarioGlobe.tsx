@@ -2,6 +2,7 @@ import {
   Component,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -28,8 +29,8 @@ const SATELLITE_TEXTURE =
 
 // INHERITANCE's 1.4-altitude opening view filled a full-height panel.
 // INQUISITION's globe shares its rail with a case dossier: frame it closer.
-const DEFAULT_FOCUS_ALTITUDE = 0.32;
-const MIN_FOCUS_ALTITUDE = 0.16;
+const DEFAULT_FOCUS_ALTITUDE = 0.22;
+const MIN_FOCUS_ALTITUDE = 0.1;
 const MAX_FOCUS_ALTITUDE = 2.1;
 
 interface CountryFeature {
@@ -46,6 +47,7 @@ interface GlobePoint {
   id: string;
   label: string;
   title: string;
+  pulseDelay: number;
 }
 
 interface GlobeMethods {
@@ -138,7 +140,10 @@ export function ScenarioGlobe() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const globeRef = useRef<GlobeMethods | null>(null);
   const [dims, setDims] = useState({ w: 640, h: 480 });
-  const [globeReady, setGlobeReady] = useState(false);
+  const [cameraInitialized, setCameraInitialized] = useState(false);
+  const cameraInitializedRef = useRef(false);
+  const lastCameraCaseRef = useRef<string | null>(null);
+  const lastCameraAltitudeRef = useRef<number | null>(null);
   const [mapError, setMapError] = useState(!supportsWebGL());
   const [countries, setCountries] = useState<CountryFeature[]>(COUNTRIES);
   const [nightTextureReady, setNightTextureReady] = useState(false);
@@ -161,12 +166,13 @@ export function ScenarioGlobe() {
   );
   const points = useMemo<GlobePoint[]>(
     () =>
-      hotspots.map((incident) => ({
+      hotspots.map((incident, index) => ({
         lat: incident.company.hqLat,
         lng: incident.company.hqLon,
         id: incident.id,
         label: incident.company.name,
         title: incident.incidentTitle,
+        pulseDelay: -(index % 11) * 0.29,
       })),
     [hotspots]
   );
@@ -285,17 +291,44 @@ export function ScenarioGlobe() {
     };
   }, [satelliteRequested]);
 
-  useEffect(() => {
-    if (!selected || !globeReady || mapError) return;
-    globeRef.current?.pointOfView(
-      {
-        lat: selected.company.hqLat,
-        lng: selected.company.hqLon,
-        altitude: cameraAltitude,
-      },
-      950
-    );
-  }, [selected, globeReady, mapError, cameraAltitude]);
+  // Force the first camera before painting the WebGL stage. The library opens
+  // at altitude 2.5 by default; animating from there caused the distant view
+  // to appear on every reload. Reapply after imagery/globe initialization too.
+  const positionCamera = useCallback(
+    (forceImmediate = false) => {
+      const globe = globeRef.current;
+      if (!globe || !selected || mapError) return;
+      const first = !cameraInitializedRef.current;
+      const changedCase = lastCameraCaseRef.current !== selected.id;
+      const changedZoom = lastCameraAltitudeRef.current !== cameraAltitude;
+      if (!forceImmediate && !first && !changedCase && !changedZoom) return;
+      try {
+        const duration = first || forceImmediate ? 0 : changedCase ? 550 : 200;
+        globe.pointOfView(
+          {
+            lat: selected.company.hqLat,
+            lng: selected.company.hqLon,
+            altitude: cameraAltitude,
+          },
+          duration
+        );
+        globe.controls().autoRotate = false;
+        cameraInitializedRef.current = true;
+        lastCameraCaseRef.current = selected.id;
+        lastCameraAltitudeRef.current = cameraAltitude;
+        setCameraInitialized(true);
+      } catch (error) {
+        // Some devices expose the ref before the renderer initializes.
+        // onGlobeReady retries with an immediate camera position.
+        console.warn("Globe camera not ready; will retry on initialization.", error);
+      }
+    },
+    [selected, mapError, cameraAltitude]
+  );
+
+  useLayoutEffect(() => {
+    positionCamera();
+  }, [positionCamera]);
 
   // During an evidence timeline replay, the timeline callout takes precedence.
   useEffect(() => {
@@ -376,6 +409,7 @@ export function ScenarioGlobe() {
       );
       button.setAttribute("aria-pressed", String(active));
       button.dataset.incidentId = incident.id;
+      button.style.setProperty("--pulse-delay", `${incident.pulseDelay}s`);
       const dot = document.createElement("span");
       dot.className = "globe-case-pin__dot";
       dot.setAttribute("aria-hidden", "true");
@@ -409,7 +443,8 @@ export function ScenarioGlobe() {
           />
         ) : (
           <GlobeErrorBoundary onFailure={() => setMapError(true)}>
-            <Globe
+            <div className={cameraInitialized ? "globe-scene globe-scene--focused" : "globe-scene"}>
+              <Globe
               ref={globeRef as never}
               width={dims.w}
               height={dims.h}
@@ -427,8 +462,8 @@ export function ScenarioGlobe() {
                   countryCode,
                   headquarters
                 )
-                  ? 0.065
-                  : 0.028
+                  ? 0.022
+                  : 0.012
               }
               polygonCapColor={(item: object) =>
                 isSelectedCountry(
@@ -464,42 +499,16 @@ export function ScenarioGlobe() {
                 )
                   setShowPopup((open) => !open);
               }}
-              pointsData={points}
-              pointLat="lat"
-              pointLng="lng"
-              pointLabel="label"
-              pointColor={(item: object) =>
-                (item as GlobePoint).id === selectedId ? "#e06b6b" : "#7ea4bf"
-              }
-              pointAltitude={(item: object) =>
-                (item as GlobePoint).id === selectedId ? 0.12 : 0.06
-              }
-              pointRadius={(item: object) =>
-                (item as GlobePoint).id === selectedId ? 0.6 : 0.37
-              }
-              pointResolution={14}
-              onPointClick={(item: object) =>
-                chooseIncident((item as GlobePoint).id)
-              }
-              onPointHover={(item: object | null) =>
-                setHoveredIncidentId((item as GlobePoint | null)?.id ?? null)
-              }
+              // No raised 3D cylinders: all case locations use surface
+              // pulses with their own accessible HTML click targets.
               htmlElementsData={points}
               htmlLat="lat"
               htmlLng="lng"
-              htmlAltitude={0.16}
+              htmlAltitude={(item: object) =>
+                (item as GlobePoint).id === selectedId ? 0.026 : 0.015
+              }
               htmlElement={createCasePin}
               htmlTransitionDuration={0}
-              labelsData={selectedPoint ? [selectedPoint] : []}
-              labelLat="lat"
-              labelLng="lng"
-              labelText="label"
-              labelColor={() => "#e7ecf0"}
-              labelAltitude={0.15}
-              labelSize={0.68}
-              labelDotRadius={0}
-              labelResolution={2}
-              onLabelClick={() => setShowPopup(true)}
               ringsData={rings}
               ringLat="lat"
               ringLng="lng"
@@ -510,24 +519,11 @@ export function ScenarioGlobe() {
                 "rgba(224,107,107,0.85)",
                 "rgba(224,107,107,0.05)",
               ]}
-              ringAltitude={0.09}
+              ringAltitude={0.027}
               ringResolution={72}
-              onGlobeReady={() => {
-                // Avoid exposing the library's far-away default camera on load.
-                if (globeRef.current) {
-                  globeRef.current.controls().autoRotate = false;
-                  globeRef.current.pointOfView(
-                    {
-                      lat: selected?.company.hqLat ?? 39,
-                      lng: selected?.company.hqLon ?? -98,
-                      altitude: cameraAltitude,
-                    },
-                    0
-                  );
-                }
-                setGlobeReady(true);
-              }}
-            />
+              onGlobeReady={() => positionCamera(true)}
+              />
+            </div>
           </GlobeErrorBoundary>
         )}
 
