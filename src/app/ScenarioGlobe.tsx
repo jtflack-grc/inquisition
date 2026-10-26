@@ -230,13 +230,7 @@ export function ScenarioGlobe() {
       },
       950
     );
-  }, [
-    selected?.id,
-    selected?.company.hqLat,
-    selected?.company.hqLon,
-    globeReady,
-    mapError,
-  ]);
+  }, [selected, globeReady, mapError]);
 
   // During an evidence timeline replay, the timeline callout takes precedence.
   useEffect(() => {
@@ -270,7 +264,7 @@ export function ScenarioGlobe() {
             },
           ]
         : [],
-    [selectedPoint?.id, selectedPoint?.lat, selectedPoint?.lng, playbackEvent]
+    [selectedPoint, playbackEvent]
   );
   const fin = selected?.company.financials;
   const globeLesson = selected ? resolveGlobeSecurityLesson(selected) : null;
