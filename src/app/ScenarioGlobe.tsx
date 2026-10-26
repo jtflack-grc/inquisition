@@ -1,27 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
+import { Component, useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import Globe from "react-globe.gl";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
+import type { Incident } from "../inquisition/types";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
+import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
 import {
   selectSelectedIncident,
   useIncidentStore,
 } from "../store/incidentStore";
 import { useTimelinePlaybackStore } from "../store/timelinePlaybackStore";
 
-declare global {
-  interface Window {
-    Cesium: any;
-    CESIUM_BASE_URL?: string;
-  }
-}
-
-const CESIUM_BASE_URL =
-  "https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/";
-const ARCGIS_IMAGERY_URL =
-  "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer";
+// A single optional equirectangular texture, NOT an elevation or tiled imagery service.
+// The locally bundled charcoal globe is always the default and works offline.
+const SATELLITE_TEXTURE =
+  "https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-blue-marble.jpg";
 
 interface CountryFeature {
   type: "Feature";
@@ -31,22 +26,31 @@ interface CountryFeature {
     coordinates: unknown;
   };
 }
+interface GlobePoint {
+  lat: number;
+  lng: number;
+  id: string;
+  label: string;
+  title: string;
+}
 
-const countriesTopology = countriesTopologyJson as unknown as Topology<{
+interface GlobeMethods {
+  pointOfView: (
+    point: { lat: number; lng: number; altitude: number },
+    durationMs?: number
+  ) => void;
+  controls: () => { autoRotate: boolean };
+}
+
+const topology = countriesTopologyJson as unknown as Topology<{
   countries: GeometryCollection<{ name: string }>;
 }>;
-const COUNTRY_FEATURES = feature(
-  countriesTopology,
-  countriesTopology.objects.countries
-).features as CountryFeature[];
+const COUNTRIES = feature(topology, topology.objects.countries)
+  .features as CountryFeature[];
 
 const COUNTRY_ALIASES: Record<string, string[]> = {
   US: ["United States of America", "United States", "USA"],
-  GB: [
-    "United Kingdom",
-    "UK",
-    "United Kingdom of Great Britain and Northern Ireland",
-  ],
+  GB: ["United Kingdom", "UK", "United Kingdom of Great Britain and Northern Ireland"],
   CA: ["Canada"],
   DE: ["Germany"],
   FR: ["France"],
@@ -58,53 +62,68 @@ const COUNTRY_ALIASES: Record<string, string[]> = {
   DK: ["Denmark"],
 };
 
-function isHighlightCountryName(
-  name: string,
+function isSelectedCountry(
+  country: CountryFeature,
   code: string | undefined,
-  canonicalHint: string
+  headquarters: string
 ): boolean {
   if (!code) return false;
-  const aliases = COUNTRY_ALIASES[code] ?? [canonicalHint].filter(Boolean);
-  return aliases.some(
-    (alias) => alias === name || name.includes(alias) || alias.includes(name)
+  const name = country.properties.name;
+  const aliases = COUNTRY_ALIASES[code] ?? [headquarters].filter(Boolean);
+  return aliases.some((candidate) =>
+    candidate === name || name.includes(candidate) || candidate.includes(name)
   );
 }
 
-function getEntityCountryName(entity: any): string {
-  const property = entity?.properties?.name;
-  const value = property?.getValue ? property.getValue() : property;
-  return String(value ?? entity?.name ?? "");
+function supportsWebGL(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    const context =
+      canvas.getContext("webgl2") || canvas.getContext("webgl");
+    return Boolean(context);
+  } catch {
+    return false;
+  }
+}
+
+/** Render-time errors fall back to the existing offline SVG navigator. */
+class GlobeErrorBoundary extends Component<
+  { children: ReactNode; onFailure: () => void },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: Error) {
+    console.error("3D case globe unavailable; using 2D navigator.", error);
+    this.props.onFailure();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 
 export function ScenarioGlobe() {
   const incidents = useIncidentStore((s) => s.incidents);
   const selectedId = useIncidentStore((s) => s.selectedIncidentId);
-  const setSelectedIncidentId = useIncidentStore(
-    (s) => s.setSelectedIncidentId
-  );
+  const setSelectedIncidentId = useIncidentStore((s) => s.setSelectedIncidentId);
   const selected = useIncidentStore(selectSelectedIncident);
   const playbackIncidentId = useTimelinePlaybackStore((s) => s.incidentId);
   const playbackStep = useTimelinePlaybackStore((s) => s.step);
   const playbackPlaying = useTimelinePlaybackStore((s) => s.playing);
-  const playbackStepStartedAt = useTimelinePlaybackStore(
-    (s) => s.stepStartedAt
-  );
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const viewerRef = useRef<any>(null);
-  const countrySourceRef = useRef<any>(null);
-  const clickHandlerRef = useRef<any>(null);
-  const lastCameraIncidentRef = useRef<string | null>(null);
   const [showPopup, setShowPopup] = useState(true);
-  const [ready, setReady] = useState(false);
-  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(
-    null
-  );
-  const [mapError, setMapError] = useState<string | null>(null);
-  const [imageryState, setImageryState] = useState<
-    "loading" | "satellite" | "vector"
-  >("loading");
-  const [countryReady, setCountryReady] = useState(false);
+  const playbackStepStartedAt = useTimelinePlaybackStore((s) => s.stepStartedAt);
+
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const globeRef = useRef<GlobeMethods | null>(null);
+  const [dims, setDims] = useState({ w: 640, h: 480 });
+  const [globeReady, setGlobeReady] = useState(false);
+  const [mapError, setMapError] = useState(!supportsWebGL());
+  const [satelliteRequested, setSatelliteRequested] = useState(false);
+  const [satelliteReady, setSatelliteReady] = useState(false);
+  const [satelliteUnavailable, setSatelliteUnavailable] = useState(false);
+  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(null);
 
   const hotspots = useMemo(
     () =>
@@ -115,382 +134,101 @@ export function ScenarioGlobe() {
       ),
     [incidents]
   );
-
-  const hoveredIncident = useMemo(
+  const points = useMemo<GlobePoint[]>(
     () =>
-      incidents.find((incident) => incident.id === hoveredIncidentId) ?? null,
-    [hoveredIncidentId, incidents]
+      hotspots.map((incident) => ({
+        lat: incident.company.hqLat,
+        lng: incident.company.hqLon,
+        id: incident.id,
+        label: incident.company.name,
+        title: incident.incidentTitle,
+      })),
+    [hotspots]
   );
+  const selectedPoint = points.find((point) => point.id === selectedId) ?? null;
+  const hoveredIncident =
+    hotspots.find((incident) => incident.id === hoveredIncidentId) ?? null;
 
   const playbackEvent = useMemo(() => {
-    if (
-      !selected ||
-      playbackIncidentId !== selected.id ||
-      playbackStep == null
-    ) {
+    if (!selected || playbackIncidentId !== selected.id || playbackStep == null)
       return null;
-    }
     const timeline = selected.disclosureTimeline ?? [];
     const event = timeline[playbackStep];
     if (!event) return null;
     return { event, index: playbackStep, total: timeline.length };
   }, [playbackIncidentId, playbackStep, selected]);
 
+  // Fit the globe to its own stage (not the entire browser window).
   useEffect(() => {
-    let disposed = false;
-    let viewer: any = null;
-    let removeRenderError: (() => void) | undefined;
-    let removeImageryError: (() => void) | undefined;
+    const stage = stageRef.current;
+    if (!stage) return;
+    const update = () => {
+      const { width, height } = stage.getBoundingClientRect();
+      setDims({
+        w: Math.max(200, Math.floor(width)),
+        h: Math.max(200, Math.floor(height)),
+      });
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(stage);
+    update();
+    return () => observer.disconnect();
+  }, []);
 
-    const initialize = () => {
-      window.CESIUM_BASE_URL = CESIUM_BASE_URL;
-      const Cesium = window.Cesium;
-      if (!Cesium || !containerRef.current) {
-        if (!disposed) setMapError("Cesium failed to load");
-        return;
-      }
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node) return;
+    const handleContextLoss = (event: Event) => {
+      event.preventDefault();
+      console.warn("WebGL context lost; switching to offline case map.");
+      setMapError(true);
+    };
+    node.addEventListener("webglcontextlost", handleContextLoss, true);
+    return () => node.removeEventListener("webglcontextlost", handleContextLoss, true);
+  }, []);
 
-      try {
-        // A distant case globe does not need a remote elevation service.
-        // Construct synchronously so a blocked ArcGIS request cannot block the map.
-        viewer = new Cesium.Viewer(containerRef.current, {
-          animation: false,
-          baseLayer: false,
-          baseLayerPicker: false,
-          fullscreenButton: false,
-          geocoder: false,
-          homeButton: false,
-          infoBox: false,
-          navigationHelpButton: false,
-          sceneModePicker: false,
-          selectionIndicator: false,
-          timeline: false,
-          terrainProvider: new Cesium.EllipsoidTerrainProvider(),
-        });
-        viewerRef.current = viewer;
-
-        removeRenderError = viewer.scene.renderError.addEventListener(
-          (_scene: unknown, error: unknown) => {
-            console.error(
-              "Cesium 3D rendering failed; switching to 2D map.",
-              error
-            );
-            if (!disposed) setMapError("Cesium rendering failed");
-          }
-        );
-
-        viewer.scene.globe.enableLighting = false;
-        // Prevent markers disappearing under the ground at changing tile LODs.
-        viewer.scene.globe.depthTestAgainstTerrain = false;
-        viewer.scene.globe.baseColor =
-          Cesium.Color.fromCssColorString("#07111b");
-        viewer.scene.highDynamicRange = false;
-        viewer.scene.screenSpaceCameraController.minimumZoomDistance = 100;
-        viewer.scene.screenSpaceCameraController.maximumZoomDistance = 30_000_000;
-        viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.25);
-
-        const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-        handler.setInputAction((movement: any) => {
-          const picked = viewer.scene.pick(movement.position);
-          const entity = picked?.id;
-          const incidentId = entity?.__inquisitionIncidentId;
-          if (incidentId) {
-            setSelectedIncidentId(String(incidentId));
-            setShowPopup(true);
-            return;
-          }
-          if (entity?.__inquisitionSelectedCountry) {
-            setShowPopup((previous) => !previous);
-          }
-        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
-        handler.setInputAction((movement: any) => {
-          const picked = viewer.scene.pick(movement.endPosition);
-          const incidentId = picked?.id?.__inquisitionIncidentId;
-          const nextId = incidentId ? String(incidentId) : null;
-          setHoveredIncidentId((current) =>
-            current === nextId ? current : nextId
-          );
-          viewer.scene.canvas.style.cursor = nextId ? "pointer" : "default";
-        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
-        clickHandlerRef.current = handler;
-        setReady(true);
-
-        // Imagery is an enhancement, not a prerequisite for a usable globe.
-        const loadImagery = async () => {
-          let layer: any = null;
-          try {
-            const provider =
-              await Cesium.ArcGisMapServerImageryProvider.fromUrl(
-                ARCGIS_IMAGERY_URL
-              );
-            if (disposed || !viewer || viewer.isDestroyed()) return;
-
-            let failed = false;
-            removeImageryError = provider.errorEvent.addEventListener(
-              (error: unknown) => {
-                if (failed || disposed) return;
-                failed = true;
-                console.warn(
-                  "ArcGIS imagery tiles failed; using vector countries.",
-                  error
-                );
-                if (viewer && !viewer.isDestroyed() && layer) {
-                  viewer.imageryLayers.remove(layer, true);
-                }
-                setImageryState("vector");
-              }
-            );
-            layer = viewer.imageryLayers.addImageryProvider(provider);
-            layer.brightness = 0.8;
-            layer.contrast = 1.07;
-            layer.saturation = 0.78;
-            if (!failed) setImageryState("satellite");
-          } catch (error) {
-            console.warn(
-              "ArcGIS World Imagery unavailable; using vector countries.",
-              error
-            );
-            if (!disposed) setImageryState("vector");
-          }
-        };
-
-        const loadCountries = async () => {
-          try {
-            const countries = await Cesium.GeoJsonDataSource.load(
-              { type: "FeatureCollection", features: COUNTRY_FEATURES },
-              { clampToGround: true }
-            );
-            if (disposed || !viewer || viewer.isDestroyed()) return;
-            await viewer.dataSources.add(countries);
-            if (disposed || viewer.isDestroyed()) return;
-            countrySourceRef.current = countries;
-            setCountryReady(true);
-          } catch (error) {
-            console.warn("Country overlay could not be loaded.", error);
-          }
-        };
-
-        void loadImagery();
-        void loadCountries();
-      } catch (error) {
-        console.error(
-          "Cesium initialization failed; switching to 2D map.",
-          error
-        );
-        if (!disposed) setMapError("Cesium initialization failed");
+  // Satellite mode is opt-in; preflight the image so failure leaves the
+  // locally bundled default intact.
+  useEffect(() => {
+    if (!satelliteRequested) return;
+    let active = true;
+    const texture = new Image();
+    texture.crossOrigin = "anonymous";
+    texture.onload = () => {
+      if (active) {
+        setSatelliteReady(true);
+        setSatelliteUnavailable(false);
       }
     };
-
-    initialize();
-
+    texture.onerror = () => {
+      if (active) {
+        setSatelliteReady(false);
+        setSatelliteRequested(false);
+        setSatelliteUnavailable(true);
+      }
+    };
+    texture.src = SATELLITE_TEXTURE;
     return () => {
-      disposed = true;
-      removeRenderError?.();
-      removeImageryError?.();
-      if (clickHandlerRef.current && !clickHandlerRef.current.isDestroyed()) {
-        clickHandlerRef.current.destroy();
-      }
-      clickHandlerRef.current = null;
-      countrySourceRef.current = null;
-      viewerRef.current = null;
-      if (viewer && !viewer.isDestroyed()) viewer.destroy();
+      active = false;
     };
-  }, [setSelectedIncidentId]);
+  }, [satelliteRequested]);
 
   useEffect(() => {
-    if (!mapError) return;
-    // Stop the broken render loop rather than repeatedly logging WebGL errors.
-    const viewer = viewerRef.current;
-    if (viewer && !viewer.isDestroyed()) viewer.destroy();
-    viewerRef.current = null;
-  }, [mapError]);
+    if (!selected || !globeReady || mapError) return;
+    globeRef.current?.pointOfView(
+      {
+        lat: selected.company.hqLat,
+        lng: selected.company.hqLon,
+        altitude: 1.95,
+      },
+      950
+    );
+  }, [selected?.id, selected?.company.hqLat, selected?.company.hqLon, globeReady, mapError]);
 
+  // During an evidence timeline replay, the timeline callout takes precedence.
   useEffect(() => {
-    if (!ready || !selected || mapError) return;
-
-    const Cesium = window.Cesium;
-    const viewer = viewerRef.current;
-    if (!Cesium || !viewer || viewer.isDestroyed()) return;
-
-    viewer.entities.removeAll();
-
-    for (const incident of hotspots) {
-      const isSelected = incident.id === selectedId;
-      const entity = viewer.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(
-          incident.company.hqLon,
-          incident.company.hqLat,
-          isSelected ? 1800 : 900
-        ),
-        point: {
-          pixelSize: isSelected
-            ? new Cesium.CallbackProperty(() => {
-                const pulseDivisor = playbackEvent ? 180 : 260;
-                const pulse = (Math.sin(Date.now() / pulseDivisor) + 1) / 2;
-                return playbackEvent ? 14 + pulse * 8 : 11 + pulse * 6;
-              }, false)
-            : 7,
-          color: Cesium.Color.fromCssColorString(
-            isSelected ? "#e06b6b" : "#7ea4bf"
-          ),
-          outlineColor: Cesium.Color.fromCssColorString(
-            isSelected ? "#ffe0e0" : "#11161b"
-          ),
-          outlineWidth: isSelected ? 2.5 : 1,
-          heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-          disableDepthTestDistance: isSelected
-            ? Number.POSITIVE_INFINITY
-            : undefined,
-        },
-        label: isSelected
-          ? {
-              text: incident.company.name,
-              font: "600 13px IBM Plex Sans, sans-serif",
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 4,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              pixelOffset: new Cesium.Cartesian2(0, -22),
-              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-              heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-            }
-          : undefined,
-      });
-      entity.__inquisitionIncidentId = incident.id;
-    }
-
-    const selectedRed = Cesium.Color.fromCssColorString("#e06b6b");
-    const selectedRingPeriod = playbackEvent ? 1350 : 1800;
-    for (const phaseOffset of [0, 0.5]) {
-      const radius = new Cesium.CallbackProperty(() => {
-        const phase =
-          (((Date.now() / selectedRingPeriod + phaseOffset) % 1) + 1) % 1;
-        return playbackEvent
-          ? 65_000 + phase * 185_000
-          : 55_000 + phase * 145_000;
-      }, false);
-      const ringColor = new Cesium.CallbackProperty(() => {
-        const phase =
-          (((Date.now() / selectedRingPeriod + phaseOffset) % 1) + 1) % 1;
-        return selectedRed.withAlpha(Math.max(0.06, 0.9 - phase * 0.84));
-      }, false);
-      const fillColor = new Cesium.CallbackProperty(() => {
-        const phase =
-          (((Date.now() / selectedRingPeriod + phaseOffset) % 1) + 1) % 1;
-        return selectedRed.withAlpha(Math.max(0.015, 0.13 - phase * 0.11));
-      }, false);
-
-      const selectedPulse = viewer.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(
-          selected.company.hqLon,
-          selected.company.hqLat
-        ),
-        ellipse: {
-          semiMajorAxis: radius,
-          semiMinorAxis: radius,
-          material: new Cesium.ColorMaterialProperty(fillColor),
-          outline: true,
-          outlineColor: ringColor,
-          height: 0,
-          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        },
-      });
-      selectedPulse.__inquisitionIncidentId = selected.id;
-    }
-
-    if (playbackEvent) {
-      const eventRadius = new Cesium.CallbackProperty(() => {
-        const elapsed = Math.max(0, Date.now() - playbackStepStartedAt);
-        const phase = Math.min(1, elapsed / 1500);
-        return 75_000 + phase * 360_000;
-      }, false);
-      const eventOutline = new Cesium.CallbackProperty(() => {
-        const elapsed = Math.max(0, Date.now() - playbackStepStartedAt);
-        const phase = Math.min(1, elapsed / 1500);
-        return selectedRed.withAlpha(Math.max(0.03, 0.95 - phase * 0.92));
-      }, false);
-      const eventFill = new Cesium.CallbackProperty(() => {
-        const elapsed = Math.max(0, Date.now() - playbackStepStartedAt);
-        const phase = Math.min(1, elapsed / 1500);
-        return selectedRed.withAlpha(Math.max(0.005, 0.12 - phase * 0.115));
-      }, false);
-      const eventWave = viewer.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(
-          selected.company.hqLon,
-          selected.company.hqLat
-        ),
-        ellipse: {
-          semiMajorAxis: eventRadius,
-          semiMinorAxis: eventRadius,
-          material: new Cesium.ColorMaterialProperty(eventFill),
-          outline: true,
-          outlineColor: eventOutline,
-          height: 0,
-          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        },
-      });
-      eventWave.__inquisitionIncidentId = selected.id;
-    }
-
-    const countrySource = countrySourceRef.current;
-    if (countrySource) {
-      for (const entity of countrySource.entities.values) {
-        const countryName = getEntityCountryName(entity);
-        const isSelectedCountry = isHighlightCountryName(
-          countryName,
-          selected.company.countryCode,
-          selected.company.headquartersLabel
-        );
-        entity.__inquisitionSelectedCountry = isSelectedCountry;
-        if (entity.polygon) {
-          entity.polygon.material = isSelectedCountry
-            ? Cesium.Color.fromCssColorString("#e06b6b").withAlpha(
-                playbackEvent ? 0.24 : 0.18
-              )
-            : imageryState === "satellite"
-              ? Cesium.Color.TRANSPARENT
-              : Cesium.Color.fromCssColorString("#1d353e").withAlpha(0.85);
-          entity.polygon.outline = isSelectedCountry;
-          entity.polygon.outlineColor = isSelectedCountry
-            ? Cesium.Color.fromCssColorString("#e89a9a")
-            : Cesium.Color.TRANSPARENT;
-        }
-      }
-    }
-
     setShowPopup(!playbackEvent);
-    if (lastCameraIncidentRef.current !== selected.id) {
-      lastCameraIncidentRef.current = selected.id;
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(
-          selected.company.hqLon,
-          selected.company.hqLat,
-          10_500_000
-        ),
-        orientation: {
-          heading: Cesium.Math.toRadians(0),
-          pitch: Cesium.Math.toRadians(-90),
-          roll: 0,
-        },
-        duration: 1.4,
-      });
-    }
-  }, [
-    countryReady,
-    hotspots,
-    imageryState,
-    mapError,
-    playbackEvent,
-    playbackIncidentId,
-    playbackPlaying,
-    playbackStep,
-    playbackStepStartedAt,
-    ready,
-    selected,
-    selectedId,
-  ]);
+  }, [selectedId, playbackEvent]);
 
   useEffect(() => {
     if (!showPopup) return;
@@ -501,65 +239,148 @@ export function ScenarioGlobe() {
     return () => document.removeEventListener("keydown", onKey);
   }, [showPopup]);
 
+  const rings = useMemo(
+    () =>
+      selectedPoint
+        ? [
+            { lat: selectedPoint.lat, lng: selectedPoint.lng, maxRadius: playbackEvent ? 4.2 : 2.7, speed: 1.15 },
+            { lat: selectedPoint.lat, lng: selectedPoint.lng, maxRadius: playbackEvent ? 3.0 : 2.0, speed: 0.75 },
+          ]
+        : [],
+    [selectedPoint?.id, selectedPoint?.lat, selectedPoint?.lng, playbackEvent]
+  );
   const fin = selected?.company.financials;
   const globeLesson = selected ? resolveGlobeSecurityLesson(selected) : null;
+  const satelliteActive = satelliteReady && satelliteRequested;
+  const countryCode = selected?.company.countryCode;
+  const headquarters = selected?.company.headquartersLabel ?? "";
+  const chooseIncident = (id: string) => {
+    setSelectedIncidentId(id);
+    setShowPopup(true);
+  };
 
   return (
     <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
-      <div className="globe-map-stage">
-        <div
-          ref={containerRef}
-          className={mapError ? "hidden" : "absolute inset-0"}
-        />
-        {mapError && (
+      <div className="globe-map-stage" ref={stageRef}>
+        {mapError ? (
           <ScenarioGlobeFallback
             hotspots={hotspots}
             selectedId={selectedId}
-            onSelect={(id) => {
-              setSelectedIncidentId(id);
-              setShowPopup(true);
-            }}
+            onSelect={chooseIncident}
           />
+        ) : (
+          <GlobeErrorBoundary onFailure={() => setMapError(true)}>
+            <Globe
+              ref={globeRef as never}
+              width={dims.w}
+              height={dims.h}
+              animateIn={false}
+              waitForGlobeReady={false}
+              backgroundColor="#050709"
+              globeImageUrl={satelliteActive ? SATELLITE_TEXTURE : "./earth-dark.svg"}
+              polygonsData={COUNTRIES}
+              polygonAltitude={(item: object) =>
+                isSelectedCountry(item as CountryFeature, countryCode, headquarters) ? 0.015 : 0.004
+              }
+              polygonCapColor={(item: object) =>
+                isSelectedCountry(item as CountryFeature, countryCode, headquarters)
+                  ? "rgba(224,107,107,0.32)"
+                  : satelliteActive
+                    ? "rgba(20,25,30,0.025)"
+                    : "rgba(52,60,67,0.95)"
+              }
+              polygonSideColor={() => "rgba(18,23,28,0.7)"}
+              polygonStrokeColor={() => satelliteActive ? "rgba(120,140,150,0.25)" : "rgba(104,119,130,0.58)"}
+              showAtmosphere
+              atmosphereColor="#607280"
+              atmosphereAltitude={0.10}
+              onPolygonClick={(item: object) => {
+                if (isSelectedCountry(item as CountryFeature, countryCode, headquarters))
+                  setShowPopup((open) => !open);
+              }}
+              pointsData={points}
+              pointLat="lat"
+              pointLng="lng"
+              pointLabel="label"
+              pointColor={(item: object) =>
+                (item as GlobePoint).id === selectedId ? "#e06b6b" : "#7ea4bf"
+              }
+              pointAltitude={(item: object) =>
+                (item as GlobePoint).id === selectedId ? 0.065 : 0.038
+              }
+              pointRadius={(item: object) =>
+                (item as GlobePoint).id === selectedId ? 0.6 : 0.37
+              }
+              pointResolution={14}
+              onPointClick={(item: object) => chooseIncident((item as GlobePoint).id)}
+              onPointHover={(item: object | null) => setHoveredIncidentId((item as GlobePoint | null)?.id ?? null)}
+              labelsData={selectedPoint ? [selectedPoint] : []}
+              labelLat="lat"
+              labelLng="lng"
+              labelText="label"
+              labelColor={() => "#e7ecf0"}
+              labelAltitude={0.095}
+              labelSize={0.68}
+              labelDotRadius={0}
+              labelResolution={2}
+              onLabelClick={() => setShowPopup(true)}
+              ringsData={rings}
+              ringLat="lat"
+              ringLng="lng"
+              ringMaxRadius="maxRadius"
+              ringPropagationSpeed="speed"
+              ringRepeatPeriod={1750}
+              ringColor={() => ["rgba(224,107,107,0.85)", "rgba(224,107,107,0.05)"]}
+              ringAltitude={0.02}
+              ringResolution={72}
+              onGlobeReady={() => {
+                setGlobeReady(true);
+                if (globeRef.current) globeRef.current.controls().autoRotate = false;
+              }}
+            />
+          </GlobeErrorBoundary>
         )}
 
-        <div className="absolute right-3 top-3 z-10 rounded border border-white/15 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
-          {hotspots.length} cases ·{" "}
-          {mapError
-            ? "2D backup"
-            : imageryState === "satellite"
-              ? "satellite map"
-              : "vector globe"}
+        <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
+          <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
+            {hotspots.length} cases · {mapError ? "2D backup" : satelliteActive ? "satellite texture" : "charcoal globe"}
+          </span>
+          {!mapError && (
+            <button
+              type="button"
+              onClick={() => {
+                setSatelliteRequested((current) => !current);
+                setSatelliteUnavailable(false);
+              }}
+              className="rounded border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-[10px] text-slate-200 hover:border-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+              aria-pressed={satelliteRequested}
+              aria-label={satelliteRequested ? "Use charcoal map texture" : "Use optional satellite image texture"}
+            >
+              {satelliteRequested ? (satelliteReady ? "Charcoal view" : "Loading satellite…") : "Satellite view"}
+            </button>
+          )}
         </div>
-
+        {satelliteUnavailable && !mapError && (
+          <p className="absolute right-3 top-12 z-10 bg-black/90 p-2 text-[10px] text-amber-200">
+            Satellite image unavailable; charcoal globe retained.
+          </p>
+        )}
         {hoveredIncident && hoveredIncident.id !== selectedId && (
-          <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[260px] rounded border border-white/15 bg-black/80 px-3 py-2">
-            <div className="text-xs font-medium text-white">
-              {hoveredIncident.company.name}
-            </div>
-            <div className="mt-0.5 text-[10px] text-slate-400">
-              {hoveredIncident.incidentTitle}
-            </div>
+          <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[260px] rounded border border-white/15 bg-black/85 px-3 py-2">
+            <div className="text-xs font-medium text-white">{hoveredIncident.company.name}</div>
+            <div className="mt-0.5 text-[10px] text-slate-400">{hoveredIncident.incidentTitle}</div>
           </div>
         )}
-
         {playbackEvent && (
-          <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3 shadow-2xl">
+          <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3">
             <div className="flex items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.14em] text-rose-300/85">
-              <span>
-                Case replay · {playbackEvent.index + 1}/{playbackEvent.total}
-              </span>
+              <span>Case replay · {playbackEvent.index + 1}/{playbackEvent.total}</span>
               <span>{playbackPlaying ? "Playing" : "Paused"}</span>
             </div>
-            <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">
-              {playbackEvent.event.dateLabel}
-            </div>
-            <div className="mt-0.5 text-sm font-semibold text-white">
-              {playbackEvent.event.label}
-            </div>
+            <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">{playbackEvent.event.dateLabel}</div>
+            <div className="mt-0.5 text-sm font-semibold text-white">{playbackEvent.event.label}</div>
             {playbackEvent.event.detail && (
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
-                {playbackEvent.event.detail}
-              </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-300">{playbackEvent.event.detail}</p>
             )}
           </div>
         )}
