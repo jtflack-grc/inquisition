@@ -12,6 +12,9 @@ import {
 } from "../store/incidentStore";
 import { useTimelinePlaybackStore } from "../store/timelinePlaybackStore";
 
+// Keep the active hemisphere prominent above the horizontal case dossier.
+const FOCUS_ALTITUDE = 1.4;
+
 // A single optional equirectangular texture, NOT an elevation or tiled imagery service.
 // The locally bundled charcoal globe is always the default and works offline.
 const SATELLITE_TEXTURE =
@@ -226,7 +229,7 @@ export function ScenarioGlobe() {
       {
         lat: selected.company.hqLat,
         lng: selected.company.hqLon,
-        altitude: 1.95,
+        altitude: FOCUS_ALTITUDE,
       },
       950
     );
@@ -304,8 +307,8 @@ export function ScenarioGlobe() {
                   countryCode,
                   headquarters
                 )
-                  ? 0.015
-                  : 0.004
+                  ? 0.065
+                  : 0.028
               }
               polygonCapColor={(item: object) =>
                 isSelectedCountry(
@@ -313,16 +316,16 @@ export function ScenarioGlobe() {
                   countryCode,
                   headquarters
                 )
-                  ? "rgba(224,107,107,0.32)"
+                  ? "rgba(224,107,107,0.52)"
                   : satelliteActive
                     ? "rgba(20,25,30,0.025)"
-                    : "rgba(52,60,67,0.95)"
+                    : "rgba(75,84,93,0.96)"
               }
-              polygonSideColor={() => "rgba(18,23,28,0.7)"}
+              polygonSideColor={() => "rgba(28,35,42,0.95)"}
               polygonStrokeColor={() =>
                 satelliteActive
                   ? "rgba(120,140,150,0.25)"
-                  : "rgba(104,119,130,0.58)"
+                  : "rgba(135,149,160,0.7)"
               }
               showAtmosphere
               atmosphereColor="#607280"
@@ -345,7 +348,7 @@ export function ScenarioGlobe() {
                 (item as GlobePoint).id === selectedId ? "#e06b6b" : "#7ea4bf"
               }
               pointAltitude={(item: object) =>
-                (item as GlobePoint).id === selectedId ? 0.065 : 0.038
+                (item as GlobePoint).id === selectedId ? 0.12 : 0.06
               }
               pointRadius={(item: object) =>
                 (item as GlobePoint).id === selectedId ? 0.6 : 0.37
@@ -362,7 +365,7 @@ export function ScenarioGlobe() {
               labelLng="lng"
               labelText="label"
               labelColor={() => "#e7ecf0"}
-              labelAltitude={0.095}
+              labelAltitude={0.15}
               labelSize={0.68}
               labelDotRadius={0}
               labelResolution={2}
@@ -377,12 +380,22 @@ export function ScenarioGlobe() {
                 "rgba(224,107,107,0.85)",
                 "rgba(224,107,107,0.05)",
               ]}
-              ringAltitude={0.02}
+              ringAltitude={0.09}
               ringResolution={72}
               onGlobeReady={() => {
-                setGlobeReady(true);
-                if (globeRef.current)
+                // Avoid exposing the library's far-away default camera on load.
+                if (globeRef.current) {
                   globeRef.current.controls().autoRotate = false;
+                  globeRef.current.pointOfView(
+                    {
+                      lat: selected?.company.hqLat ?? 39,
+                      lng: selected?.company.hqLon ?? -98,
+                      altitude: FOCUS_ALTITUDE,
+                    },
+                    0
+                  );
+                }
+                setGlobeReady(true);
               }}
             />
           </GlobeErrorBoundary>
