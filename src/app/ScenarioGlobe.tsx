@@ -4,7 +4,6 @@ import Globe from "react-globe.gl";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
-import type { Incident } from "../inquisition/types";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
 import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
 import {
@@ -113,7 +112,6 @@ export function ScenarioGlobe() {
   const playbackStep = useTimelinePlaybackStore((s) => s.step);
   const playbackPlaying = useTimelinePlaybackStore((s) => s.playing);
   const [showPopup, setShowPopup] = useState(true);
-  const playbackStepStartedAt = useTimelinePlaybackStore((s) => s.stepStartedAt);
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const globeRef = useRef<GlobeMethods | null>(null);
