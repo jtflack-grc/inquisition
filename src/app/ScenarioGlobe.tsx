@@ -187,12 +187,18 @@ export function ScenarioGlobe() {
         return response.json();
       })
       .then((collection: { features?: CountryFeature[] }) => {
-        if (Array.isArray(collection.features) && collection.features.length > 0)
+        if (
+          Array.isArray(collection.features) &&
+          collection.features.length > 0
+        )
           setCountries(collection.features);
       })
       .catch((error: unknown) => {
         if (!controller.signal.aborted)
-          console.warn("Detailed globe geography unavailable; using bundled atlas.", error);
+          console.warn(
+            "Detailed globe geography unavailable; using bundled atlas.",
+            error
+          );
       });
     return () => controller.abort();
   }, []);
@@ -327,7 +333,10 @@ export function ScenarioGlobe() {
       : "./earth-dark.svg";
   const changeZoom = (delta: number) => {
     setCameraAltitude((current) =>
-      Math.max(MIN_FOCUS_ALTITUDE, Math.min(MAX_FOCUS_ALTITUDE, Number((current + delta).toFixed(2))))
+      Math.max(
+        MIN_FOCUS_ALTITUDE,
+        Math.min(MAX_FOCUS_ALTITUDE, Number((current + delta).toFixed(2)))
+      )
     );
   };
   const countryCode = selected?.company.countryCode;
