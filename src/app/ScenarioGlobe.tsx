@@ -1,4 +1,11 @@
-import { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Component,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import Globe from "react-globe.gl";
 import { feature } from "topojson-client";
@@ -342,44 +349,54 @@ export function ScenarioGlobe() {
   };
   const countryCode = selected?.company.countryCode;
   const headquarters = selected?.company.headquartersLabel ?? "";
-  const chooseIncident = useCallback((id: string) => {
-    setSelectedIncidentId(id);
-    setShowPopup(true);
-  }, [setSelectedIncidentId]);
+  const chooseIncident = useCallback(
+    (id: string) => {
+      setSelectedIncidentId(id);
+      setShowPopup(true);
+    },
+    [setSelectedIncidentId]
+  );
 
   // HTML-marked hotspots are deliberate: a 32px DOM hit target remains clickable
   // when the more detailed 3D country polygons and pulse geometry overlap.
   // react-globe.gl handles projected placement and hides markers on the far side.
-  const createCasePin = useCallback((item: object): HTMLElement => {
-    const incident = item as GlobePoint;
-    const active = incident.id === selectedId;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = active
-      ? "globe-case-pin globe-case-pin--active"
-      : "globe-case-pin";
-    button.title = `${incident.label} — ${incident.title}`;
-    button.setAttribute(
-      "aria-label",
-      `Select ${incident.label}: ${incident.title}`
-    );
-    button.setAttribute("aria-pressed", String(active));
-    button.dataset.incidentId = incident.id;
-    const dot = document.createElement("span");
-    dot.className = "globe-case-pin__dot";
-    dot.setAttribute("aria-hidden", "true");
-    button.appendChild(dot);
-    button.addEventListener("pointerdown", (event) => event.stopPropagation());
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      chooseIncident(incident.id);
-    });
-    button.addEventListener("mouseenter", () => setHoveredIncidentId(incident.id));
-    button.addEventListener("mouseleave", () => setHoveredIncidentId(null));
-    button.addEventListener("focus", () => setHoveredIncidentId(incident.id));
-    button.addEventListener("blur", () => setHoveredIncidentId(null));
-    return button;
-  }, [chooseIncident, selectedId]);
+  const createCasePin = useCallback(
+    (item: object): HTMLElement => {
+      const incident = item as GlobePoint;
+      const active = incident.id === selectedId;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = active
+        ? "globe-case-pin globe-case-pin--active"
+        : "globe-case-pin";
+      button.title = `${incident.label} — ${incident.title}`;
+      button.setAttribute(
+        "aria-label",
+        `Select ${incident.label}: ${incident.title}`
+      );
+      button.setAttribute("aria-pressed", String(active));
+      button.dataset.incidentId = incident.id;
+      const dot = document.createElement("span");
+      dot.className = "globe-case-pin__dot";
+      dot.setAttribute("aria-hidden", "true");
+      button.appendChild(dot);
+      button.addEventListener("pointerdown", (event) =>
+        event.stopPropagation()
+      );
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        chooseIncident(incident.id);
+      });
+      button.addEventListener("mouseenter", () =>
+        setHoveredIncidentId(incident.id)
+      );
+      button.addEventListener("mouseleave", () => setHoveredIncidentId(null));
+      button.addEventListener("focus", () => setHoveredIncidentId(incident.id));
+      button.addEventListener("blur", () => setHoveredIncidentId(null));
+      return button;
+    },
+    [chooseIncident, selectedId]
+  );
 
   return (
     <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">

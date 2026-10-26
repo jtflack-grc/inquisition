@@ -336,7 +336,9 @@ h3 {
   border-radius: 50%;
   background: #7ea4bf;
   box-shadow: 0 0 0 1px rgba(166, 191, 205, 0.55);
-  transition: transform 120ms ease, border-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease;
 }
 
 .globe-map-stage .globe-case-pin:hover .globe-case-pin__dot,
@@ -357,7 +359,6 @@ h3 {
   outline: 2px solid #f2f5f7;
   outline-offset: -1px;
 }
-
 
 .case-briefing {
   position: relative;
