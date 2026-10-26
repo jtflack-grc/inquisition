@@ -320,7 +320,10 @@ export function ScenarioGlobe() {
       } catch (error) {
         // Some devices expose the ref before the renderer initializes.
         // onGlobeReady retries with an immediate camera position.
-        console.warn("Globe camera not ready; will retry on initialization.", error);
+        console.warn(
+          "Globe camera not ready; will retry on initialization.",
+          error
+        );
       }
     },
     [selected, mapError, cameraAltitude]
@@ -443,85 +446,91 @@ export function ScenarioGlobe() {
           />
         ) : (
           <GlobeErrorBoundary onFailure={() => setMapError(true)}>
-            <div className={cameraInitialized ? "globe-scene globe-scene--focused" : "globe-scene"}>
+            <div
+              className={
+                cameraInitialized
+                  ? "globe-scene globe-scene--focused"
+                  : "globe-scene"
+              }
+            >
               <Globe
-              ref={globeRef as never}
-              width={dims.w}
-              height={dims.h}
-              animateIn={false}
-              waitForGlobeReady={false}
-              backgroundColor="#050709"
-              globeImageUrl={textureUrl}
-              polygonsData={countries}
-              polygonGeoJsonGeometry={(item: object) =>
-                (item as CountryFeature).geometry as never
-              }
-              polygonAltitude={(item: object) =>
-                isSelectedCountry(
-                  item as CountryFeature,
-                  countryCode,
-                  headquarters
-                )
-                  ? 0.022
-                  : 0.012
-              }
-              polygonCapColor={(item: object) =>
-                isSelectedCountry(
-                  item as CountryFeature,
-                  countryCode,
-                  headquarters
-                )
-                  ? "rgba(224,107,107,0.48)"
-                  : satelliteActive
-                    ? "rgba(20,25,30,0.025)"
-                    : nightTextureReady
-                      ? "rgba(45,56,66,0.35)"
-                      : "rgba(75,84,93,0.96)"
-              }
-              polygonSideColor={() => "rgba(28,35,42,0.95)"}
-              polygonStrokeColor={() =>
-                satelliteActive
-                  ? "rgba(120,140,150,0.25)"
-                  : nightTextureReady && !satelliteActive
-                    ? "rgba(157,174,187,0.48)"
-                    : "rgba(135,149,160,0.7)"
-              }
-              showAtmosphere
-              atmosphereColor="#607280"
-              atmosphereAltitude={0.1}
-              onPolygonClick={(item: object) => {
-                if (
+                ref={globeRef as never}
+                width={dims.w}
+                height={dims.h}
+                animateIn={false}
+                waitForGlobeReady={false}
+                backgroundColor="#050709"
+                globeImageUrl={textureUrl}
+                polygonsData={countries}
+                polygonGeoJsonGeometry={(item: object) =>
+                  (item as CountryFeature).geometry as never
+                }
+                polygonAltitude={(item: object) =>
                   isSelectedCountry(
                     item as CountryFeature,
                     countryCode,
                     headquarters
                   )
-                )
-                  setShowPopup((open) => !open);
-              }}
-              // No raised 3D cylinders: all case locations use surface
-              // pulses with their own accessible HTML click targets.
-              htmlElementsData={points}
-              htmlLat="lat"
-              htmlLng="lng"
-              htmlAltitude={(item: object) =>
-                (item as GlobePoint).id === selectedId ? 0.026 : 0.015
-              }
-              htmlElement={createCasePin}
-              htmlTransitionDuration={0}
-              ringsData={rings}
-              ringLat="lat"
-              ringLng="lng"
-              ringMaxRadius="maxRadius"
-              ringPropagationSpeed="speed"
-              ringRepeatPeriod={1750}
-              ringColor={() => [
-                "rgba(224,107,107,0.85)",
-                "rgba(224,107,107,0.05)",
-              ]}
-              ringAltitude={0.027}
-              ringResolution={72}
-              onGlobeReady={() => positionCamera(true)}
+                    ? 0.022
+                    : 0.012
+                }
+                polygonCapColor={(item: object) =>
+                  isSelectedCountry(
+                    item as CountryFeature,
+                    countryCode,
+                    headquarters
+                  )
+                    ? "rgba(224,107,107,0.48)"
+                    : satelliteActive
+                      ? "rgba(20,25,30,0.025)"
+                      : nightTextureReady
+                        ? "rgba(45,56,66,0.35)"
+                        : "rgba(75,84,93,0.96)"
+                }
+                polygonSideColor={() => "rgba(28,35,42,0.95)"}
+                polygonStrokeColor={() =>
+                  satelliteActive
+                    ? "rgba(120,140,150,0.25)"
+                    : nightTextureReady && !satelliteActive
+                      ? "rgba(157,174,187,0.48)"
+                      : "rgba(135,149,160,0.7)"
+                }
+                showAtmosphere
+                atmosphereColor="#607280"
+                atmosphereAltitude={0.1}
+                onPolygonClick={(item: object) => {
+                  if (
+                    isSelectedCountry(
+                      item as CountryFeature,
+                      countryCode,
+                      headquarters
+                    )
+                  )
+                    setShowPopup((open) => !open);
+                }}
+                // No raised 3D cylinders: all case locations use surface
+                // pulses with their own accessible HTML click targets.
+                htmlElementsData={points}
+                htmlLat="lat"
+                htmlLng="lng"
+                htmlAltitude={(item: object) =>
+                  (item as GlobePoint).id === selectedId ? 0.026 : 0.015
+                }
+                htmlElement={createCasePin}
+                htmlTransitionDuration={0}
+                ringsData={rings}
+                ringLat="lat"
+                ringLng="lng"
+                ringMaxRadius="maxRadius"
+                ringPropagationSpeed="speed"
+                ringRepeatPeriod={1750}
+                ringColor={() => [
+                  "rgba(224,107,107,0.85)",
+                  "rgba(224,107,107,0.05)",
+                ]}
+                ringAltitude={0.027}
+                ringResolution={72}
+                onGlobeReady={() => positionCamera(true)}
               />
             </div>
           </GlobeErrorBoundary>
