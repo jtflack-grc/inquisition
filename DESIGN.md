@@ -46,7 +46,7 @@ Do not turn the whole interface green. The casebook should look neutral enough t
 
 1. **Evidence rail**: case selection, timeline, caveats, cited sources, and evidence trust.
 2. **Materiality rail**: estimate, assumptions, simulation, and FAIR-informed range decomposition.
-3. **Case map**: realistic Earth, all incident hotspots, selected-case geography, and concise company/security context.
+3. **Case map**: restrained dark globe, all incident hotspots, selected-case geography, and concise company/security context.
 
 The rails share state. Selecting a case from the evidence rail or a map hotspot must realign all three rails to the same incident.
 
@@ -62,7 +62,10 @@ The case map is interactive navigation, not decoration.
 - Clicking a hotspot changes the shared incident selection and opens the case briefing.
 - The selected country may receive a subtle translucent risk overlay.
 - Default camera framing should show a large, readable globe while keeping the selected hemisphere central.
-- Terrain and imagery may be realistic because geography contributes directly to case comprehension.
+- Use the original locally hosted charcoal/gray react-globe.gl rendering as the default. Terrain elevation and map tile services are unnecessary for the casebook.
+- Satellite imagery is an optional, single-texture view; a missing CDN image must never block the local charcoal globe.
+- The horizontally docked case briefing must remain intact and the map should remain visible above it.
+- Keep the network-independent 2D map available if the user's browser does not support WebGL.
 
 Do not replace hotspots with a single selected marker. That would remove a core Inquisition navigation behavior.
 
