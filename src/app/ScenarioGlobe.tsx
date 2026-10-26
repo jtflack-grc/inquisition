@@ -58,6 +58,7 @@ const COUNTRIES = feature(topology, topology.objects.countries)
 const COUNTRY_ALIASES: Record<string, string[]> = {
   US: ["United States of America", "United States", "USA"],
   GB: [
+    "England", // INHERITANCE world.geojson labels GBR as England.
     "United Kingdom",
     "UK",
     "United Kingdom of Great Britain and Northern Ireland",
