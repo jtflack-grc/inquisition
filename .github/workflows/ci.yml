@@ -6,7 +6,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -24,17 +22,6 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
-      - name: Format INHERITANCE globe migration on PR
-        if: github.event_name == 'pull_request'
-        run: |
-          npx prettier --write src/app/ScenarioGlobe.tsx
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/app/ScenarioGlobe.tsx
-          if ! git diff --cached --quiet; then
-            git commit -m 'style: format detailed globe component'
-            git push origin "HEAD:${{ github.head_ref }}"
-          fi
       - name: Check formatting
         run: npm run format:check
       - name: Lint
