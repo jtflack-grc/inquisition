@@ -12,11 +12,8 @@ import {
 } from "../store/incidentStore";
 import { useTimelinePlaybackStore } from "../store/timelinePlaybackStore";
 
-// Keep the active hemisphere prominent above the horizontal case dossier.
-const FOCUS_ALTITUDE = 1.4;
-
-// A single optional equirectangular texture, NOT an elevation or tiled imagery service.
-// The locally bundled charcoal globe is always the default and works offline.
+// Detailed imagery uses one static texture, never live elevation or imagery tiles.
+// The bundled charcoal texture remains the reliable offline fallback.
 const NIGHT_TEXTURE =
   "https://unpkg.com/three-globe/example/img/earth-night.jpg";
 const SATELLITE_TEXTURE =
