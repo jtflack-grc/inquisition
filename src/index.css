@@ -310,7 +310,21 @@ h3 {
   overflow: hidden;
 }
 
-/* Globe hotspots need a real pointer/keyboard hit area above polygon meshes. */
+/* Do not expose react-globe.gl's default distant camera during first paint. */
+.globe-scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.globe-scene--focused {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Ground signals retain a 34px interactive target with no elevated cylinders.
+   The radial animation indicates a case location, not a floating map pin. */
 .globe-map-stage .globe-case-pin {
   position: relative;
   box-sizing: border-box;
@@ -328,36 +342,77 @@ h3 {
   touch-action: manipulation;
 }
 
-.globe-map-stage .globe-case-pin__dot {
-  display: block;
-  width: 11px;
-  height: 11px;
-  border: 2px solid #091117;
+.globe-map-stage .globe-case-pin::before,
+.globe-map-stage .globe-case-pin--active::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(154, 170, 180, 0.7);
   border-radius: 50%;
-  background: #7ea4bf;
-  box-shadow: 0 0 0 1px rgba(166, 191, 205, 0.55);
-  transition:
-    transform 120ms ease,
-    border-color 120ms ease;
+  pointer-events: none;
+  animation: inq-ground-pulse 4s ease-out infinite;
+  animation-delay: var(--pulse-delay, 0s);
+}
+
+.globe-map-stage .globe-case-pin--active::before,
+.globe-map-stage .globe-case-pin--active::after {
+  border-color: rgba(224, 107, 107, 0.85);
+  animation-duration: 2.3s;
+}
+
+.globe-map-stage .globe-case-pin--active::after {
+  animation-delay: -1.15s;
+}
+
+.globe-map-stage .globe-case-pin__dot {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #ced8dd;
+  border-radius: 50%;
+  background: #87979f;
+  transition: transform 120ms ease;
 }
 
 .globe-map-stage .globe-case-pin:hover .globe-case-pin__dot,
 .globe-map-stage .globe-case-pin:focus-visible .globe-case-pin__dot {
-  transform: scale(1.45);
-  border-color: #f2f5f7;
+  transform: scale(1.6);
 }
 
 .globe-map-stage .globe-case-pin--active .globe-case-pin__dot {
-  width: 15px;
-  height: 15px;
+  width: 10px;
+  height: 10px;
   background: #e06b6b;
-  border-color: #f6caca;
-  box-shadow: 0 0 0 4px rgba(224, 107, 107, 0.22);
+  border-color: #f6d2d2;
 }
 
 .globe-map-stage .globe-case-pin:focus-visible {
   outline: 2px solid #f2f5f7;
   outline-offset: -1px;
+}
+
+@keyframes inq-ground-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.85;
+  }
+
+  80%,
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe-map-stage .globe-case-pin::before,
+  .globe-map-stage .globe-case-pin--active::after {
+    animation: none;
+    inset: 8px;
+    opacity: 0.75;
+  }
 }
 
 .case-briefing {
