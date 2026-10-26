@@ -318,7 +318,7 @@ h3 {
   flex: 0 0 auto;
   flex-direction: column;
   width: 100%;
-  height: min(57%, 600px);
+  height: min(50%, 560px);
   min-height: 0;
   overflow: hidden;
   border-top: 1px solid var(--inq-line-strong);
@@ -433,7 +433,7 @@ h3 {
 
 @media (max-height: 650px) {
   .case-briefing {
-    height: 53%;
+    height: 47%;
   }
 
   .case-briefing__head {
