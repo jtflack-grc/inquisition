@@ -368,7 +368,7 @@ export function ScenarioGlobe() {
               globeImageUrl={textureUrl}
               polygonsData={countries}
               polygonGeoJsonGeometry={(item: object) =>
-                (item as CountryFeature).geometry
+                (item as CountryFeature).geometry as never
               }
               polygonResolution={3}
               polygonAltitude={(item: object) =>
