@@ -310,6 +310,55 @@ h3 {
   overflow: hidden;
 }
 
+/* Globe hotspots need a real pointer/keyboard hit area above polygon meshes. */
+.globe-map-stage .globe-case-pin {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.globe-map-stage .globe-case-pin__dot {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #091117;
+  border-radius: 50%;
+  background: #7ea4bf;
+  box-shadow: 0 0 0 1px rgba(166, 191, 205, 0.55);
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+.globe-map-stage .globe-case-pin:hover .globe-case-pin__dot,
+.globe-map-stage .globe-case-pin:focus-visible .globe-case-pin__dot {
+  transform: scale(1.45);
+  border-color: #f2f5f7;
+}
+
+.globe-map-stage .globe-case-pin--active .globe-case-pin__dot {
+  width: 15px;
+  height: 15px;
+  background: #e06b6b;
+  border-color: #f6caca;
+  box-shadow: 0 0 0 4px rgba(224, 107, 107, 0.22);
+}
+
+.globe-map-stage .globe-case-pin:focus-visible {
+  outline: 2px solid #f2f5f7;
+  outline-offset: -1px;
+}
+
+
 .case-briefing {
   position: relative;
   z-index: 20;
