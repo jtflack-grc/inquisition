@@ -49,7 +49,11 @@ const COUNTRIES = feature(topology, topology.objects.countries)
 
 const COUNTRY_ALIASES: Record<string, string[]> = {
   US: ["United States of America", "United States", "USA"],
-  GB: ["United Kingdom", "UK", "United Kingdom of Great Britain and Northern Ireland"],
+  GB: [
+    "United Kingdom",
+    "UK",
+    "United Kingdom of Great Britain and Northern Ireland",
+  ],
   CA: ["Canada"],
   DE: ["Germany"],
   FR: ["France"],
@@ -69,16 +73,16 @@ function isSelectedCountry(
   if (!code) return false;
   const name = country.properties.name;
   const aliases = COUNTRY_ALIASES[code] ?? [headquarters].filter(Boolean);
-  return aliases.some((candidate) =>
-    candidate === name || name.includes(candidate) || candidate.includes(name)
+  return aliases.some(
+    (candidate) =>
+      candidate === name || name.includes(candidate) || candidate.includes(name)
   );
 }
 
 function supportsWebGL(): boolean {
   try {
     const canvas = document.createElement("canvas");
-    const context =
-      canvas.getContext("webgl2") || canvas.getContext("webgl");
+    const context = canvas.getContext("webgl2") || canvas.getContext("webgl");
     return Boolean(context);
   } catch {
     return false;
@@ -106,7 +110,9 @@ class GlobeErrorBoundary extends Component<
 export function ScenarioGlobe() {
   const incidents = useIncidentStore((s) => s.incidents);
   const selectedId = useIncidentStore((s) => s.selectedIncidentId);
-  const setSelectedIncidentId = useIncidentStore((s) => s.setSelectedIncidentId);
+  const setSelectedIncidentId = useIncidentStore(
+    (s) => s.setSelectedIncidentId
+  );
   const selected = useIncidentStore(selectSelectedIncident);
   const playbackIncidentId = useTimelinePlaybackStore((s) => s.incidentId);
   const playbackStep = useTimelinePlaybackStore((s) => s.step);
@@ -121,7 +127,9 @@ export function ScenarioGlobe() {
   const [satelliteRequested, setSatelliteRequested] = useState(false);
   const [satelliteReady, setSatelliteReady] = useState(false);
   const [satelliteUnavailable, setSatelliteUnavailable] = useState(false);
-  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(null);
+  const [hoveredIncidentId, setHoveredIncidentId] = useState<string | null>(
+    null
+  );
 
   const hotspots = useMemo(
     () =>
@@ -182,7 +190,8 @@ export function ScenarioGlobe() {
       setMapError(true);
     };
     node.addEventListener("webglcontextlost", handleContextLoss, true);
-    return () => node.removeEventListener("webglcontextlost", handleContextLoss, true);
+    return () =>
+      node.removeEventListener("webglcontextlost", handleContextLoss, true);
   }, []);
 
   // Satellite mode is opt-in; preflight the image so failure leaves the
@@ -221,7 +230,13 @@ export function ScenarioGlobe() {
       },
       950
     );
-  }, [selected?.id, selected?.company.hqLat, selected?.company.hqLon, globeReady, mapError]);
+  }, [
+    selected?.id,
+    selected?.company.hqLat,
+    selected?.company.hqLon,
+    globeReady,
+    mapError,
+  ]);
 
   // During an evidence timeline replay, the timeline callout takes precedence.
   useEffect(() => {
@@ -241,8 +256,18 @@ export function ScenarioGlobe() {
     () =>
       selectedPoint
         ? [
-            { lat: selectedPoint.lat, lng: selectedPoint.lng, maxRadius: playbackEvent ? 4.2 : 2.7, speed: 1.15 },
-            { lat: selectedPoint.lat, lng: selectedPoint.lng, maxRadius: playbackEvent ? 3.0 : 2.0, speed: 0.75 },
+            {
+              lat: selectedPoint.lat,
+              lng: selectedPoint.lng,
+              maxRadius: playbackEvent ? 4.2 : 2.7,
+              speed: 1.15,
+            },
+            {
+              lat: selectedPoint.lat,
+              lng: selectedPoint.lng,
+              maxRadius: playbackEvent ? 3.0 : 2.0,
+              speed: 0.75,
+            },
           ]
         : [],
     [selectedPoint?.id, selectedPoint?.lat, selectedPoint?.lng, playbackEvent]
@@ -275,25 +300,47 @@ export function ScenarioGlobe() {
               animateIn={false}
               waitForGlobeReady={false}
               backgroundColor="#050709"
-              globeImageUrl={satelliteActive ? SATELLITE_TEXTURE : "./earth-dark.svg"}
+              globeImageUrl={
+                satelliteActive ? SATELLITE_TEXTURE : "./earth-dark.svg"
+              }
               polygonsData={COUNTRIES}
               polygonAltitude={(item: object) =>
-                isSelectedCountry(item as CountryFeature, countryCode, headquarters) ? 0.015 : 0.004
+                isSelectedCountry(
+                  item as CountryFeature,
+                  countryCode,
+                  headquarters
+                )
+                  ? 0.015
+                  : 0.004
               }
               polygonCapColor={(item: object) =>
-                isSelectedCountry(item as CountryFeature, countryCode, headquarters)
+                isSelectedCountry(
+                  item as CountryFeature,
+                  countryCode,
+                  headquarters
+                )
                   ? "rgba(224,107,107,0.32)"
                   : satelliteActive
                     ? "rgba(20,25,30,0.025)"
                     : "rgba(52,60,67,0.95)"
               }
               polygonSideColor={() => "rgba(18,23,28,0.7)"}
-              polygonStrokeColor={() => satelliteActive ? "rgba(120,140,150,0.25)" : "rgba(104,119,130,0.58)"}
+              polygonStrokeColor={() =>
+                satelliteActive
+                  ? "rgba(120,140,150,0.25)"
+                  : "rgba(104,119,130,0.58)"
+              }
               showAtmosphere
               atmosphereColor="#607280"
-              atmosphereAltitude={0.10}
+              atmosphereAltitude={0.1}
               onPolygonClick={(item: object) => {
-                if (isSelectedCountry(item as CountryFeature, countryCode, headquarters))
+                if (
+                  isSelectedCountry(
+                    item as CountryFeature,
+                    countryCode,
+                    headquarters
+                  )
+                )
                   setShowPopup((open) => !open);
               }}
               pointsData={points}
@@ -310,8 +357,12 @@ export function ScenarioGlobe() {
                 (item as GlobePoint).id === selectedId ? 0.6 : 0.37
               }
               pointResolution={14}
-              onPointClick={(item: object) => chooseIncident((item as GlobePoint).id)}
-              onPointHover={(item: object | null) => setHoveredIncidentId((item as GlobePoint | null)?.id ?? null)}
+              onPointClick={(item: object) =>
+                chooseIncident((item as GlobePoint).id)
+              }
+              onPointHover={(item: object | null) =>
+                setHoveredIncidentId((item as GlobePoint | null)?.id ?? null)
+              }
               labelsData={selectedPoint ? [selectedPoint] : []}
               labelLat="lat"
               labelLng="lng"
@@ -328,12 +379,16 @@ export function ScenarioGlobe() {
               ringMaxRadius="maxRadius"
               ringPropagationSpeed="speed"
               ringRepeatPeriod={1750}
-              ringColor={() => ["rgba(224,107,107,0.85)", "rgba(224,107,107,0.05)"]}
+              ringColor={() => [
+                "rgba(224,107,107,0.85)",
+                "rgba(224,107,107,0.05)",
+              ]}
               ringAltitude={0.02}
               ringResolution={72}
               onGlobeReady={() => {
                 setGlobeReady(true);
-                if (globeRef.current) globeRef.current.controls().autoRotate = false;
+                if (globeRef.current)
+                  globeRef.current.controls().autoRotate = false;
               }}
             />
           </GlobeErrorBoundary>
@@ -341,7 +396,12 @@ export function ScenarioGlobe() {
 
         <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
           <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
-            {hotspots.length} cases · {mapError ? "2D backup" : satelliteActive ? "satellite texture" : "charcoal globe"}
+            {hotspots.length} cases ·{" "}
+            {mapError
+              ? "2D backup"
+              : satelliteActive
+                ? "satellite texture"
+                : "charcoal globe"}
           </span>
           {!mapError && (
             <button
@@ -352,9 +412,17 @@ export function ScenarioGlobe() {
               }}
               className="rounded border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-[10px] text-slate-200 hover:border-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
               aria-pressed={satelliteRequested}
-              aria-label={satelliteRequested ? "Use charcoal map texture" : "Use optional satellite image texture"}
+              aria-label={
+                satelliteRequested
+                  ? "Use charcoal map texture"
+                  : "Use optional satellite image texture"
+              }
             >
-              {satelliteRequested ? (satelliteReady ? "Charcoal view" : "Loading satellite…") : "Satellite view"}
+              {satelliteRequested
+                ? satelliteReady
+                  ? "Charcoal view"
+                  : "Loading satellite…"
+                : "Satellite view"}
             </button>
           )}
         </div>
@@ -365,20 +433,32 @@ export function ScenarioGlobe() {
         )}
         {hoveredIncident && hoveredIncident.id !== selectedId && (
           <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[260px] rounded border border-white/15 bg-black/85 px-3 py-2">
-            <div className="text-xs font-medium text-white">{hoveredIncident.company.name}</div>
-            <div className="mt-0.5 text-[10px] text-slate-400">{hoveredIncident.incidentTitle}</div>
+            <div className="text-xs font-medium text-white">
+              {hoveredIncident.company.name}
+            </div>
+            <div className="mt-0.5 text-[10px] text-slate-400">
+              {hoveredIncident.incidentTitle}
+            </div>
           </div>
         )}
         {playbackEvent && (
           <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3">
             <div className="flex items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.14em] text-rose-300/85">
-              <span>Case replay · {playbackEvent.index + 1}/{playbackEvent.total}</span>
+              <span>
+                Case replay · {playbackEvent.index + 1}/{playbackEvent.total}
+              </span>
               <span>{playbackPlaying ? "Playing" : "Paused"}</span>
             </div>
-            <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">{playbackEvent.event.dateLabel}</div>
-            <div className="mt-0.5 text-sm font-semibold text-white">{playbackEvent.event.label}</div>
+            <div className="mt-2 text-[10px] uppercase tracking-[0.12em] text-slate-400">
+              {playbackEvent.event.dateLabel}
+            </div>
+            <div className="mt-0.5 text-sm font-semibold text-white">
+              {playbackEvent.event.label}
+            </div>
             {playbackEvent.event.detail && (
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-300">{playbackEvent.event.detail}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
+                {playbackEvent.event.detail}
+              </p>
             )}
           </div>
         )}
