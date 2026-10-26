@@ -21,8 +21,8 @@ const SATELLITE_TEXTURE =
 
 // INHERITANCE's 1.4-altitude opening view filled a full-height panel.
 // INQUISITION's globe shares its rail with a case dossier: frame it closer.
-const DEFAULT_FOCUS_ALTITUDE = 0.78;
-const MIN_FOCUS_ALTITUDE = 0.45;
+const DEFAULT_FOCUS_ALTITUDE = 0.32;
+const MIN_FOCUS_ALTITUDE = 0.16;
 const MAX_FOCUS_ALTITUDE = 2.1;
 
 interface CountryFeature {
@@ -347,6 +347,40 @@ export function ScenarioGlobe() {
     setShowPopup(true);
   };
 
+  // HTML-marked hotspots are deliberate: a 32px DOM hit target remains clickable
+  // when the more detailed 3D country polygons and pulse geometry overlap.
+  // react-globe.gl handles projected placement and hides markers on the far side.
+  const createCasePin = (item: object): HTMLElement => {
+    const incident = item as GlobePoint;
+    const active = incident.id === selectedId;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = active
+      ? "globe-case-pin globe-case-pin--active"
+      : "globe-case-pin";
+    button.title = `${incident.label} — ${incident.title}`;
+    button.setAttribute(
+      "aria-label",
+      `Select ${incident.label}: ${incident.title}`
+    );
+    button.setAttribute("aria-pressed", String(active));
+    button.dataset.incidentId = incident.id;
+    const dot = document.createElement("span");
+    dot.className = "globe-case-pin__dot";
+    dot.setAttribute("aria-hidden", "true");
+    button.appendChild(dot);
+    button.addEventListener("pointerdown", (event) => event.stopPropagation());
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      chooseIncident(incident.id);
+    });
+    button.addEventListener("mouseenter", () => setHoveredIncidentId(incident.id));
+    button.addEventListener("mouseleave", () => setHoveredIncidentId(null));
+    button.addEventListener("focus", () => setHoveredIncidentId(incident.id));
+    button.addEventListener("blur", () => setHoveredIncidentId(null));
+    return button;
+  };
+
   return (
     <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
       <div className="globe-map-stage" ref={stageRef}>
@@ -433,6 +467,12 @@ export function ScenarioGlobe() {
               onPointHover={(item: object | null) =>
                 setHoveredIncidentId((item as GlobePoint | null)?.id ?? null)
               }
+              htmlElementsData={points}
+              htmlLat="lat"
+              htmlLng="lng"
+              htmlAltitude={0.16}
+              htmlElement={createCasePin}
+              htmlTransitionDuration={0}
               labelsData={selectedPoint ? [selectedPoint] : []}
               labelLat="lat"
               labelLng="lng"
