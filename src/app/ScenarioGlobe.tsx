@@ -1,4 +1,4 @@
-import { Component, useEffect, useMemo, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Globe from "react-globe.gl";
 import { feature } from "topojson-client";
@@ -342,15 +342,15 @@ export function ScenarioGlobe() {
   };
   const countryCode = selected?.company.countryCode;
   const headquarters = selected?.company.headquartersLabel ?? "";
-  const chooseIncident = (id: string) => {
+  const chooseIncident = useCallback((id: string) => {
     setSelectedIncidentId(id);
     setShowPopup(true);
-  };
+  }, [setSelectedIncidentId]);
 
   // HTML-marked hotspots are deliberate: a 32px DOM hit target remains clickable
   // when the more detailed 3D country polygons and pulse geometry overlap.
   // react-globe.gl handles projected placement and hides markers on the far side.
-  const createCasePin = (item: object): HTMLElement => {
+  const createCasePin = useCallback((item: object): HTMLElement => {
     const incident = item as GlobePoint;
     const active = incident.id === selectedId;
     const button = document.createElement("button");
@@ -379,7 +379,7 @@ export function ScenarioGlobe() {
     button.addEventListener("focus", () => setHoveredIncidentId(incident.id));
     button.addEventListener("blur", () => setHoveredIncidentId(null));
     return button;
-  };
+  }, [chooseIncident, selectedId]);
 
   return (
     <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
