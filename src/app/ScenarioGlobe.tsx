@@ -370,7 +370,6 @@ export function ScenarioGlobe() {
               polygonGeoJsonGeometry={(item: object) =>
                 (item as CountryFeature).geometry as never
               }
-              polygonResolution={3}
               polygonAltitude={(item: object) =>
                 isSelectedCountry(
                   item as CountryFeature,
