@@ -17,8 +17,16 @@ const FOCUS_ALTITUDE = 1.4;
 
 // A single optional equirectangular texture, NOT an elevation or tiled imagery service.
 // The locally bundled charcoal globe is always the default and works offline.
+const NIGHT_TEXTURE =
+  "https://unpkg.com/three-globe/example/img/earth-night.jpg";
 const SATELLITE_TEXTURE =
   "https://cdn.jsdelivr.net/npm/three-globe@2.45.2/example/img/earth-blue-marble.jpg";
+
+// INHERITANCE's 1.4-altitude opening view filled a full-height panel.
+// INQUISITION's globe shares its rail with a case dossier: frame it closer.
+const DEFAULT_FOCUS_ALTITUDE = 0.78;
+const MIN_FOCUS_ALTITUDE = 0.45;
+const MAX_FOCUS_ALTITUDE = 2.1;
 
 interface CountryFeature {
   type: "Feature";
@@ -127,6 +135,9 @@ export function ScenarioGlobe() {
   const [dims, setDims] = useState({ w: 640, h: 480 });
   const [globeReady, setGlobeReady] = useState(false);
   const [mapError, setMapError] = useState(!supportsWebGL());
+  const [countries, setCountries] = useState<CountryFeature[]>(COUNTRIES);
+  const [nightTextureReady, setNightTextureReady] = useState(false);
+  const [cameraAltitude, setCameraAltitude] = useState(DEFAULT_FOCUS_ALTITUDE);
   const [satelliteRequested, setSatelliteRequested] = useState(false);
   const [satelliteReady, setSatelliteReady] = useState(false);
   const [satelliteUnavailable, setSatelliteUnavailable] = useState(false);
@@ -166,6 +177,46 @@ export function ScenarioGlobe() {
     if (!event) return null;
     return { event, index: playbackStep, total: timeline.length };
   }, [playbackIncidentId, playbackStep, selected]);
+
+  // INHERITANCE uses the fuller, 10k-vertex world.geojson geometry.
+  // Keep the bundled atlas as an offline fallback if the detailed data fails.
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`${import.meta.env.BASE_URL}world-detailed.geojson`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((collection: { features?: CountryFeature[] }) => {
+        if (Array.isArray(collection.features) && collection.features.length > 0)
+          setCountries(collection.features);
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted)
+          console.warn("Detailed globe geography unavailable; using bundled atlas.", error);
+      });
+    return () => controller.abort();
+  }, []);
+
+  // Borrow the Earth-at-night texture from INHERITANCE, without making the
+  // rest of INQUISITION depend on the remote image loading successfully.
+  useEffect(() => {
+    let active = true;
+    const texture = new Image();
+    texture.crossOrigin = "anonymous";
+    texture.onload = () => {
+      if (active) setNightTextureReady(true);
+    };
+    texture.onerror = () => {
+      if (active) setNightTextureReady(false);
+    };
+    texture.src = NIGHT_TEXTURE;
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Fit the globe to its own stage (not the entire browser window).
   useEffect(() => {
@@ -229,11 +280,11 @@ export function ScenarioGlobe() {
       {
         lat: selected.company.hqLat,
         lng: selected.company.hqLon,
-        altitude: FOCUS_ALTITUDE,
+        altitude: cameraAltitude,
       },
       950
     );
-  }, [selected, globeReady, mapError]);
+  }, [selected, globeReady, mapError, cameraAltitude]);
 
   // During an evidence timeline replay, the timeline callout takes precedence.
   useEffect(() => {
@@ -272,6 +323,16 @@ export function ScenarioGlobe() {
   const fin = selected?.company.financials;
   const globeLesson = selected ? resolveGlobeSecurityLesson(selected) : null;
   const satelliteActive = satelliteReady && satelliteRequested;
+  const textureUrl = satelliteActive
+    ? SATELLITE_TEXTURE
+    : nightTextureReady
+      ? NIGHT_TEXTURE
+      : "./earth-dark.svg";
+  const changeZoom = (delta: number) => {
+    setCameraAltitude((current) =>
+      Math.max(MIN_FOCUS_ALTITUDE, Math.min(MAX_FOCUS_ALTITUDE, Number((current + delta).toFixed(2))))
+    );
+  };
   const countryCode = selected?.company.countryCode;
   const headquarters = selected?.company.headquartersLabel ?? "";
   const chooseIncident = (id: string) => {
@@ -297,10 +358,12 @@ export function ScenarioGlobe() {
               animateIn={false}
               waitForGlobeReady={false}
               backgroundColor="#050709"
-              globeImageUrl={
-                satelliteActive ? SATELLITE_TEXTURE : "./earth-dark.svg"
+              globeImageUrl={textureUrl}
+              polygonsData={countries}
+              polygonGeoJsonGeometry={(item: object) =>
+                (item as CountryFeature).geometry
               }
-              polygonsData={COUNTRIES}
+              polygonResolution={3}
               polygonAltitude={(item: object) =>
                 isSelectedCountry(
                   item as CountryFeature,
@@ -316,16 +379,20 @@ export function ScenarioGlobe() {
                   countryCode,
                   headquarters
                 )
-                  ? "rgba(224,107,107,0.52)"
+                  ? "rgba(224,107,107,0.48)"
                   : satelliteActive
                     ? "rgba(20,25,30,0.025)"
-                    : "rgba(75,84,93,0.96)"
+                    : nightTextureReady
+                      ? "rgba(45,56,66,0.35)"
+                      : "rgba(75,84,93,0.96)"
               }
               polygonSideColor={() => "rgba(28,35,42,0.95)"}
               polygonStrokeColor={() =>
                 satelliteActive
                   ? "rgba(120,140,150,0.25)"
-                  : "rgba(135,149,160,0.7)"
+                  : nightTextureReady && !satelliteActive
+                    ? "rgba(157,174,187,0.48)"
+                    : "rgba(135,149,160,0.7)"
               }
               showAtmosphere
               atmosphereColor="#607280"
@@ -390,7 +457,7 @@ export function ScenarioGlobe() {
                     {
                       lat: selected?.company.hqLat ?? 39,
                       lng: selected?.company.hqLon ?? -98,
-                      altitude: FOCUS_ALTITUDE,
+                      altitude: cameraAltitude,
                     },
                     0
                   );
@@ -400,6 +467,33 @@ export function ScenarioGlobe() {
             />
           </GlobeErrorBoundary>
         )}
+
+        <div className="absolute left-3 bottom-3 z-10 flex items-center gap-1">
+          {!mapError && (
+            <>
+              <button
+                type="button"
+                onClick={() => changeZoom(-0.16)}
+                disabled={cameraAltitude <= MIN_FOCUS_ALTITUDE}
+                className="border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-xs text-slate-200 hover:border-slate-300 disabled:opacity-40"
+                aria-label="Zoom globe in toward the selected incident"
+                title="Zoom in"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                onClick={() => changeZoom(0.16)}
+                disabled={cameraAltitude >= MAX_FOCUS_ALTITUDE}
+                className="border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-xs text-slate-200 hover:border-slate-300 disabled:opacity-40"
+                aria-label="Zoom globe out from the selected incident"
+                title="Zoom out"
+              >
+                −
+              </button>
+            </>
+          )}
+        </div>
 
         <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
           <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
