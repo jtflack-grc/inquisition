@@ -14,6 +14,7 @@ import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
 import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
+import { supportsWebGL } from "./webglSupport";
 import {
   selectSelectedIncident,
   useIncidentStore,
@@ -29,7 +30,9 @@ const SATELLITE_TEXTURE =
 
 // INHERITANCE's 1.4-altitude opening view filled a full-height panel.
 // INQUISITION's globe shares its rail with a case dossier: frame it closer.
-const DEFAULT_FOCUS_ALTITUDE = 0.22;
+// Camera is now initialized before the 3D scene is revealed, so we can use a
+// readable mid-distance frame without the old library-default fly-in.
+const DEFAULT_FOCUS_ALTITUDE = 0.58;
 const MIN_FOCUS_ALTITUDE = 0.1;
 const MAX_FOCUS_ALTITUDE = 2.1;
 
@@ -97,16 +100,6 @@ function isSelectedCountry(
   );
 }
 
-function supportsWebGL(): boolean {
-  try {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("webgl2") || canvas.getContext("webgl");
-    return Boolean(context);
-  } catch {
-    return false;
-  }
-}
-
 /** Render-time errors fall back to the existing offline SVG navigator. */
 class GlobeErrorBoundary extends Component<
   { children: ReactNode; onFailure: () => void },
@@ -144,7 +137,10 @@ export function ScenarioGlobe() {
   const cameraInitializedRef = useRef(false);
   const lastCameraCaseRef = useRef<string | null>(null);
   const lastCameraAltitudeRef = useRef<number | null>(null);
-  const [mapError, setMapError] = useState(!supportsWebGL());
+  // Lazy initialization matters: calling supportsWebGL() directly in the
+  // useState argument allocates a new context on *every* React re-render.
+  // That can evict the actual globe context and trigger the 2D fallback.
+  const [mapError, setMapError] = useState(() => !supportsWebGL());
   const [countries, setCountries] = useState<CountryFeature[]>(COUNTRIES);
   const [nightTextureReady, setNightTextureReady] = useState(false);
   const [cameraAltitude, setCameraAltitude] = useState(DEFAULT_FOCUS_ALTITUDE);
