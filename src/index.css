@@ -2032,3 +2032,20 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
   .loss-overview__values { font-size: 9px; }
   .evidence-header { padding-inline: 13px; }
 }
+
+/* On small screens the case notebook is a full-height workspace, not a
+   half-height dock competing with a globe that is intentionally desktop-only. */
+.mobile-notebook-rail {
+  min-height: 0;
+  background: #0b1115;
+}
+.mobile-notebook-rail .case-notebook,
+.mobile-notebook-rail .case-notebook[data-size] {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+.mobile-notebook-rail .notebook-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+}
