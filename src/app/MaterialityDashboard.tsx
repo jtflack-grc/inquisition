@@ -146,6 +146,10 @@ export function MaterialityDashboard() {
         // Scroll after React has rendered the requested model view.
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
+            const breakdown = document.getElementById(
+              "model-category-breakdown"
+            );
+            if (breakdown instanceof HTMLDetailsElement) breakdown.open = true;
             document
               .getElementById("model-category-" + detail.category)
               ?.scrollIntoView({
@@ -362,6 +366,35 @@ export function MaterialityDashboard() {
             primary={outputsDisplayed.grossPrimaryTotalUSDm}
             secondary={outputsDisplayed.secondaryTotalUSDm}
           />
+        )}
+        {tab === "basic" && (
+          <section
+            className="fair-reading-guide"
+            aria-label="FAIR reasoning guide"
+          >
+            <div className="fair-reading-guide__head">
+              <span>FAIR / READING THE LOSS STORY</span>
+              <span>ESTIMATE VIEW</span>
+            </div>
+            <div className="fair-reading-guide__pair">
+              <div>
+                <strong>Loss Magnitude · shown here</strong>
+                <p>
+                  How costly one loss event could be. Primary and conditional
+                  secondary loss are different pathways, not interchangeable
+                  totals.
+                </p>
+              </div>
+              <div>
+                <strong>Loss Event Frequency · separate</strong>
+                <p>
+                  How often a loss event could occur. This estimate does not
+                  calculate frequency; Simulation exposes a simplified frequency
+                  assumption.
+                </p>
+              </div>
+            </div>
+          </section>
         )}
         {["advanced", "fair_native"].includes(tab) && (
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -782,63 +815,79 @@ export function MaterialityDashboard() {
             </section>
           </>
         )}
-        <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
-          <h3 className="text-xs font-semibold tracking-[0.15em] text-war-muted uppercase">
-            {tab === "basic"
-              ? "Where the money goes (simplified)"
-              : tab === "fair_native"
-                ? "LM decomposition (buckets)"
-                : "Category breakdown"}
-          </h3>
-          {tab === "fair_native" && (
-            <p className="text-[9px] text-slate-400 leading-relaxed border-l-2 border-amber-500/40 pl-2 -mt-2 mb-1">
-              Rows start <strong className="text-slate-300">compact</strong>{" "}
-              (range + simulation note). Use{" "}
-              <strong className="text-slate-300">Show formula…</strong> per
-              bucket for provenance, interpretation and control questions.
-            </p>
-          )}
-
-          <div>
-            <h4 className="text-[10px] text-sky-400/90 uppercase tracking-wide mb-2">
+        <details
+          id="model-category-breakdown"
+          key={tab}
+          className="materiality-categories"
+          open={tab !== "basic"}
+        >
+          <summary>
+            <span>
               {tab === "basic"
-                ? "Direct"
-                : tab === "fair_native"
-                  ? "Primary LM buckets"
-                  : "Primary"}
-            </h4>
-            <ul className="space-y-3">
-              {primaryCats.map((c) => (
-                <CategoryRow
-                  key={c.category}
-                  estimate={c}
-                  tab={tab}
-                  focused={notebookCategory === c.category}
-                />
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-[10px] text-emerald-400/90 uppercase tracking-wide mb-2">
+                ? "Explore the modeled loss categories"
+                : "Category-by-category loss decomposition"}
+            </span>
+            <span>
+              {tab === "basic" ? "Optional deeper view" : "Source calculations"}
+            </span>
+          </summary>
+          <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
+            <h3 className="text-xs font-semibold tracking-[0.15em] text-war-muted uppercase">
               {tab === "basic"
-                ? "Conditional external reaction"
+                ? "Where the money goes (simplified)"
                 : tab === "fair_native"
-                  ? "Secondary LM buckets"
-                  : "Secondary"}
-            </h4>
-            <ul className="space-y-3">
-              {secondaryCats.map((c) => (
-                <CategoryRow
-                  key={c.category}
-                  estimate={c}
-                  tab={tab}
-                  focused={notebookCategory === c.category}
-                />
-              ))}
-            </ul>
-          </div>
-        </section>
+                  ? "LM decomposition (buckets)"
+                  : "Category breakdown"}
+            </h3>
+            {tab === "fair_native" && (
+              <p className="text-[9px] text-slate-400 leading-relaxed border-l-2 border-amber-500/40 pl-2 -mt-2 mb-1">
+                Rows start <strong className="text-slate-300">compact</strong>{" "}
+                (range + simulation note). Use{" "}
+                <strong className="text-slate-300">Show formula…</strong> per
+                bucket for provenance, interpretation and control questions.
+              </p>
+            )}
 
+            <div>
+              <h4 className="text-[10px] text-sky-400/90 uppercase tracking-wide mb-2">
+                {tab === "basic"
+                  ? "Direct"
+                  : tab === "fair_native"
+                    ? "Primary LM buckets"
+                    : "Primary"}
+              </h4>
+              <ul className="space-y-3">
+                {primaryCats.map((c) => (
+                  <CategoryRow
+                    key={c.category}
+                    estimate={c}
+                    tab={tab}
+                    focused={notebookCategory === c.category}
+                  />
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-[10px] text-emerald-400/90 uppercase tracking-wide mb-2">
+                {tab === "basic"
+                  ? "Conditional external reaction"
+                  : tab === "fair_native"
+                    ? "Secondary LM buckets"
+                    : "Secondary"}
+              </h4>
+              <ul className="space-y-3">
+                {secondaryCats.map((c) => (
+                  <CategoryRow
+                    key={c.category}
+                    estimate={c}
+                    tab={tab}
+                    focused={notebookCategory === c.category}
+                  />
+                ))}
+              </ul>
+            </div>
+          </section>
+        </details>
         <section className="rounded-xl border border-war-border/40 bg-black/40 px-4 py-3">
           <p className="text-[10px] text-war-muted leading-relaxed">
             {tab === "basic" ? (
@@ -957,7 +1006,7 @@ function CategoryRow({
             }
             body={
               tab === "basic"
-                ? "Teaching range for this bucket—tighten it with evidence and open Assumptions when you need the formula."
+                ? `${estimate.kind === "primary" ? "Primary loss (event and organization's response)." : "Secondary loss (conditional outside-party reaction)."} ${estimate.provenance.analysisHint ?? "This is an illustrative modeled magnitude, not an observed invoice."} Use Assumptions to inspect the formula and underlying inputs; change only inputs supported by evidence.`
                 : `${estimate.provenance.formula} Category ranges are illustrative; substitute defensible sector curves and cited record counts when available.`
             }
             badge={tooltipBadge}

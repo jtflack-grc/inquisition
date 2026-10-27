@@ -1,5 +1,6 @@
 import type { Range3 } from "../inquisition/types";
 import { lossRangePositions } from "./lossRangePositions";
+import { EduTooltip } from "./EduTooltip";
 
 function format(value: number) {
   return "$" + value.toFixed(1) + "M";
@@ -33,15 +34,35 @@ export function LossRangeOverview({
       aria-label="Modeled loss ranges on a common dollar scale"
     >
       <div className="loss-overview__masthead">
-        <span>MODEL AT A GLANCE</span>
-        <span>SHARED SCALE · $M</span>
+        <span>LOSS MAGNITUDE / ONE EVENT</span>
+        <div className="loss-overview__teach">
+          <span>SHARED SCALE · $M</span>
+          <EduTooltip
+            title="FAIR: how often versus how much?"
+            badge="FAIR"
+            body="FAIR distinguishes Loss Event Frequency (LEF: how often loss events occur) from Loss Magnitude (LM: how costly an event is when it happens). This chart is an illustrative LM teaching model. It contains no LEF estimate. Simulation provides a simplified, assumed annual LEF—not a calibrated Threat Event Frequency / Vulnerability model."
+          />
+        </div>
       </div>
       {rows.map(({ id, name, range, conditional }) => {
         const pos = lossRangePositions(range, max);
         return (
           <div className="loss-overview__row" key={id}>
             <div className="loss-overview__row-head">
-              <span>{name}</span>
+              <span className="loss-overview__row-title">
+                {name}
+                <EduTooltip
+                  title={
+                    conditional ? "FAIR: secondary loss" : "FAIR: primary loss"
+                  }
+                  badge="FAIR"
+                  body={
+                    conditional
+                      ? "Secondary loss arises from the reactions of outside stakeholders to a primary loss event—for example regulators, customers or litigants. It is not simply 'loss that happens later.' This range is the magnitude if that secondary event occurs; the chart does not estimate its probability."
+                      : "Primary loss is borne by the organization from the loss event and its own response, such as interruption, investigation or restoration. It is not simply a synonym for immediate loss. This is a gross modeled range before any insurance recovery offset."
+                  }
+                />
+              </span>
               <span>
                 {conditional
                   ? "If outside parties react"
