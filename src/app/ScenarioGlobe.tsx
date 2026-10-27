@@ -565,7 +565,7 @@ export function ScenarioGlobe() {
           )}
         </div>
 
-        <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
+        <div className="globe-map-mode-controls absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
           <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
             {hotspots.length} cases ·{" "}
             {mapError
