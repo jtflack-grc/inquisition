@@ -363,6 +363,24 @@ export function MaterialityDashboard() {
             secondary={outputsDisplayed.secondaryTotalUSDm}
           />
         )}
+        {tab === "basic" && (
+          <section className="fair-reading-guide" aria-label="FAIR reasoning guide">
+            <div className="fair-reading-guide__head">
+              <span>FAIR / READING THE LOSS STORY</span>
+              <span>ESTIMATE VIEW</span>
+            </div>
+            <div className="fair-reading-guide__pair">
+              <div>
+                <strong>Loss Magnitude · shown here</strong>
+                <p>How costly one loss event could be. Primary and conditional secondary loss are different pathways, not interchangeable totals.</p>
+              </div>
+              <div>
+                <strong>Loss Event Frequency · separate</strong>
+                <p>How often a loss event could occur. This estimate does not calculate frequency; Simulation exposes a simplified frequency assumption.</p>
+              </div>
+            </div>
+          </section>
+        )}
         {["advanced", "fair_native"].includes(tab) && (
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <article className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3">
@@ -782,6 +800,11 @@ export function MaterialityDashboard() {
             </section>
           </>
         )}
+        <details key={tab} className="materiality-categories" open={tab !== "basic"}>
+          <summary>
+            <span>{tab === "basic" ? "Explore the modeled loss categories" : "Category-by-category loss decomposition"}</span>
+            <span>{tab === "basic" ? "Optional deeper view" : "Source calculations"}</span>
+          </summary>
         <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
           <h3 className="text-xs font-semibold tracking-[0.15em] text-war-muted uppercase">
             {tab === "basic"
@@ -839,6 +862,7 @@ export function MaterialityDashboard() {
           </div>
         </section>
 
+        </details>
         <section className="rounded-xl border border-war-border/40 bg-black/40 px-4 py-3">
           <p className="text-[10px] text-war-muted leading-relaxed">
             {tab === "basic" ? (
@@ -957,7 +981,7 @@ function CategoryRow({
             }
             body={
               tab === "basic"
-                ? "Teaching range for this bucket—tighten it with evidence and open Assumptions when you need the formula."
+                ? `${estimate.kind === "primary" ? "Primary loss (event and organization's response)." : "Secondary loss (conditional outside-party reaction)."} ${estimate.provenance.analysisHint ?? "This is an illustrative modeled magnitude, not an observed invoice."} Use Assumptions to inspect the formula and underlying inputs; change only inputs supported by evidence.`
                 : `${estimate.provenance.formula} Category ranges are illustrative; substitute defensible sector curves and cited record counts when available.`
             }
             badge={tooltipBadge}
