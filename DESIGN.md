@@ -99,10 +99,11 @@ The materiality rail shares IMPACT's analytical language but focuses on ranges a
 - Keep controls compact and explicit.
 - Do not visually collapse deterministic estimates, assumptions, and simulation outputs into one undifferentiated layer.
 - FAIR pedagogy belongs in the first Estimate view, but in concise layers: introduce loss magnitude (LM) for one event versus loss event frequency (LEF), identify primary loss versus conditional external stakeholder reactions, and clarify that ranges are neither probabilities nor confidence intervals. The detailed category ledger should be collapsed in Estimate and fully available under the deeper model views.
-- Shared information popovers must portal to the page's top layer with viewport-aware positioning, keyboard focus and Escape/click-away dismissal, not render inside scrollable rails where stacking contexts can clip them.
+- Shared information popovers must portal above scrollable rails but below genuine modal dialogs (Welcome/Method) with viewport-aware positioning, keyboard focus and Escape/click-away dismissal. The with viewport-aware positioning, keyboard focus and Escape/click-away dismissal, not render inside scrollable rails where stacking contexts can clip them.
 - Estimate starts with an honest common-dollar-scale visualization of gross primary and **conditional** secondary loss magnitudes, not a probability chart. Scenario stress, editable inputs and model export/reset belong in Assumptions or Simulation, and notebook links continue to navigate to precise categories.
 - Replace beginner-facing heuristic 'confidence' with an explicit input-basis description; historical model confidence remains described as a non-calibrated flag in deeper views. No uncertainty metric implies statistical confidence without actual calibration.
-- On mobile, offer Evidence / Loss model / Notebook views. The 3D globe remains a desktop visualization, but its case notebook and cross-rail learning flow must remain accessible on narrow screens.
+- At widths below 1280px, offer Evidence / Loss model / Notebook views rather than clipping three side-by-side minimum-width rails. Full three-rail globe layout starts when the available viewport can fit all three columns. The notebook's mobile close control returns to Evidence.
+- The Materiality stress factor is shared with the notebook and resets to the neutral 100% when selecting another incident. Never display unstressed notebook amounts alongside adjusted model ranges without a clearly labeled distinction. Label the shared magnitude chart endpoints and teach that business-interruption loss models **lost contribution**, not gross revenue.
 
 # Dialogs
 
