@@ -453,6 +453,9 @@ export function IncidentIntelPanel() {
                   Browse the full source trail ↓
                 </button>
               </section>
+              <div className="evidence-source-facts-visible" aria-label="Source Facts provenance disclosure">
+                <EvidenceSourceLabel incident={selected} />
+              </div>
 
               <div className="rounded-xl border-2 border-sky-500/50 bg-gradient-to-b from-sky-950/40 to-black/75 px-3 py-3 shadow-[0_0_24px_rgba(56,189,248,0.14)] ring-1 ring-sky-400/20 space-y-3">
                 <div className="pb-2 border-b border-sky-500/30">
@@ -640,13 +643,6 @@ export function IncidentIntelPanel() {
                     and “why it matters” note.
                   </p>
                 </div>
-                <details className="evidence-source-facts">
-                  <summary>
-                    <span>Source Facts · provenance label and barcode</span>
-                    <span aria-hidden="true">+</span>
-                  </summary>
-                  <EvidenceSourceLabel incident={selected} />
-                </details>
                 {EVIDENCE_GROUP_ORDER.map(({ key, label }) => {
                   const items = groupedEvidence.get(key) ?? [];
                   if (items.length === 0) return null;
