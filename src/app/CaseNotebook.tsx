@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { computeMateriality } from "../inquisition/computeMateriality";
 import type { Incident, MaterialityCategory } from "../inquisition/types";
 import type { ResolvedGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
@@ -36,7 +37,7 @@ function Disclosure({ title, question, answer }: { title: string; question: stri
   );
 }
 
-function SectionLabel({ children, tag }: { children: React.ReactNode; tag?: string }) {
+function SectionLabel({ children, tag }: { children: ReactNode; tag?: string }) {
   return (
     <div className="notebook-section-label">
       <span>{children}</span>
@@ -71,13 +72,10 @@ export function CaseNotebook({
     (a, b) => b.rangeUSDm.mostLikely - a.rangeUSDm.mostLikely
   )[0];
   const fin = incident.company.financials;
-  const primaryEvidence = incident.evidence.find(
-    (item) => item.type === "sec_8k" || item.type === "sec_other" || item.type === "regulator"
-  );
   const activeView = VIEWS.find((view) => view.id === tab) ?? VIEWS[0];
 
   useEffect(() => {
-    scroller.current?.scrollTo({ top: 0, behavior: "instant" });
+    scroller.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [incident.id, tab]);
 
   const toEvidence = (section: "intel-evidence" | "intel-limits" | "intel-timeline" = "intel-evidence") => {
