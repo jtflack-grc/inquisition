@@ -1,4 +1,16 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
+import {
+  positionTeachPopover,
+  type TeachPopoverPosition,
+} from "./teachPopoverPlacement";
 
 export interface EduTooltipProps {
   title: string;
@@ -9,8 +21,9 @@ export interface EduTooltipProps {
 }
 
 /**
- * Accessible info popover: click to toggle (no hover-only), Escape closes, click-outside closes,
- * min 28×28px trigger for touch targets.
+ * Click-to-open instructional popover.
+ * Portal to document.body escapes all three rails' overflow and z-index stacks.
+ * Viewport placement accounts for scrolling, resizing, bottom-edge and mobile.
  */
 export function EduTooltip({
   title,
@@ -19,42 +32,93 @@ export function EduTooltip({
   className = "",
 }: EduTooltipProps) {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLSpanElement>(null);
+  const [placement, setPlacement] = useState<TeachPopoverPosition | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  const headingId = useId();
   const close = useCallback(() => setOpen(false), []);
-  const toggle = useCallback(() => setOpen((o) => !o), []);
+
+  const reposition = useCallback((measuredHeight?: number) => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const next = positionTeachPopover(
+      rect,
+      window.innerWidth,
+      window.innerHeight,
+      measuredHeight
+    );
+    setPlacement((prev) =>
+      prev &&
+      prev.top === next.top &&
+      prev.left === next.left &&
+      prev.width === next.width &&
+      prev.maxHeight === next.maxHeight &&
+      prev.side === next.side
+        ? prev
+        : next
+    );
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setPlacement(null);
+      return;
+    }
+    reposition();
+  }, [open, reposition]);
+
+  // Adjust for actual rendered panel height (body lengths vary significantly).
+  useLayoutEffect(() => {
+    if (!open || !placement || !panelRef.current) return;
+    const height = panelRef.current.getBoundingClientRect().height;
+    if (height > 0) reposition(height);
+  }, [open, placement, reposition]);
 
   useEffect(() => {
     if (!open) return;
-    const handlePointerDown = (e: MouseEvent) => {
+    const handlePointer = (event: PointerEvent) => {
+      const target = event.target as Node;
       if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !triggerRef.current?.contains(target) &&
+        !panelRef.current?.contains(target)
       ) {
-        setOpen(false);
+        close();
       }
     };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        setOpen(false);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+        triggerRef.current?.focus();
       }
     };
-    document.addEventListener("mousedown", handlePointerDown);
+    const onViewportChange = () => {
+      reposition(panelRef.current?.getBoundingClientRect().height);
+    };
+    document.addEventListener("pointerdown", handlePointer);
     document.addEventListener("keydown", handleKeyDown);
+    // Capture scroll events from *any* scrollable rail or nested evidence section.
+    window.addEventListener("scroll", onViewportChange, true);
+    window.addEventListener("resize", onViewportChange);
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("pointerdown", handlePointer);
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", onViewportChange, true);
+      window.removeEventListener("resize", onViewportChange);
     };
-  }, [open]);
+  }, [open, close, reposition]);
 
   return (
-    <span ref={containerRef} className={`relative inline-flex ${className}`}>
+    <span className={`inline-flex align-middle ${className}`}>
       <button
+        ref={triggerRef}
         type="button"
-        onClick={toggle}
+        onClick={() => setOpen((value) => !value)}
         className="inline-flex items-center justify-center min-h-[28px] min-w-[28px] rounded-full border border-slate-400/90 bg-slate-800 text-slate-200 hover:text-white hover:bg-slate-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
         aria-label={`Learn more: ${title}`}
+        aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={panelId}
         id={`${panelId}-trigger`}
@@ -72,46 +136,47 @@ export function EduTooltip({
           />
         </svg>
       </button>
-      {open && (
-        <div
-          id={panelId}
-          role="region"
-          aria-label={title}
-          className="absolute z-[100] left-0 top-full mt-1.5 w-72 max-w-[90vw] rounded-lg border border-slate-500 bg-slate-900 shadow-xl p-3 text-left"
-        >
-          <div className="flex items-start justify-between gap-2 mb-1.5">
-            <span className="text-xs font-semibold text-white pr-2">
-              {title}
-            </span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {badge && (
-                <span
-                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                    badge === "FAIR"
-                      ? "bg-amber-500/25 text-amber-200"
-                      : badge === "FMVA"
-                        ? "bg-emerald-500/25 text-emerald-200"
-                        : badge === "Intro"
-                          ? "bg-sky-500/25 text-sky-200"
-                          : "bg-violet-500/25 text-violet-200"
-                  }`}
-                >
-                  {badge}
-                </span>
-              )}
+      {open &&
+        placement &&
+        createPortal(
+          <div
+            ref={panelRef}
+            id={panelId}
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby={headingId}
+            className="inquisition-teachable"
+            data-side={placement.side}
+            style={{
+              position: "fixed",
+              top: placement.top,
+              left: placement.left,
+              width: placement.width,
+              maxHeight: placement.maxHeight,
+              zIndex: 2147483000,
+            }}
+          >
+            <div className="inquisition-teachable__header">
+              <div className="inquisition-teachable__heading">
+                <span id={headingId}>{title}</span>
+                {badge && <span className="inquisition-teachable__badge">{badge}</span>}
+              </div>
               <button
                 type="button"
-                onClick={close}
-                className="rounded px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:bg-slate-700 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-400"
-                aria-label="Close help"
+                onClick={() => {
+                  close();
+                  triggerRef.current?.focus();
+                }}
+                className="inquisition-teachable__close"
+                aria-label="Close explanation"
               >
-                ✕
+                ×
               </button>
             </div>
-          </div>
-          <p className="text-[11px] text-slate-200 leading-relaxed">{body}</p>
-        </div>
-      )}
+            <p className="inquisition-teachable__body">{body}</p>
+          </div>,
+          document.body
+        )}
     </span>
   );
 }
