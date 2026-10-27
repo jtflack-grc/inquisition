@@ -44,6 +44,10 @@ export function LossRangeOverview({
           />
         </div>
       </div>
+      <div className="loss-overview__scale" aria-hidden="true">
+        <span>$0M</span>
+        <span>{format(max)}</span>
+      </div>
       {rows.map(({ id, name, range, conditional }) => {
         const pos = lossRangePositions(range, max);
         return (
