@@ -26,6 +26,7 @@ import { EduTooltip } from "./EduTooltip";
 import { FairMethodologyDeepDive } from "./FairMethodologyDeepDive";
 import { FairNativeMaterialityPanel } from "./FairNativeMaterialityPanel";
 import { ModelLimitsStrip } from "./ModelLimitsStrip";
+import { LossRangeOverview } from "./LossRangeOverview";
 import { NOTEBOOK_RAIL_EVENT } from "./notebookRailNavigation";
 import type { NotebookRailDetail } from "./notebookRailNavigation";
 
@@ -340,6 +341,21 @@ export function MaterialityDashboard() {
           />
         )}
 
+        {tab === "basic" && (
+          <div className="analysis-inquiry">
+            <span>02 / QUANTIFY</span>
+            <h2>What could this event cost?</h2>
+            <p>Start with modeled loss magnitudes. Challenge their inputs in Assumptions; use Simulation only when you're ready to explore event frequency and uncertainty.</p>
+            {(overrides != null || stressPct !== 100) && <span className="analysis-inquiry__changed">SCENARIO ADJUSTED · not the case baseline</span>}
+          </div>
+        )}
+        {tab === "basic" && (
+          <LossRangeOverview
+            primary={outputsDisplayed.grossPrimaryTotalUSDm}
+            secondary={outputsDisplayed.secondaryTotalUSDm}
+          />
+        )}
+        {tab !== "basic" && (
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <article className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3">
             <h3 className="flex items-center gap-1.5 text-xs font-medium text-war-white/90 mb-2">
@@ -425,24 +441,34 @@ export function MaterialityDashboard() {
           </article>
         </section>
 
+        )}
         <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-wide text-war-muted">
-              {tab === "basic" ? "How sure?" : "Confidence"}
+              {tab === "basic" ? "Revenue basis" : "Model confidence flag"}
             </span>
             <span className="text-sm font-semibold text-war-white">
-              {outputs.confidenceLabel}
+              {tab === "basic"
+                ? inputs.revenueUSDm == null
+                  ? "Not supplied"
+                  : "Available"
+                : outputs.confidenceLabel}
             </span>
             <EduTooltip
-              title={tab === "basic" ? "How sure?" : "Confidence label"}
+              title={tab === "basic" ? "Financial input basis" : "Heuristic confidence flag"}
               body={
                 tab === "basic"
-                  ? "Simple gut check from the model: if we don’t know revenue scale, bands stay wide. Open Assumptions for the full financial inputs."
-                  : "Heuristic: without disclosed revenue scale, ranges are wider and confidence is lower. Add better financials via overrides."
+                  ? "This tells you only whether a revenue figure is available to the model; it is not a measurement of statistical confidence or the reliability of any claim."
+                  : "Legacy heuristic flag: defaults to Low when revenue is missing and Medium otherwise; a user override may change it. It is not statistically calibrated confidence."
               }
               badge={tab === "basic" ? "Intro" : "FAIR"}
             />
           </div>
+          {tab === "basic" ? (
+            <button type="button" className="analysis-depth-link" onClick={() => setTab("advanced")}>
+              Challenge the estimate · Open assumptions ↗
+            </button>
+          ) : (
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -462,9 +488,12 @@ export function MaterialityDashboard() {
               Reset overrides
             </button>
           </div>
+          )}
         </section>
 
-        <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
+        {tab !== "basic" && (
+          <>
+          <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-war-white/90">
             {tab === "basic" ? (
               <>
@@ -724,6 +753,8 @@ export function MaterialityDashboard() {
           </div>
         </section>
 
+          </>
+        )}
         <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
           <h3 className="text-xs font-semibold tracking-[0.15em] text-war-muted uppercase">
             {tab === "basic"
