@@ -524,10 +524,12 @@ export function IncidentIntelPanel() {
 
                 {selected.disclosureTimeline &&
                   selected.disclosureTimeline.length > 0 && (
-                    <div
-                      id="intel-timeline"
-                      className="scroll-mt-4 rounded-lg bg-black/50 border border-sky-500/25 px-3 py-2.5 space-y-2"
-                    >
+                    <details id="intel-timeline" className="evidence-disclosure" >
+                      <summary className="evidence-disclosure__summary">
+                        <span>Disclosure & filing timeline</span>
+                        <span>{selected.disclosureTimeline.length} milestones</span>
+                      </summary>
+                      <div className="evidence-disclosure__body">
                       <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80 font-semibold">
                         Disclosure &amp; filing trail
                       </p>
@@ -559,13 +561,16 @@ export function IncidentIntelPanel() {
                         ))}
                       </ol>
                     </div>
+                    </details>
                   )}
 
                 {selected.limitations && selected.limitations.length > 0 && (
-                  <div
-                    id="intel-limits"
-                    className="scroll-mt-4 rounded-lg border border-rose-500/40 bg-rose-950/20 px-3 py-2.5 space-y-1.5"
-                  >
+                  <details id="intel-limits" className="evidence-disclosure" >
+                      <summary className="evidence-disclosure__summary">
+                        <span>Known limits & open questions</span>
+                        <span>{selected.limitations.length} caveats</span>
+                      </summary>
+                      <div className="evidence-disclosure__body">
                     <p className="text-[11px] uppercase tracking-[0.15em] text-rose-300/90 font-semibold">
                       What we don’t know
                     </p>
@@ -575,6 +580,7 @@ export function IncidentIntelPanel() {
                       ))}
                     </ul>
                   </div>
+                    </details>
                 )}
               </div>
 
