@@ -26,6 +26,8 @@ import { EduTooltip } from "./EduTooltip";
 import { FairMethodologyDeepDive } from "./FairMethodologyDeepDive";
 import { FairNativeMaterialityPanel } from "./FairNativeMaterialityPanel";
 import { ModelLimitsStrip } from "./ModelLimitsStrip";
+import { NOTEBOOK_RAIL_EVENT } from "./notebookRailNavigation";
+import type { NotebookRailDetail } from "./notebookRailNavigation";
 
 export type MaterialityTab = MaterialityViewTab;
 
@@ -130,6 +132,33 @@ export function MaterialityDashboard() {
   );
 
   const [tab, setTab] = useState<MaterialityViewTab>("basic");
+  const [notebookCategory, setNotebookCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const navigateFromNotebook = (event: Event) => {
+      const detail = (event as CustomEvent<NotebookRailDetail>).detail;
+      if (detail?.rail !== "model" || detail.incidentId !== selected?.id)
+        return;
+      setTab(detail.tab);
+      setNotebookCategory(detail.category ?? null);
+      if (detail.category) {
+        // Scroll after React has rendered the requested model view.
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            document
+              .getElementById("model-category-" + detail.category)
+              ?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+          });
+        });
+      }
+    };
+    window.addEventListener(NOTEBOOK_RAIL_EVENT, navigateFromNotebook);
+    return () =>
+      window.removeEventListener(NOTEBOOK_RAIL_EVENT, navigateFromNotebook);
+  }, [selected?.id]);
   const [stressPct, setStressPct] = useState(100);
   const [sectorPreset, setSectorPreset] = useState<SectorPresetId>("neutral");
   const [mcIterations, setMcIterations] = useState(10_000);
@@ -138,6 +167,7 @@ export function MaterialityDashboard() {
     useState(50);
 
   useEffect(() => {
+    setNotebookCategory(null);
     setSectorPreset("neutral");
     setStressPct(100);
     setMcIterations(10_000);
@@ -721,7 +751,12 @@ export function MaterialityDashboard() {
             </h4>
             <ul className="space-y-3">
               {primaryCats.map((c) => (
-                <CategoryRow key={c.category} estimate={c} tab={tab} />
+                <CategoryRow
+                  key={c.category}
+                  estimate={c}
+                  tab={tab}
+                  focused={notebookCategory === c.category}
+                />
               ))}
             </ul>
           </div>
@@ -735,7 +770,12 @@ export function MaterialityDashboard() {
             </h4>
             <ul className="space-y-3">
               {secondaryCats.map((c) => (
-                <CategoryRow key={c.category} estimate={c} tab={tab} />
+                <CategoryRow
+                  key={c.category}
+                  estimate={c}
+                  tab={tab}
+                  focused={notebookCategory === c.category}
+                />
               ))}
             </ul>
           </div>
@@ -809,9 +849,11 @@ function CategoryProvenanceBlock({
 function CategoryRow({
   estimate,
   tab,
+  focused,
 }: {
   estimate: CategoryEstimate;
   tab: MaterialityViewTab;
+  focused: boolean;
 }) {
   const [fairExpanded, setFairExpanded] = useState(false);
 
@@ -835,7 +877,14 @@ function CategoryRow({
     tab === "basic" ? "Intro" : tab === "fair_native" ? "FAIR" : "FAIR";
 
   return (
-    <li className="rounded-lg border border-war-border/50 bg-black/50 p-3">
+    <li
+      id={"model-category-" + estimate.category}
+      className={
+        focused
+          ? "rounded-lg border border-sky-400/75 bg-sky-950/20 p-3 scroll-mt-5"
+          : "rounded-lg border border-war-border/50 bg-black/50 p-3"
+      }
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-medium text-war-white">{title}</span>

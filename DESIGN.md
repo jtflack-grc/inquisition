@@ -64,7 +64,11 @@ The case map is interactive navigation, not decoration.
 - Default camera framing should show a large, readable globe while keeping the selected hemisphere central.
 - Use the original locally hosted charcoal/gray react-globe.gl rendering as the default. Terrain elevation and map tile services are unnecessary for the casebook.
 - Satellite imagery is an optional, single-texture view; a missing CDN image must never block the local charcoal globe.
-- The horizontally docked case briefing must remain intact and the map should remain visible above it.
+- The bottom horizontal case notebook remains docked beneath the globe and offers three explicit heights (compact, standard, expanded) plus a persistent reopening handle when collapsed.
+- The notebook presents **Case**, **Mechanism**, **Loss pathways**, and **Controls** as focused investigative views rather than a vertically compressed encyclopedia. The selected tab persists when the user changes cases, and notebook scroll resets to the top.
+- Each view distinguishes curated case descriptions, analyst interpretation, modeled assumptions and suggested controls. FAIR event frequency and loss magnitude must never be conflated or presented as observed results.
+- Analyst questions reveal a worked consideration without claiming a single certain answer. Only evidence-supported statements are presented as case facts; uncertain mechanisms and recommended controls remain explicitly hypotheses.
+- Cross-rail actions link source context to the existing evidence rail and derived category ranges to the existing materiality rail. They must not silently modify selected cases or user-adjusted model inputs.
 - Keep the network-independent 2D map available if the user's browser does not support WebGL.
 
 Do not replace hotspots with a single selected marker. That would remove a core Inquisition navigation behavior.
