@@ -1,6 +1,11 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { CreditsPopup, INQUISITION_OPEN_CREDITS_EVENT } from "./CreditsPopup";
 import { IncidentIntelPanel } from "./IncidentIntelPanel";
+import { CaseNotebook } from "./CaseNotebook";
+import { NOTEBOOK_RAIL_EVENT } from "./notebookRailNavigation";
+import type { NotebookRailDetail } from "./notebookRailNavigation";
+import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
+import { selectSelectedIncident, useIncidentStore } from "../store/incidentStore";
 import { MaterialityDashboard } from "./MaterialityDashboard";
 import { WelcomePopup } from "./WelcomePopup";
 
@@ -21,9 +26,23 @@ function GlobeLoadingFallback() {
 }
 
 export function Layout() {
-  const [mobilePane, setMobilePane] = useState<"evidence" | "model">(
-    "evidence"
+  const [mobilePane, setMobilePane] = useState<"evidence" | "model" | "notebook">("evidence");
+  const selected = useIncidentStore(selectSelectedIncident);
+  const lesson = useMemo(
+    () => selected ? resolveGlobeSecurityLesson(selected) : null,
+    [selected]
   );
+
+  useEffect(() => {
+    const followNotebook = (event: Event) => {
+      const detail = (event as CustomEvent<NotebookRailDetail>).detail;
+      if (detail?.rail === "evidence" || detail?.rail === "model") {
+        setMobilePane(detail.rail);
+      }
+    };
+    window.addEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
+    return () => window.removeEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
+  }, []);
 
   return (
     <>
@@ -57,10 +76,10 @@ export function Layout() {
         </header>
 
         <nav
-          className="relative z-10 grid shrink-0 grid-cols-2 border-b border-war-border bg-[#0a0d10] md:hidden"
+          className="relative z-10 grid shrink-0 grid-cols-3 border-b border-war-border bg-[#0a0d10] md:hidden"
           aria-label="Mobile workspace"
         >
-          {(["evidence", "model"] as const).map((pane) => (
+          {(["evidence", "model", "notebook"] as const).map((pane) => (
             <button
               key={pane}
               type="button"
@@ -72,7 +91,7 @@ export function Layout() {
               }`}
               aria-current={mobilePane === pane ? "page" : undefined}
             >
-              {pane === "evidence" ? "Evidence" : "Loss model"}
+              {pane === "evidence" ? "Evidence" : pane === "model" ? "Loss model" : "Notebook"}
             </button>
           ))}
         </nav>
@@ -88,6 +107,24 @@ export function Layout() {
             className={`analysis-rail ${mobilePane === "model" ? "block" : "hidden"} min-h-0 min-w-0 flex-1 overflow-y-auto border-r border-war-border md:block md:min-w-[390px] md:max-w-[650px]`}
           >
             <MaterialityDashboard />
+          </section>
+
+          <section
+            className={mobilePane === "notebook" ? "mobile-notebook-rail flex min-h-0 flex-1 flex-col md:hidden" : "hidden"}
+            aria-label="Mobile case notebook"
+          >
+            {selected && lesson ? (
+              <CaseNotebook
+                incident={selected}
+                lesson={lesson}
+                size="expanded"
+                showSizeControls={false}
+                onSizeChange={() => {}}
+                onClose={() => setMobilePane("evidence")}
+              />
+            ) : (
+              <p className="p-5 text-war-muted">Select an incident to open its notebook.</p>
+            )}
           </section>
 
           <section className="globe-rail relative hidden min-h-0 min-w-0 flex-1 flex-col bg-black md:flex md:min-w-[430px]">
