@@ -84,6 +84,7 @@ export function CaseNotebook({
   size,
   onSizeChange,
   showSizeControls = true,
+  closeLabel = "Map only",
 }: {
   incident: Incident;
   lesson: ResolvedGlobeSecurityLesson;
@@ -91,6 +92,7 @@ export function CaseNotebook({
   size: NotebookSize;
   onSizeChange: (size: NotebookSize) => void;
   showSizeControls?: boolean;
+  closeLabel?: string;
 }) {
   const [tab, setTab] = useState<NotebookTab>("case");
   const scroller = useRef<HTMLDivElement | null>(null);
@@ -187,7 +189,7 @@ export function CaseNotebook({
             className="notebook-map-button"
             onClick={onClose}
           >
-            Map only <span aria-hidden="true">×</span>
+            {closeLabel} <span aria-hidden="true">×</span>
           </button>
         </div>
       </header>
