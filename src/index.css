@@ -2095,7 +2095,6 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
   flex: 1 1 auto;
 }
 
-
 /* Source Facts is a deliberate Tony Martin-Vegue-inspired disclosure artifact.
    Keep the printed label visible; don't tuck it into source metadata details. */
 .evidence-source-facts-visible {
@@ -2129,7 +2128,9 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
   flex-wrap: wrap;
   gap: 6px;
   color: #a0b5c2;
-  font: 500 9px/1.4 "IBM Plex Mono", monospace;
+  font:
+    500 9px/1.4 "IBM Plex Mono",
+    monospace;
 }
 .fair-reading-guide__pair {
   display: grid;
@@ -2144,12 +2145,16 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
   display: block;
   margin-bottom: 5px;
   color: #e4ecf1;
-  font: 600 12px/1.4 "IBM Plex Sans", sans-serif;
+  font:
+    600 12px/1.4 "IBM Plex Sans",
+    sans-serif;
 }
 .fair-reading-guide__pair p {
   margin: 0;
   color: #b6c4cc;
-  font: 400 11.5px/1.5 "IBM Plex Sans", sans-serif;
+  font:
+    400 11.5px/1.5 "IBM Plex Sans",
+    sans-serif;
 }
 .materiality-categories {
   border: 1px solid #303d48;
@@ -2164,14 +2169,18 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
   list-style: none;
   cursor: pointer;
   color: #dbe6ec;
-  font: 500 12px/1.5 "IBM Plex Sans", sans-serif;
+  font:
+    500 12px/1.5 "IBM Plex Sans",
+    sans-serif;
 }
 .materiality-categories > summary::-webkit-details-marker {
   display: none;
 }
 .materiality-categories > summary span:last-child {
   color: #96b5c6;
-  font: 500 10px/1.5 "IBM Plex Mono", monospace;
+  font:
+    500 10px/1.5 "IBM Plex Mono",
+    monospace;
 }
 .materiality-categories[open] > summary {
   border-bottom: 1px solid #33434d;
@@ -2223,7 +2232,9 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
   border: 1px solid #57717f;
   border-radius: 3px;
   color: #b8d3e3;
-  font: 500 9px/1.3 "IBM Plex Mono", monospace;
+  font:
+    500 9px/1.3 "IBM Plex Mono",
+    monospace;
 }
 .inquisition-teachable__close {
   min-width: 28px;

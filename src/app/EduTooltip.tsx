@@ -169,7 +169,9 @@ export function EduTooltip({
             <div className="inquisition-teachable__header">
               <div className="inquisition-teachable__heading">
                 <span id={headingId}>{title}</span>
-                {badge && <span className="inquisition-teachable__badge">{badge}</span>}
+                {badge && (
+                  <span className="inquisition-teachable__badge">{badge}</span>
+                )}
               </div>
               <button
                 type="button"

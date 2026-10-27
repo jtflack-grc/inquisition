@@ -52,7 +52,9 @@ export function LossRangeOverview({
               <span className="loss-overview__row-title">
                 {name}
                 <EduTooltip
-                  title={conditional ? "FAIR: secondary loss" : "FAIR: primary loss"}
+                  title={
+                    conditional ? "FAIR: secondary loss" : "FAIR: primary loss"
+                  }
                   badge="FAIR"
                   body={
                     conditional

@@ -453,7 +453,10 @@ export function IncidentIntelPanel() {
                   Browse the full source trail ↓
                 </button>
               </section>
-              <div className="evidence-source-facts-visible" aria-label="Source Facts provenance disclosure">
+              <div
+                className="evidence-source-facts-visible"
+                aria-label="Source Facts provenance disclosure"
+              >
                 <EvidenceSourceLabel incident={selected} />
               </div>
 
