@@ -146,6 +146,8 @@ export function MaterialityDashboard() {
         // Scroll after React has rendered the requested model view.
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
+            const breakdown = document.getElementById("model-category-breakdown");
+            if (breakdown instanceof HTMLDetailsElement) breakdown.open = true;
             document
               .getElementById("model-category-" + detail.category)
               ?.scrollIntoView({
@@ -800,7 +802,7 @@ export function MaterialityDashboard() {
             </section>
           </>
         )}
-        <details key={tab} className="materiality-categories" open={tab !== "basic"}>
+        <details id="model-category-breakdown" key={tab} className="materiality-categories" open={tab !== "basic"}>
           <summary>
             <span>{tab === "basic" ? "Explore the modeled loss categories" : "Category-by-category loss decomposition"}</span>
             <span>{tab === "basic" ? "Optional deeper view" : "Source calculations"}</span>
