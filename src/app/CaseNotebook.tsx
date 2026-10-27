@@ -82,12 +82,14 @@ export function CaseNotebook({
   onClose,
   size,
   onSizeChange,
+  showSizeControls = true,
 }: {
   incident: Incident;
   lesson: ResolvedGlobeSecurityLesson;
   onClose: () => void;
   size: NotebookSize;
   onSizeChange: (size: NotebookSize) => void;
+  showSizeControls?: boolean;
 }) {
   const [tab, setTab] = useState<NotebookTab>("case");
   const scroller = useRef<HTMLDivElement | null>(null);
@@ -147,6 +149,8 @@ export function CaseNotebook({
           <p>{incident.incidentTitle}</p>
         </div>
         <div className="notebook-header__actions">
+          {showSizeControls && (
+          <>
           <span className="notebook-header__size-label">DOCK</span>
           <div
             className="notebook-size-controls"
@@ -165,6 +169,8 @@ export function CaseNotebook({
               </button>
             ))}
           </div>
+          </>
+          )}
           <button
             type="button"
             className="notebook-map-button"
