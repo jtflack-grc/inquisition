@@ -79,9 +79,9 @@ Do not replace hotspots with a single selected marker. That would remove a core 
 
 The evidence rail can be dense, but it should not feel like a stack of glowing cards.
 
-**Source Facts stays visible.** The Tony Martin-Vegue-inspired label and barcode are an intentional signature of the evidence rail, not expendable advanced metadata. Keep it fully rendered immediately after the featured source entry; retain the disclaimer that source classification does not establish truthfulness.
+**Source Facts stays visible.** The Tony Martin-Vegue-inspired label and barcode are an intentional signature of the evidence rail, not expendable advanced metadata. Keep it fully rendered immediately after the featured source entry as a pure reversed disclosure label: off-white ink, rules and barcode on near-black OLED ground, with no glow, shadow, gradient or new decoration. Retain the disclaimer that source classification does not establish truthfulness.
 
-First contact should answer **what incident is selected, and which cited source can I open?** Keep incident selection and a clearly qualified source link visible. Put search, complete Source Facts, source metadata, disclosure timeline and caveats behind easily opened local disclosures. Deep-links from the notebook must expand their targets before scrolling. Counts and provenance tiers are classifications, never confidence or truth scores.
+First contact should answer **what incident is selected, and which cited source can I open?** Keep incident selection and a clearly qualified source link visible. Put search, expanded source metadata, disclosure timeline and caveats behind easily opened local disclosures; leave the complete Source Facts label visible. Deep-links from the notebook must expand their targets before scrolling. Counts and provenance tiers are classifications, never confidence or truth scores.
 
 - Search and incident selection are primary controls and should be visually calm.
 - Evidence trust tiers may use restrained color distinctions.
