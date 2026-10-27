@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type {
   EvidenceItem,
   EvidenceTrustTier,
@@ -16,6 +16,8 @@ import {
   useIncidentStore,
 } from "../store/incidentStore";
 import { TimelinePlaybackControls } from "./TimelinePlaybackControls";
+import { NOTEBOOK_RAIL_EVENT } from "./notebookRailNavigation";
+import type { NotebookRailDetail } from "./notebookRailNavigation";
 
 const EVIDENCE_GROUP_ORDER: {
   key: "sec" | "lawsuit" | "regulator" | "news";
@@ -145,6 +147,15 @@ export function IncidentIntelPanel() {
   const goTo = useCallback((id: string) => {
     scrollPanelToId(scrollAreaRef.current, id);
   }, []);
+  useEffect(() => {
+    const jumpFromNotebook = (event: Event) => {
+      const detail = (event as CustomEvent<NotebookRailDetail>).detail;
+      if (detail?.rail !== "evidence" || detail.incidentId !== selected?.id) return;
+      goTo(detail.section);
+    };
+    window.addEventListener(NOTEBOOK_RAIL_EVENT, jumpFromNotebook);
+    return () => window.removeEventListener(NOTEBOOK_RAIL_EVENT, jumpFromNotebook);
+  }, [goTo, selected?.id]);
 
   const groupedEvidence = useMemo(() => {
     if (!selected) return new Map<string, EvidenceItem[]>();
