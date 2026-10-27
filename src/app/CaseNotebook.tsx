@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { computeMateriality } from "../inquisition/computeMateriality";
+import { scaleMaterialityOutputs } from "../inquisition/materialityScale";
 import type { Incident, MaterialityCategory } from "../inquisition/types";
 import type { ResolvedGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
 import { useIncidentStore } from "../store/incidentStore";
@@ -96,9 +97,13 @@ export function CaseNotebook({
   const overrides = useIncidentStore(
     (s) => s.materialityOverridesByIncidentId[incident.id]
   );
+  const stressPct = useIncidentStore((state) => state.scenarioStressPct);
   const estimates = useMemo(
-    () => computeMateriality(incident, overrides).outputs.categories,
-    [incident, overrides]
+    () => scaleMaterialityOutputs(
+      computeMateriality(incident, overrides).outputs,
+      stressPct / 100
+    ).categories,
+    [incident, overrides, stressPct]
   );
   const primary = estimates.filter((item) => item.kind === "primary");
   const secondary = estimates.filter((item) => item.kind === "secondary");
@@ -418,10 +423,17 @@ export function CaseNotebook({
               </SectionLabel>
               <p className="notebook-context">
                 These are illustrative FAIR-informed ranges from the shared
-                model, reflecting current case overrides. They are not
-                documented losses, probability estimates or measured confidence
-                intervals.
+                model, reflecting current case overrides and scenario stress.
+                They are not documented losses, probability estimates or measured
+                confidence intervals.
               </p>
+              {stressPct !== 100 && (
+                <p className="notebook-context notebook-scenario-stress">
+                  Scenario stress: {stressPct}% of baseline. The same scale
+                  is applied in the Materiality rail; it is a sensitivity
+                  assumption, not additional incident evidence.
+                </p>
+              )}
               {(
                 [
                   { name: "Primary · event and response", rows: primary },
