@@ -37,7 +37,7 @@ function money(value: number | undefined) {
 }
 
 function categoryName(value: MaterialityCategory) {
-  return value.replaceAll("_", " ");
+  return value.split("_").join(" ");
 }
 
 function Disclosure({
