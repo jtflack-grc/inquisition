@@ -460,14 +460,14 @@ export function IncidentIntelPanel() {
                 <EvidenceSourceLabel incident={selected} />
               </div>
 
-              <div className="rounded-xl border-2 border-sky-500/50 bg-gradient-to-b from-sky-950/40 to-black/75 px-3 py-3 shadow-[0_0_24px_rgba(56,189,248,0.14)] ring-1 ring-sky-400/20 space-y-3">
+              <div className="rounded-md border border-slate-600/35 border-l-2 border-l-sky-500/60 bg-[#11181d] px-3 py-3 space-y-3">
                 <div className="pb-2 border-b border-sky-500/30">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-sky-200">
                     Case file
                   </p>
                   <p className="text-[10px] text-war-muted mt-0.5 leading-snug">
-                    Company context and disclosure milestones — read this block
-                    first, then dive into{" "}
+                    A concise account of the selected incident. Check the cited
+                    sources before relying on{" "}
                     <span className="text-emerald-200/85">evidence</span> below.
                   </p>
                 </div>
@@ -634,7 +634,7 @@ export function IncidentIntelPanel() {
 
               <div
                 id="intel-evidence"
-                className="scroll-mt-4 rounded-xl border-2 border-emerald-500/50 bg-gradient-to-b from-emerald-950/35 to-black/80 px-3 py-3 sm:px-4 sm:py-4 shadow-[0_0_26px_rgba(16,185,129,0.14)] ring-1 ring-emerald-500/25 space-y-3"
+                className="scroll-mt-4 rounded-md border border-emerald-500/30 border-l-2 border-l-emerald-600/70 bg-[#0d1513] px-3 py-3 sm:px-4 sm:py-4 space-y-3"
               >
                 <div className="pb-2.5 border-b border-emerald-500/35">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-200">
