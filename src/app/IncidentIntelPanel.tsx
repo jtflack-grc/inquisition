@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type {
   EvidenceItem,
   EvidenceTrustTier,
@@ -150,11 +157,13 @@ export function IncidentIntelPanel() {
   useEffect(() => {
     const jumpFromNotebook = (event: Event) => {
       const detail = (event as CustomEvent<NotebookRailDetail>).detail;
-      if (detail?.rail !== "evidence" || detail.incidentId !== selected?.id) return;
+      if (detail?.rail !== "evidence" || detail.incidentId !== selected?.id)
+        return;
       goTo(detail.section);
     };
     window.addEventListener(NOTEBOOK_RAIL_EVENT, jumpFromNotebook);
-    return () => window.removeEventListener(NOTEBOOK_RAIL_EVENT, jumpFromNotebook);
+    return () =>
+      window.removeEventListener(NOTEBOOK_RAIL_EVENT, jumpFromNotebook);
   }, [goTo, selected?.id]);
 
   const groupedEvidence = useMemo(() => {

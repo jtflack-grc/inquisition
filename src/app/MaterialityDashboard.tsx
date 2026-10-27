@@ -137,23 +137,27 @@ export function MaterialityDashboard() {
   useEffect(() => {
     const navigateFromNotebook = (event: Event) => {
       const detail = (event as CustomEvent<NotebookRailDetail>).detail;
-      if (detail?.rail !== "model" || detail.incidentId !== selected?.id) return;
+      if (detail?.rail !== "model" || detail.incidentId !== selected?.id)
+        return;
       setTab(detail.tab);
       setNotebookCategory(detail.category ?? null);
       if (detail.category) {
         // Scroll after React has rendered the requested model view.
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
-            document.getElementById("model-category-" + detail.category)?.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
+            document
+              .getElementById("model-category-" + detail.category)
+              ?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
           });
         });
       }
     };
     window.addEventListener(NOTEBOOK_RAIL_EVENT, navigateFromNotebook);
-    return () => window.removeEventListener(NOTEBOOK_RAIL_EVENT, navigateFromNotebook);
+    return () =>
+      window.removeEventListener(NOTEBOOK_RAIL_EVENT, navigateFromNotebook);
   }, [selected?.id]);
   const [stressPct, setStressPct] = useState(100);
   const [sectorPreset, setSectorPreset] = useState<SectorPresetId>("neutral");
@@ -747,7 +751,12 @@ export function MaterialityDashboard() {
             </h4>
             <ul className="space-y-3">
               {primaryCats.map((c) => (
-                <CategoryRow key={c.category} estimate={c} tab={tab} focused={notebookCategory === c.category} />
+                <CategoryRow
+                  key={c.category}
+                  estimate={c}
+                  tab={tab}
+                  focused={notebookCategory === c.category}
+                />
               ))}
             </ul>
           </div>
