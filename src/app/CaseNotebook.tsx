@@ -184,18 +184,25 @@ export function CaseNotebook({
             onClick={() => setTab(view.id)}
             aria-current={tab === view.id ? "page" : undefined}
           >
-            {view.label}
+            <span className="notebook-tabs__number">
+              {String(VIEWS.indexOf(view) + 1).padStart(2, "0")}
+            </span>
+            <span className="notebook-tabs__name">{view.label}</span>
           </button>
         ))}
       </nav>
 
       <div className="notebook-scroll" ref={scroller}>
         <div className="notebook-deck">
-          <span className="notebook-kicker">
-            INVESTIGATIVE QUESTION /{" "}
+          <div className="notebook-deck__number" aria-hidden="true">
             {String(VIEWS.indexOf(activeView) + 1).padStart(2, "0")}
-          </span>
-          <p>{activeView.question}</p>
+          </div>
+          <div className="notebook-deck__copy">
+            <span className="notebook-kicker">
+              INVESTIGATIVE QUESTION · {activeView.label.toUpperCase()}
+            </span>
+            <p>{activeView.question}</p>
+          </div>
         </div>
 
         {tab === "case" && (
@@ -475,75 +482,105 @@ export function CaseNotebook({
         )}
 
         {tab === "controls" && (
-          <div className="notebook-content">
-            <section className="notebook-block">
+          <div className="notebook-content notebook-content--controls">
+            <section className="notebook-block notebook-controls__hypotheses">
               <SectionLabel tag="CONTROL HYPOTHESES">
-                Detection and prevention
+                Where could the chain be interrupted?
               </SectionLabel>
               <p className="notebook-context">
-                The items below are curated recommendations and
-                taxonomy-informed teaching prompts, not confirmed controls in
-                place at the victim organization.
+                Curated recommendations and taxonomy-informed teaching prompts,
+                not confirmed controls at the affected organization.
               </p>
-              <div className="notebook-control-group">
-                <h3>Identify and detect</h3>
-                <ul className="notebook-list">
-                  {lesson.identification.map((line, i) => (
-                    <li key={i}>{line}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="notebook-control-group">
-                <h3>Prevent and harden</h3>
-                <ul className="notebook-list">
-                  {lesson.prevention.map((line, i) => (
-                    <li key={i}>{line}</li>
-                  ))}
-                </ul>
+              <div className="notebook-controls-grid">
+                <section className="notebook-control-track notebook-control-track--detect">
+                  <header className="notebook-control-track__header">
+                    <span className="notebook-control-track__index">01 / OBSERVE</span>
+                    <h3>Identify &amp; detect</h3>
+                    <p>Signals that could expose the sequence sooner.</p>
+                  </header>
+                  {lesson.identification.length ? (
+                    <ul className="notebook-list">
+                      {lesson.identification.map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="notebook-context">
+                      No detection guidance curated for this case.
+                    </p>
+                  )}
+                </section>
+                <section className="notebook-control-track notebook-control-track--prevent">
+                  <header className="notebook-control-track__header">
+                    <span className="notebook-control-track__index">02 / INTERRUPT</span>
+                    <h3>Prevent &amp; harden</h3>
+                    <p>Changes that could make the path harder to complete.</p>
+                  </header>
+                  {lesson.prevention.length ? (
+                    <ul className="notebook-list">
+                      {lesson.prevention.map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="notebook-context">
+                      No prevention guidance curated for this case.
+                    </p>
+                  )}
+                </section>
               </div>
               {lesson.mergedTaxonomyHints && (
-                <p className="notebook-context">
-                  Some recommendations are derived from the incident's taxonomy
-                  tags, rather than incident-specific reporting.
+                <p className="notebook-context notebook-controls__provenance">
+                  Some examples come from incident taxonomy tags, not
+                  incident-specific reporting.
                 </p>
               )}
             </section>
-            <section className="notebook-block">
-              <SectionLabel tag="PRIORITIES">
-                Response and resilience
+
+            <section className="notebook-block notebook-controls__response">
+              <SectionLabel tag="ORDERED HYPOTHESES">
+                Response &amp; resilience priorities
               </SectionLabel>
-              <ol className="notebook-list notebook-list--numbered">
+              <ol className="notebook-priorities">
                 {lesson.mitigationPriority.map((line, i) => (
-                  <li key={i}>{line}</li>
+                  <li key={i}>
+                    <span className="notebook-priorities__number">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span>{line}</span>
+                  </li>
                 ))}
               </ol>
             </section>
-            <section className="notebook-block">
-              <SectionLabel tag="FAIR CONNECTION">
-                Which lever could move?
+
+            <section className="notebook-block notebook-controls__fair">
+              <SectionLabel tag="FAIR REASONING">
+                What would the intervention change?
               </SectionLabel>
-              <div className="notebook-causal">
-                <div>
-                  <small>FREQUENCY</small>
-                  <span>
-                    Prevention and effective detection might reduce the
+              <div className="notebook-levers">
+                <div className="notebook-lever notebook-lever--frequency">
+                  <span className="notebook-kicker">01 / FREQUENCY</span>
+                  <h3>Fewer loss events?</h3>
+                  <p>
+                    Effective prevention and detection might reduce the
                     likelihood of successful loss events.
-                  </span>
+                  </p>
                 </div>
-                <div>
-                  <small>MAGNITUDE</small>
-                  <span>
+                <div className="notebook-lever notebook-lever--magnitude">
+                  <span className="notebook-kicker">02 / MAGNITUDE</span>
+                  <h3>Less costly events?</h3>
+                  <p>
                     Containment, recovery and contractual response might change
-                    the cost once an event occurs.
-                  </span>
+                    loss magnitude after an event occurs.
+                  </p>
                 </div>
-                <div>
-                  <small>EVIDENCE</small>
-                  <span>
-                    Check telemetry, tests and actual recovery outcomes before
-                    crediting effectiveness.
-                  </span>
-                </div>
+              </div>
+              <div className="notebook-evidence-rule">
+                <span className="notebook-kicker">EVIDENCE REQUIRED</span>
+                <p>
+                  Check telemetry, control testing and observed recovery
+                  outcomes before crediting operating effectiveness.
+                </p>
               </div>
               <button
                 type="button"
