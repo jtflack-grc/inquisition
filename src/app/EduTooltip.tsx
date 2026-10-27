@@ -35,6 +35,7 @@ export function EduTooltip({
   const [placement, setPlacement] = useState<TeachPopoverPosition | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const focusedForThisOpen = useRef(false);
   const panelId = useId();
   const headingId = useId();
   const close = useCallback(() => setOpen(false), []);
@@ -63,6 +64,7 @@ export function EduTooltip({
 
   useLayoutEffect(() => {
     if (!open) {
+      focusedForThisOpen.current = false;
       setPlacement(null);
       return;
     }
@@ -75,6 +77,14 @@ export function EduTooltip({
     const height = panelRef.current.getBoundingClientRect().height;
     if (height > 0) reposition(height);
   }, [open, placement, reposition]);
+
+  // Nonmodal dialog is portalled to body, so keyboard users must be placed
+  // inside it once when opened rather than tabbing through the entire page.
+  useLayoutEffect(() => {
+    if (!open || !placement || focusedForThisOpen.current) return;
+    panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    focusedForThisOpen.current = true;
+  }, [open, placement]);
 
   useEffect(() => {
     if (!open) return;
