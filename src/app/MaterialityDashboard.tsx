@@ -770,7 +770,7 @@ export function MaterialityDashboard() {
             </h4>
             <ul className="space-y-3">
               {secondaryCats.map((c) => (
-                <CategoryRow key={c.category} estimate={c} tab={tab} />
+                <CategoryRow key={c.category} estimate={c} tab={tab} focused={notebookCategory === c.category} />
               ))}
             </ul>
           </div>
