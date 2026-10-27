@@ -5,7 +5,10 @@ import { CaseNotebook } from "./CaseNotebook";
 import { NOTEBOOK_RAIL_EVENT } from "./notebookRailNavigation";
 import type { NotebookRailDetail } from "./notebookRailNavigation";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
-import { selectSelectedIncident, useIncidentStore } from "../store/incidentStore";
+import {
+  selectSelectedIncident,
+  useIncidentStore,
+} from "../store/incidentStore";
 import { MaterialityDashboard } from "./MaterialityDashboard";
 import { WelcomePopup } from "./WelcomePopup";
 
@@ -26,10 +29,12 @@ function GlobeLoadingFallback() {
 }
 
 export function Layout() {
-  const [mobilePane, setMobilePane] = useState<"evidence" | "model" | "notebook">("evidence");
+  const [mobilePane, setMobilePane] = useState<
+    "evidence" | "model" | "notebook"
+  >("evidence");
   const selected = useIncidentStore(selectSelectedIncident);
   const lesson = useMemo(
-    () => selected ? resolveGlobeSecurityLesson(selected) : null,
+    () => (selected ? resolveGlobeSecurityLesson(selected) : null),
     [selected]
   );
 
@@ -41,7 +46,8 @@ export function Layout() {
       }
     };
     window.addEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
-    return () => window.removeEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
+    return () =>
+      window.removeEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
   }, []);
 
   return (
@@ -91,7 +97,11 @@ export function Layout() {
               }`}
               aria-current={mobilePane === pane ? "page" : undefined}
             >
-              {pane === "evidence" ? "Evidence" : pane === "model" ? "Loss model" : "Notebook"}
+              {pane === "evidence"
+                ? "Evidence"
+                : pane === "model"
+                  ? "Loss model"
+                  : "Notebook"}
             </button>
           ))}
         </nav>
@@ -110,7 +120,11 @@ export function Layout() {
           </section>
 
           <section
-            className={mobilePane === "notebook" ? "mobile-notebook-rail flex min-h-0 flex-1 flex-col md:hidden" : "hidden"}
+            className={
+              mobilePane === "notebook"
+                ? "mobile-notebook-rail flex min-h-0 flex-1 flex-col md:hidden"
+                : "hidden"
+            }
             aria-label="Mobile case notebook"
           >
             {selected && lesson ? (
@@ -123,7 +137,9 @@ export function Layout() {
                 onClose={() => setMobilePane("evidence")}
               />
             ) : (
-              <p className="p-5 text-war-muted">Select an incident to open its notebook.</p>
+              <p className="p-5 text-war-muted">
+                Select an incident to open its notebook.
+              </p>
             )}
           </section>
 

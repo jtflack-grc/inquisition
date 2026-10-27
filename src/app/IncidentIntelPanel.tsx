@@ -190,7 +190,13 @@ export function IncidentIntelPanel() {
   const featuredEvidence = useMemo(() => {
     if (!selected) return null;
     const sorted = sortEvidenceByTrust(selected.evidence);
-    return sorted.find((item) => resolveEvidenceTrust(item).linkRole !== "navigation_hub") ?? sorted[0] ?? null;
+    return (
+      sorted.find(
+        (item) => resolveEvidenceTrust(item).linkRole !== "navigation_hub"
+      ) ??
+      sorted[0] ??
+      null
+    );
   }, [selected]);
 
   const jumpTargets = useMemo(() => {
@@ -254,7 +260,9 @@ export function IncidentIntelPanel() {
         </select>
         <details className="evidence-search">
           <summary>
-            <span>{incidentQuery ? "Case filter active" : "Find a case by keyword"}</span>
+            <span>
+              {incidentQuery ? "Case filter active" : "Find a case by keyword"}
+            </span>
             <span aria-hidden="true">⌕</span>
           </summary>
           <div className="evidence-search__content">
@@ -267,7 +275,9 @@ export function IncidentIntelPanel() {
               placeholder="Company, tag, or breach keyword…"
             />
             <div className="evidence-search__feedback">
-              <span>{filtered.length} of {incidents.length} cases shown</span>
+              <span>
+                {filtered.length} of {incidents.length} cases shown
+              </span>
               {incidentQuery && (
                 <button type="button" onClick={() => setIncidentQuery("")}>
                   Clear filter
@@ -277,7 +287,9 @@ export function IncidentIntelPanel() {
           </div>
         </details>
         {filtered.length === 0 && (
-          <p className="evidence-search__error">No matches. Clear your filter to restore the library.</p>
+          <p className="evidence-search__error">
+            No matches. Clear your filter to restore the library.
+          </p>
         )}
         <details className="mt-3 rounded-lg border border-war-border/55 bg-black/45 [&_summary::-webkit-details-marker]:hidden">
           <summary className="cursor-pointer list-none flex items-center justify-between gap-2 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-war-muted hover:text-war-white/90 transition-colors">
@@ -497,92 +509,121 @@ export function IncidentIntelPanel() {
                   </div>
                 </div>
 
-                <section className="evidence-source-lead" aria-label="Start with a source">
+                <section
+                  className="evidence-source-lead"
+                  aria-label="Start with a source"
+                >
                   <div className="evidence-source-lead__eyebrow">
                     <span>READ THE RECORD</span>
                     <span>{selected.evidence.length} source links</span>
                   </div>
                   {featuredEvidence ? (
                     <>
-                      <p className="evidence-source-lead__subtitle">A useful starting point—not a certificate of truth.</p>
-                      <a href={featuredEvidence.url} target="_blank" rel="noopener noreferrer" className="evidence-source-lead__link">
-                        {featuredEvidence.title} <span aria-hidden="true">↗</span>
+                      <p className="evidence-source-lead__subtitle">
+                        A useful starting point—not a certificate of truth.
+                      </p>
+                      <a
+                        href={featuredEvidence.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="evidence-source-lead__link"
+                      >
+                        {featuredEvidence.title}{" "}
+                        <span aria-hidden="true">↗</span>
                       </a>
                       <div className="evidence-source-lead__metadata">
                         {resolveEvidenceTrust(featuredEvidence).label}
-                        {featuredEvidence.publishedAt ? " · " + featuredEvidence.publishedAt : ""}
-                        {resolveEvidenceTrust(featuredEvidence).linkRole === "navigation_hub" && (
-                          <span> · Index link: follow through to the underlying document</span>
+                        {featuredEvidence.publishedAt
+                          ? " · " + featuredEvidence.publishedAt
+                          : ""}
+                        {resolveEvidenceTrust(featuredEvidence).linkRole ===
+                          "navigation_hub" && (
+                          <span>
+                            {" "}
+                            · Index link: follow through to the underlying
+                            document
+                          </span>
                         )}
                       </div>
                     </>
                   ) : (
-                    <p className="notebook-context">No source link is currently recorded for this case.</p>
+                    <p className="notebook-context">
+                      No source link is currently recorded for this case.
+                    </p>
                   )}
-                  <button type="button" className="evidence-source-lead__open" onClick={() => goTo("intel-evidence")}>
+                  <button
+                    type="button"
+                    className="evidence-source-lead__open"
+                    onClick={() => goTo("intel-evidence")}
+                  >
                     Browse the full source trail ↓
                   </button>
                 </section>
 
                 {selected.disclosureTimeline &&
                   selected.disclosureTimeline.length > 0 && (
-                    <details id="intel-timeline" className="evidence-disclosure" >
+                    <details
+                      id="intel-timeline"
+                      className="evidence-disclosure"
+                    >
                       <summary className="evidence-disclosure__summary">
                         <span>Disclosure & filing timeline</span>
-                        <span>{selected.disclosureTimeline.length} milestones</span>
+                        <span>
+                          {selected.disclosureTimeline.length} milestones
+                        </span>
                       </summary>
                       <div className="evidence-disclosure__body">
-                      <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80 font-semibold">
-                        Disclosure &amp; filing trail
-                      </p>
-                      <p className="text-[10px] text-war-muted/90 leading-relaxed">
-                        Human-readable milestones (not a minute-by-minute IR
-                        timeline). Compare gaps between intrusion narrative,
-                        public story, and issuer/regulator artifacts.
-                      </p>
-                      <TimelinePlaybackControls incident={selected} />
-                      <ol className="space-y-2.5 list-decimal list-inside marker:text-sky-500/80">
-                        {selected.disclosureTimeline.map((ev, idx) => (
-                          <li
-                            key={idx}
-                            className="text-[11px] text-war-muted leading-relaxed pl-0.5"
-                          >
-                            <span className="text-war-white font-medium">
-                              {ev.label}
-                            </span>
-                            <span className="text-war-muted">
-                              {" "}
-                              — {ev.dateLabel}
-                            </span>
-                            {ev.detail && (
-                              <span className="block mt-0.5 text-[10px] text-war-muted/85 pl-4">
-                                {ev.detail}
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80 font-semibold">
+                          Disclosure &amp; filing trail
+                        </p>
+                        <p className="text-[10px] text-war-muted/90 leading-relaxed">
+                          Human-readable milestones (not a minute-by-minute IR
+                          timeline). Compare gaps between intrusion narrative,
+                          public story, and issuer/regulator artifacts.
+                        </p>
+                        <TimelinePlaybackControls incident={selected} />
+                        <ol className="space-y-2.5 list-decimal list-inside marker:text-sky-500/80">
+                          {selected.disclosureTimeline.map((ev, idx) => (
+                            <li
+                              key={idx}
+                              className="text-[11px] text-war-muted leading-relaxed pl-0.5"
+                            >
+                              <span className="text-war-white font-medium">
+                                {ev.label}
                               </span>
-                            )}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
+                              <span className="text-war-muted">
+                                {" "}
+                                — {ev.dateLabel}
+                              </span>
+                              {ev.detail && (
+                                <span className="block mt-0.5 text-[10px] text-war-muted/85 pl-4">
+                                  {ev.detail}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
                     </details>
                   )}
 
                 {selected.limitations && selected.limitations.length > 0 && (
-                  <details id="intel-limits" className="evidence-disclosure" >
-                      <summary className="evidence-disclosure__summary">
-                        <span>Known limits & open questions</span>
-                        <span>{selected.limitations.length} caveats</span>
-                      </summary>
-                      <div className="evidence-disclosure__body">
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-rose-300/90 font-semibold">
-                      What we don’t know
-                    </p>
-                    <ul className="space-y-1 text-[11px] text-rose-100/85 leading-relaxed list-disc list-inside">
-                      {selected.limitations.map((line, i) => (
-                        <li key={i}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
-                    </details>
+                  <details id="intel-limits" className="evidence-disclosure">
+                    <summary className="evidence-disclosure__summary">
+                      <span>Known limits & open questions</span>
+                      <span>{selected.limitations.length} caveats</span>
+                    </summary>
+                    <div className="evidence-disclosure__body">
+                      <p className="text-[11px] uppercase tracking-[0.15em] text-rose-300/90 font-semibold">
+                        What we don’t know
+                      </p>
+                      <ul className="space-y-1 text-[11px] text-rose-100/85 leading-relaxed list-disc list-inside">
+                        {selected.limitations.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </details>
                 )}
               </div>
 

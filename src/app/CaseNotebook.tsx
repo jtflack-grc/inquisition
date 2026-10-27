@@ -150,26 +150,32 @@ export function CaseNotebook({
         </div>
         <div className="notebook-header__actions">
           {showSizeControls && (
-          <>
-          <span className="notebook-header__size-label">DOCK</span>
-          <div
-            className="notebook-size-controls"
-            role="group"
-            aria-label="Dossier height"
-          >
-            {(["compact", "standard", "expanded"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={size === option}
-                onClick={() => onSizeChange(option)}
-                title={option + " dossier height"}
+            <>
+              <span className="notebook-header__size-label">DOCK</span>
+              <div
+                className="notebook-size-controls"
+                role="group"
+                aria-label="Dossier height"
               >
-                {option === "compact" ? "S" : option === "standard" ? "M" : "L"}
-              </button>
-            ))}
-          </div>
-          </>
+                {(["compact", "standard", "expanded"] as const).map(
+                  (option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      aria-pressed={size === option}
+                      onClick={() => onSizeChange(option)}
+                      title={option + " dossier height"}
+                    >
+                      {option === "compact"
+                        ? "S"
+                        : option === "standard"
+                          ? "M"
+                          : "L"}
+                    </button>
+                  )
+                )}
+              </div>
+            </>
           )}
           <button
             type="button"
