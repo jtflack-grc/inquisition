@@ -79,6 +79,8 @@ Do not replace hotspots with a single selected marker. That would remove a core 
 
 The evidence rail can be dense, but it should not feel like a stack of glowing cards.
 
+**Source Facts stays visible.** The Tony Martin-Vegue-inspired label and barcode are an intentional signature of the evidence rail, not expendable advanced metadata. Keep it fully rendered immediately after the featured source entry; retain the disclaimer that source classification does not establish truthfulness.
+
 First contact should answer **what incident is selected, and which cited source can I open?** Keep incident selection and a clearly qualified source link visible. Put search, complete Source Facts, source metadata, disclosure timeline and caveats behind easily opened local disclosures. Deep-links from the notebook must expand their targets before scrolling. Counts and provenance tiers are classifications, never confidence or truth scores.
 
 - Search and incident selection are primary controls and should be visually calm.
@@ -96,6 +98,8 @@ The materiality rail shares IMPACT's analytical language but focuses on ranges a
 - Use mono numerals for dollar outputs and technical parameters.
 - Keep controls compact and explicit.
 - Do not visually collapse deterministic estimates, assumptions, and simulation outputs into one undifferentiated layer.
+- FAIR pedagogy belongs in the first Estimate view, but in concise layers: introduce loss magnitude (LM) for one event versus loss event frequency (LEF), identify primary loss versus conditional external stakeholder reactions, and clarify that ranges are neither probabilities nor confidence intervals. The detailed category ledger should be collapsed in Estimate and fully available under the deeper model views.
+- Shared information popovers must portal to the page's top layer with viewport-aware positioning, keyboard focus and Escape/click-away dismissal, not render inside scrollable rails where stacking contexts can clip them.
 - Estimate starts with an honest common-dollar-scale visualization of gross primary and **conditional** secondary loss magnitudes, not a probability chart. Scenario stress, editable inputs and model export/reset belong in Assumptions or Simulation, and notebook links continue to navigate to precise categories.
 - Replace beginner-facing heuristic 'confidence' with an explicit input-basis description; historical model confidence remains described as a non-calibrated flag in deeper views. No uncertainty metric implies statistical confidence without actual calibration.
 - On mobile, offer Evidence / Loss model / Notebook views. The 3D globe remains a desktop visualization, but its case notebook and cross-rail learning flow must remain accessible on narrow screens.
