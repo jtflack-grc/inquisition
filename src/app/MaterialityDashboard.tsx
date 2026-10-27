@@ -66,7 +66,7 @@ function basicCategoryLabel(c: MaterialityCategory): string {
     case "information_privacy":
       return "Privacy & breach response";
     case "business_interruption":
-      return "Downtime & lost revenue";
+      return "Business interruption (lost contribution)";
     case "cyber_extortion":
       return "Extortion (if any)";
     case "network_security":
@@ -164,7 +164,8 @@ export function MaterialityDashboard() {
     return () =>
       window.removeEventListener(NOTEBOOK_RAIL_EVENT, navigateFromNotebook);
   }, [selected?.id]);
-  const [stressPct, setStressPct] = useState(100);
+  const stressPct = useIncidentStore((state) => state.scenarioStressPct);
+  const setStressPct = useIncidentStore((state) => state.setScenarioStressPct);
   const [sectorPreset, setSectorPreset] = useState<SectorPresetId>("neutral");
   const [mcIterations, setMcIterations] = useState(10_000);
   const [lefAnnual, setLefAnnual] = useState(1);
@@ -174,7 +175,6 @@ export function MaterialityDashboard() {
   useEffect(() => {
     setNotebookCategory(null);
     setSectorPreset("neutral");
-    setStressPct(100);
     setMcIterations(10_000);
     setLefAnnual(1);
     setSecondaryEventProbabilityPct(50);
@@ -834,7 +834,7 @@ export function MaterialityDashboard() {
           <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
             <h3 className="text-xs font-semibold tracking-[0.15em] text-war-muted uppercase">
               {tab === "basic"
-                ? "Where the money goes (simplified)"
+                ? "How the modeled loss is allocated"
                 : tab === "fair_native"
                   ? "LM decomposition (buckets)"
                   : "Category breakdown"}
@@ -896,8 +896,8 @@ export function MaterialityDashboard() {
                 <span className="text-war-white/80">
                   {selected.taxonomyTags.join(", ") || "—"}
                 </span>
-                . They hint which buckets matter most (e.g. lots of records →
-                privacy costs).
+                . They suggest which pathways to examine, but are not proof of
+                costs or of their magnitude.
               </>
             ) : (
               <>

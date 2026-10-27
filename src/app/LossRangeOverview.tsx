@@ -13,7 +13,8 @@ export function LossRangeOverview({
   primary: Range3;
   secondary: Range3;
 }) {
-  const max = Math.max(primary.max, secondary.max, 1);
+  const reportedMax = Math.max(primary.max, secondary.max, 0);
+  const max = Math.max(reportedMax, 1);
   const rows = [
     {
       id: "primary",
@@ -43,6 +44,10 @@ export function LossRangeOverview({
             body="FAIR distinguishes Loss Event Frequency (LEF: how often loss events occur) from Loss Magnitude (LM: how costly an event is when it happens). This chart is an illustrative LM teaching model. It contains no LEF estimate. Simulation provides a simplified, assumed annual LEF—not a calibrated Threat Event Frequency / Vulnerability model."
           />
         </div>
+      </div>
+      <div className="loss-overview__scale" aria-hidden="true">
+        <span>$0M</span>
+        <span>{format(reportedMax)}</span>
       </div>
       {rows.map(({ id, name, range, conditional }) => {
         const pos = lossRangePositions(range, max);

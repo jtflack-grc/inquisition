@@ -7,6 +7,9 @@ export interface IncidentState {
   selectedIncidentId: string | null;
   incidentQuery: string;
   materialityOverridesByIncidentId: Record<string, MaterialityOverrides>;
+  /** Shared scenario scale, so the case notebook and materiality rail always agree. */
+  scenarioStressPct: number;
+  setScenarioStressPct: (percent: number) => void;
   /** True after seed is applied (always true at init for MVP). */
   hydrated: boolean;
   setSelectedIncidentId: (id: string) => void;
@@ -28,11 +31,19 @@ export const useIncidentStore = create<IncidentState>((set, get) => ({
   selectedIncidentId: firstId,
   incidentQuery: "",
   materialityOverridesByIncidentId: {},
+  scenarioStressPct: 100,
+  setScenarioStressPct: (percent) => {
+    if (Number.isFinite(percent) && percent >= 50 && percent <= 150) {
+      set({ scenarioStressPct: percent });
+    }
+  },
   hydrated: true,
 
   setSelectedIncidentId: (id) => {
     const exists = get().incidents.some((i) => i.id === id);
-    if (exists) set({ selectedIncidentId: id });
+    if (exists && get().selectedIncidentId !== id) {
+      set({ selectedIncidentId: id, scenarioStressPct: 100 });
+    }
   },
 
   setIncidentQuery: (q) => set({ incidentQuery: q }),

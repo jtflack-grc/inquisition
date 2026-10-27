@@ -82,7 +82,7 @@ export function Layout() {
         </header>
 
         <nav
-          className="relative z-10 grid shrink-0 grid-cols-3 border-b border-war-border bg-[#0a0d10] md:hidden"
+          className="relative z-10 grid shrink-0 grid-cols-3 border-b border-war-border bg-[#0a0d10] xl:hidden"
           aria-label="Mobile workspace"
         >
           {(["evidence", "model", "notebook"] as const).map((pane) => (
@@ -106,15 +106,15 @@ export function Layout() {
           ))}
         </nav>
 
-        <main className="relative z-10 flex flex-1 flex-col overflow-hidden md:flex-row">
+        <main className="relative z-10 flex flex-1 flex-col overflow-hidden xl:flex-row">
           <section
-            className={`evidence-rail ${mobilePane === "evidence" ? "flex" : "hidden"} min-h-0 w-full flex-1 flex-col border-r border-war-border md:flex md:w-[360px] md:flex-none lg:w-[410px]`}
+            className={`evidence-rail ${mobilePane === "evidence" ? "flex" : "hidden"} min-h-0 w-full flex-1 flex-col border-r border-war-border xl:flex xl:w-[410px] xl:flex-none`}
           >
             <IncidentIntelPanel />
           </section>
 
           <section
-            className={`analysis-rail ${mobilePane === "model" ? "block" : "hidden"} min-h-0 min-w-0 flex-1 overflow-y-auto border-r border-war-border md:block md:min-w-[390px] md:max-w-[650px]`}
+            className={`analysis-rail ${mobilePane === "model" ? "block" : "hidden"} min-h-0 min-w-0 flex-1 overflow-y-auto border-r border-war-border xl:block xl:min-w-[390px] xl:max-w-[650px]`}
           >
             <MaterialityDashboard />
           </section>
@@ -122,7 +122,7 @@ export function Layout() {
           <section
             className={
               mobilePane === "notebook"
-                ? "mobile-notebook-rail flex min-h-0 flex-1 flex-col md:hidden"
+                ? "mobile-notebook-rail flex min-h-0 flex-1 flex-col xl:hidden"
                 : "hidden"
             }
             aria-label="Mobile case notebook"
@@ -134,6 +134,7 @@ export function Layout() {
                 size="expanded"
                 showSizeControls={false}
                 onSizeChange={() => {}}
+                closeLabel="Evidence"
                 onClose={() => setMobilePane("evidence")}
               />
             ) : (
@@ -143,7 +144,7 @@ export function Layout() {
             )}
           </section>
 
-          <section className="globe-rail relative hidden min-h-0 min-w-0 flex-1 flex-col bg-black md:flex md:min-w-[430px]">
+          <section className="globe-rail relative hidden min-h-0 min-w-0 flex-1 flex-col bg-black xl:flex xl:min-w-[430px]">
             <Suspense fallback={<GlobeLoadingFallback />}>
               <div className="flex-1 min-h-0 flex flex-col">
                 <ScenarioGlobe />
