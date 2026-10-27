@@ -30,7 +30,7 @@ describe("global teachable popover placement", () => {
 
   it("fits narrow and short screens without leaking off screen", () => {
     const pos = positionTeachPopover(
-      { left: 260, right: 288, top: 110, bottom: 138 },
+      { left: 260, right: 288, top: 55, bottom: 83 },
       300,
       240,
       230
@@ -38,7 +38,7 @@ describe("global teachable popover placement", () => {
     expect(pos.width).toBe(276);
     expect(pos.left).toBe(12);
     expect(pos.side).toBe("below");
-    expect(pos.maxHeight).toBe(82);
-    expect(pos.top).toBe(146);
+    expect(pos.maxHeight).toBe(137);
+    expect(pos.top).toBe(91);
   });
 });
