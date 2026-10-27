@@ -179,7 +179,9 @@ export function ScenarioGlobe() {
   // Show the selected case from first render; hovering another pulse previews it.
   const mapPlacard = resolveMapPlacard(selected, hoveredIncident);
   const placardCaseNumber = mapPlacard
-    ? incidents.findIndex((incident) => incident.id === mapPlacard.incident.id) + 1
+    ? incidents.findIndex(
+        (incident) => incident.id === mapPlacard.incident.id
+      ) + 1
     : 0;
 
   const playbackEvent = useMemo(() => {
@@ -609,7 +611,9 @@ export function ScenarioGlobe() {
                 ? "map-case-placard map-case-placard--preview"
                 : "map-case-placard"
             }
-            aria-label={mapPlacard.isPreview ? "Hovered map case" : "Active map case"}
+            aria-label={
+              mapPlacard.isPreview ? "Hovered map case" : "Active map case"
+            }
           >
             <div className="map-case-placard__masthead">
               <span className="map-case-placard__brand">
@@ -626,7 +630,10 @@ export function ScenarioGlobe() {
             </div>
             <div className="map-case-placard__body">
               <div className="map-case-placard__state">
-                <span className="map-case-placard__state-indicator" aria-hidden="true" />
+                <span
+                  className="map-case-placard__state-indicator"
+                  aria-hidden="true"
+                />
                 {mapPlacard.isPreview ? "HOVER PREVIEW" : "ACTIVE CASE"}
               </div>
               <h3 className="map-case-placard__company">
@@ -637,22 +644,30 @@ export function ScenarioGlobe() {
               </p>
               <div className="map-case-placard__metadata">
                 <div>
-                  <span className="map-case-placard__metadata-label">CASE TYPE</span>
+                  <span className="map-case-placard__metadata-label">
+                    CASE TYPE
+                  </span>
                   <span className="map-case-placard__metadata-value">
                     {mapPlacard.incident.incidentTypeLabel}
                   </span>
                 </div>
                 <div>
-                  <span className="map-case-placard__metadata-label">FIRST REPORTED</span>
+                  <span className="map-case-placard__metadata-label">
+                    FIRST REPORTED
+                  </span>
                   <span className="map-case-placard__metadata-value">
                     {mapPlacard.incident.firstReportedLabel}
                   </span>
                 </div>
               </div>
               <div className="map-case-placard__foot">
-                <span>HQ · {mapPlacard.incident.company.headquartersLabel}</span>
+                <span>
+                  HQ · {mapPlacard.incident.company.headquartersLabel}
+                </span>
                 <span className="map-case-placard__action">
-                  {mapPlacard.isPreview ? "SELECT PULSE TO OPEN" : "CASE IN FOCUS"}
+                  {mapPlacard.isPreview
+                    ? "SELECT PULSE TO OPEN"
+                    : "CASE IN FOCUS"}
                 </span>
               </div>
             </div>

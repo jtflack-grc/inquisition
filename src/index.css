@@ -353,7 +353,9 @@ h3 {
   padding: 7px 10px;
   border-bottom: 1px solid #283139;
   background: rgba(25, 31, 38, 0.7);
-  font: 500 9px "IBM Plex Mono", monospace;
+  font:
+    500 9px "IBM Plex Mono",
+    monospace;
   letter-spacing: 0.035em;
   color: #a7b4bd;
 }
@@ -396,7 +398,9 @@ h3 {
   gap: 6px;
   margin-bottom: 5px;
   color: #df9999;
-  font: 500 9px "IBM Plex Mono", monospace;
+  font:
+    500 9px "IBM Plex Mono",
+    monospace;
   letter-spacing: 0.07em;
 }
 
@@ -413,7 +417,9 @@ h3 {
 
 .map-case-placard__company {
   margin: 0;
-  font: 600 16px/1.2 "IBM Plex Sans", sans-serif;
+  font:
+    600 16px/1.2 "IBM Plex Sans",
+    sans-serif;
   letter-spacing: -0.018em;
   color: #f2f5f7;
 }
@@ -425,7 +431,9 @@ h3 {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   color: #c3ced5;
-  font: 400 11px/1.38 "IBM Plex Sans", sans-serif;
+  font:
+    400 11px/1.38 "IBM Plex Sans",
+    sans-serif;
 }
 
 .map-case-placard__metadata {
@@ -449,14 +457,18 @@ h3 {
 .map-case-placard__metadata-label {
   margin-bottom: 3px;
   color: #7f929e;
-  font: 500 8px "IBM Plex Mono", monospace;
+  font:
+    500 8px "IBM Plex Mono",
+    monospace;
   letter-spacing: 0.05em;
 }
 
 .map-case-placard__metadata-value {
   overflow-wrap: anywhere;
   color: #d4dee4;
-  font: 400 10px/1.3 "IBM Plex Sans", sans-serif;
+  font:
+    400 10px/1.3 "IBM Plex Sans",
+    sans-serif;
 }
 
 .map-case-placard__foot {
@@ -468,7 +480,9 @@ h3 {
   padding-top: 7px;
   border-top: 1px solid #283139;
   color: #8395a1;
-  font: 400 9px/1.35 "IBM Plex Mono", monospace;
+  font:
+    400 9px/1.35 "IBM Plex Mono",
+    monospace;
 }
 
 .map-case-placard__action {
