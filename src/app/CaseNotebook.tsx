@@ -101,10 +101,11 @@ export function CaseNotebook({
   );
   const stressPct = useIncidentStore((state) => state.scenarioStressPct);
   const estimates = useMemo(
-    () => scaleMaterialityOutputs(
-      computeMateriality(incident, overrides).outputs,
-      stressPct / 100
-    ).categories,
+    () =>
+      scaleMaterialityOutputs(
+        computeMateriality(incident, overrides).outputs,
+        stressPct / 100
+      ).categories,
     [incident, overrides, stressPct]
   );
   const primary = estimates.filter((item) => item.kind === "primary");
@@ -426,13 +427,13 @@ export function CaseNotebook({
               <p className="notebook-context">
                 These are illustrative FAIR-informed ranges from the shared
                 model, reflecting current case overrides and scenario stress.
-                They are not documented losses, probability estimates or measured
-                confidence intervals.
+                They are not documented losses, probability estimates or
+                measured confidence intervals.
               </p>
               {stressPct !== 100 && (
                 <p className="notebook-context notebook-scenario-stress">
-                  Scenario stress: {stressPct}% of baseline. The same scale
-                  is applied in the Materiality rail; it is a sensitivity
+                  Scenario stress: {stressPct}% of baseline. The same scale is
+                  applied in the Materiality rail; it is a sensitivity
                   assumption, not additional incident evidence.
                 </p>
               )}
