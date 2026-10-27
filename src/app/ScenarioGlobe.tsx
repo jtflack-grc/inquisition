@@ -14,6 +14,7 @@ import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
 import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
+import { resolveMapPlacard } from "./globeCasePlacard";
 import { supportsWebGL } from "./webglSupport";
 import {
   selectSelectedIncident,
@@ -175,6 +176,13 @@ export function ScenarioGlobe() {
   const selectedPoint = points.find((point) => point.id === selectedId) ?? null;
   const hoveredIncident =
     hotspots.find((incident) => incident.id === hoveredIncidentId) ?? null;
+  // Show the selected case from first render; hovering another pulse previews it.
+  const mapPlacard = resolveMapPlacard(selected, hoveredIncident);
+  const placardCaseNumber = mapPlacard
+    ? incidents.findIndex(
+        (incident) => incident.id === mapPlacard.incident.id
+      ) + 1
+    : 0;
 
   const playbackEvent = useMemo(() => {
     if (!selected || playbackIncidentId !== selected.id || playbackStep == null)
@@ -559,7 +567,7 @@ export function ScenarioGlobe() {
           )}
         </div>
 
-        <div className="absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
+        <div className="globe-map-mode-controls absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
           <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
             {hotspots.length} cases ·{" "}
             {mapError
@@ -596,15 +604,74 @@ export function ScenarioGlobe() {
             Satellite image unavailable; charcoal globe retained.
           </p>
         )}
-        {hoveredIncident && hoveredIncident.id !== selectedId && (
-          <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[260px] rounded border border-white/15 bg-black/85 px-3 py-2">
-            <div className="text-xs font-medium text-white">
-              {hoveredIncident.company.name}
+        {mapPlacard && (
+          <aside
+            className={
+              mapPlacard.isPreview
+                ? "map-case-placard map-case-placard--preview"
+                : "map-case-placard"
+            }
+            aria-label={
+              mapPlacard.isPreview ? "Hovered map case" : "Active map case"
+            }
+          >
+            <div className="map-case-placard__masthead">
+              <span className="map-case-placard__brand">
+                <span className="map-case-placard__symbol" aria-hidden="true">
+                  ◈
+                </span>
+                INQUISITION / FIELD NOTE
+              </span>
+              <span className="map-case-placard__counter">
+                {String(placardCaseNumber).padStart(2, "0")}
+                <span className="map-case-placard__counter-divider"> / </span>
+                {String(incidents.length).padStart(2, "0")}
+              </span>
             </div>
-            <div className="mt-0.5 text-[10px] text-slate-400">
-              {hoveredIncident.incidentTitle}
+            <div className="map-case-placard__body">
+              <div className="map-case-placard__state">
+                <span
+                  className="map-case-placard__state-indicator"
+                  aria-hidden="true"
+                />
+                {mapPlacard.isPreview ? "HOVER PREVIEW" : "ACTIVE CASE"}
+              </div>
+              <h3 className="map-case-placard__company">
+                {mapPlacard.incident.company.name}
+              </h3>
+              <p className="map-case-placard__title">
+                {mapPlacard.incident.incidentTitle}
+              </p>
+              <div className="map-case-placard__metadata">
+                <div>
+                  <span className="map-case-placard__metadata-label">
+                    CASE TYPE
+                  </span>
+                  <span className="map-case-placard__metadata-value">
+                    {mapPlacard.incident.incidentTypeLabel}
+                  </span>
+                </div>
+                <div>
+                  <span className="map-case-placard__metadata-label">
+                    FIRST REPORTED
+                  </span>
+                  <span className="map-case-placard__metadata-value">
+                    {mapPlacard.incident.firstReportedLabel}
+                  </span>
+                </div>
+              </div>
+              <div className="map-case-placard__foot">
+                <span>
+                  HQ · {mapPlacard.incident.company.headquartersLabel}
+                </span>
+                <span className="map-case-placard__action">
+                  {mapPlacard.isPreview
+                    ? "SELECT PULSE TO OPEN"
+                    : "CASE IN FOCUS"}
+                </span>
+              </div>
             </div>
-          </div>
+          </aside>
         )}
         {playbackEvent && (
           <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3">

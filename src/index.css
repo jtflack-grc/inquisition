@@ -323,6 +323,187 @@ h3 {
   pointer-events: auto;
 }
 
+/* The map callout is an indexed field note, not a hover-only tooltip.
+   Active risk is red; an unselected case preview uses informational blue. */
+.map-case-placard {
+  position: absolute;
+  z-index: 12;
+  top: 12px;
+  left: 12px;
+  box-sizing: border-box;
+  width: min(286px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: hidden;
+  border: 1px solid #313b45;
+  border-left: 3px solid var(--inq-risk);
+  background: rgba(9, 13, 17, 0.96);
+  color: var(--inq-text);
+  pointer-events: none;
+}
+
+.map-case-placard--preview {
+  border-left-color: var(--inq-info);
+}
+
+.map-case-placard__masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid #283139;
+  background: rgba(25, 31, 38, 0.7);
+  font:
+    500 9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.035em;
+  color: #a7b4bd;
+}
+
+.map-case-placard__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.map-case-placard__symbol {
+  color: var(--inq-risk);
+  font-size: 12px;
+  line-height: 0.8;
+}
+
+.map-case-placard--preview .map-case-placard__symbol {
+  color: var(--inq-info);
+}
+
+.map-case-placard__counter {
+  white-space: nowrap;
+  font-size: 11px;
+  color: #e2e8ec;
+  font-variant-numeric: tabular-nums;
+}
+
+.map-case-placard__counter-divider {
+  color: #63717c;
+}
+
+.map-case-placard__body {
+  padding: 10px 12px 9px;
+}
+
+.map-case-placard__state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+  color: #df9999;
+  font:
+    500 9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.07em;
+}
+
+.map-case-placard--preview .map-case-placard__state {
+  color: #96bbd0;
+}
+
+.map-case-placard__state-indicator {
+  display: block;
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+}
+
+.map-case-placard__company {
+  margin: 0;
+  font:
+    600 16px/1.2 "IBM Plex Sans",
+    sans-serif;
+  letter-spacing: -0.018em;
+  color: #f2f5f7;
+}
+
+.map-case-placard__title {
+  display: -webkit-box;
+  margin: 5px 0 0;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: #c3ced5;
+  font:
+    400 11px/1.38 "IBM Plex Sans",
+    sans-serif;
+}
+
+.map-case-placard__metadata {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 0;
+  border-top: 1px solid #283139;
+}
+
+.map-case-placard__metadata > div {
+  min-width: 0;
+}
+
+.map-case-placard__metadata-label,
+.map-case-placard__metadata-value {
+  display: block;
+}
+
+.map-case-placard__metadata-label {
+  margin-bottom: 3px;
+  color: #7f929e;
+  font:
+    500 8px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.05em;
+}
+
+.map-case-placard__metadata-value {
+  overflow-wrap: anywhere;
+  color: #d4dee4;
+  font:
+    400 10px/1.3 "IBM Plex Sans",
+    sans-serif;
+}
+
+.map-case-placard__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding-top: 7px;
+  border-top: 1px solid #283139;
+  color: #8395a1;
+  font:
+    400 9px/1.35 "IBM Plex Mono",
+    monospace;
+}
+
+.map-case-placard__action {
+  color: #c18d8d;
+  white-space: nowrap;
+}
+
+.map-case-placard--preview .map-case-placard__action {
+  color: #8fbbd5;
+}
+
+/* Preserve the full placard on narrow globe rails without covering the
+   satellite toggle at upper right. Zoom stays at the lower left. */
+@container (max-width: 620px) {
+  .globe-map-mode-controls {
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
 /* Ground signals retain a 34px interactive target with no elevated cylinders.
    The radial animation indicates a case location, not a floating map pin. */
 .globe-map-stage .globe-case-pin {

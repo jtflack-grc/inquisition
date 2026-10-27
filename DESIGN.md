@@ -57,8 +57,8 @@ The case map is interactive navigation, not decoration.
 - Every incident with valid headquarters coordinates remains a selectable hotspot.
 - Unselected hotspots use the quiet steel-blue information color.
 - The selected hotspot becomes a red incident beacon: the point itself breathes in size while two expanding, fading red rings throb outward from the location.
-- The active company label remains attached to the selected point so the red pulse communicates focus, not an unlabeled alarm.
-- Hovering an unselected hotspot reveals company and incident identity without opening a modal.
+- The map's compact upper-left case placard shows the selected incident immediately on first load, with its case number, title, type, disclosure date, and headquarters. It visually identifies the red ground pulse without floating labels.
+- Hovering an unselected hotspot temporarily replaces the placard with a blue-accented case preview; leaving the hotspot restores the active case without changing the shared selection.
 - Clicking a hotspot changes the shared incident selection and opens the case briefing.
 - The selected country may receive a subtle translucent risk overlay.
 - Default camera framing should show a large, readable globe while keeping the selected hemisphere central.
