@@ -2266,3 +2266,21 @@ body > div [role="dialog"] [class*="backdrop-blur"] {
     border-right: 1px solid #35434d;
   }
 }
+
+
+/* Final QA: make the shared loss-axis endpoints explicit. */
+.loss-overview__scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 2px 0;
+  color: #aebdc7;
+  font: 500 9px/1.3 "IBM Plex Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+.notebook-scenario-stress {
+  padding: 8px 10px;
+  border-left: 2px solid #b89661;
+  background: #1d1b17;
+  color: #dec18d;
+}
