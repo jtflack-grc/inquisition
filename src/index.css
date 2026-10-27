@@ -1272,18 +1272,24 @@ h3 {
   min-height: 49px;
   padding: 8px 11px;
   text-align: left;
-  transition: background-color 130ms ease, color 130ms ease;
+  transition:
+    background-color 130ms ease,
+    color 130ms ease;
 }
 
 .notebook-tabs__number {
   color: #788b98;
-  font: 500 9px/1 "IBM Plex Mono", monospace;
+  font:
+    500 9px/1 "IBM Plex Mono",
+    monospace;
   letter-spacing: 0.025em;
 }
 
 .notebook-tabs__name {
   color: inherit;
-  font: 500 11px/1.25 "IBM Plex Sans", sans-serif;
+  font:
+    500 11px/1.25 "IBM Plex Sans",
+    sans-serif;
 }
 
 .notebook-tabs button.notebook-tabs__active {
@@ -1330,7 +1336,9 @@ h3 {
   align-self: stretch;
   border-right: 1px solid #9d585e;
   color: #d0898b;
-  font: 400 29px/1 "IBM Plex Mono", monospace;
+  font:
+    400 29px/1 "IBM Plex Mono",
+    monospace;
   letter-spacing: -0.055em;
   font-variant-numeric: tabular-nums;
 }
@@ -1478,21 +1486,27 @@ h3 {
   display: block;
   margin-bottom: 6px;
   color: #acbbc5;
-  font: 500 9px/1.2 "IBM Plex Mono", monospace;
+  font:
+    500 9px/1.2 "IBM Plex Mono",
+    monospace;
   letter-spacing: 0.055em;
 }
 
 .notebook-control-track__header h3 {
   margin: 0;
   color: #edf2f5;
-  font: 600 14px/1.2 "IBM Plex Sans", sans-serif;
+  font:
+    600 14px/1.2 "IBM Plex Sans",
+    sans-serif;
   letter-spacing: -0.015em;
 }
 
 .notebook-control-track__header p {
   margin: 5px 0 0;
   color: #9dabb5;
-  font: 400 11px/1.45 "IBM Plex Sans", sans-serif;
+  font:
+    400 11px/1.45 "IBM Plex Sans",
+    sans-serif;
 }
 
 .notebook-control-track .notebook-list {
@@ -1537,12 +1551,16 @@ h3 {
   padding: 10px 2px 11px;
   border-bottom: 1px solid #303c45;
   color: #d4dfe5;
-  font: 400 12px/1.5 "IBM Plex Sans", sans-serif;
+  font:
+    400 12px/1.5 "IBM Plex Sans",
+    sans-serif;
 }
 
 .notebook-priorities__number {
   color: #c59697;
-  font: 500 11px/1.6 "IBM Plex Mono", monospace;
+  font:
+    500 11px/1.6 "IBM Plex Mono",
+    monospace;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1567,13 +1585,17 @@ h3 {
 .notebook-lever h3 {
   margin: 6px 0;
   color: #e8eef2;
-  font: 600 13px/1.25 "IBM Plex Sans", sans-serif;
+  font:
+    600 13px/1.25 "IBM Plex Sans",
+    sans-serif;
 }
 
 .notebook-lever p {
   margin: 0;
   color: #c1cdd5;
-  font: 400 11.5px/1.5 "IBM Plex Sans", sans-serif;
+  font:
+    400 11.5px/1.5 "IBM Plex Sans",
+    sans-serif;
 }
 
 .notebook-evidence-rule {
@@ -1589,7 +1611,9 @@ h3 {
 .notebook-evidence-rule p {
   margin: 0;
   color: #d1d7d9;
-  font: 400 11.5px/1.5 "IBM Plex Sans", sans-serif;
+  font:
+    400 11.5px/1.5 "IBM Plex Sans",
+    sans-serif;
 }
 
 @container (min-width: 560px) {

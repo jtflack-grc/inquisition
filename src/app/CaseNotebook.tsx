@@ -494,7 +494,9 @@ export function CaseNotebook({
               <div className="notebook-controls-grid">
                 <section className="notebook-control-track notebook-control-track--detect">
                   <header className="notebook-control-track__header">
-                    <span className="notebook-control-track__index">01 / OBSERVE</span>
+                    <span className="notebook-control-track__index">
+                      01 / OBSERVE
+                    </span>
                     <h3>Identify &amp; detect</h3>
                     <p>Signals that could expose the sequence sooner.</p>
                   </header>
@@ -512,7 +514,9 @@ export function CaseNotebook({
                 </section>
                 <section className="notebook-control-track notebook-control-track--prevent">
                   <header className="notebook-control-track__header">
-                    <span className="notebook-control-track__index">02 / INTERRUPT</span>
+                    <span className="notebook-control-track__index">
+                      02 / INTERRUPT
+                    </span>
                     <h3>Prevent &amp; harden</h3>
                     <p>Changes that could make the path harder to complete.</p>
                   </header>
