@@ -404,56 +404,55 @@ export function IncidentIntelPanel() {
                 )}
               </nav>
 
-                <section
-                  className="evidence-source-lead"
-                  aria-label="Start with a source"
-                >
-                  <div className="evidence-source-lead__eyebrow">
-                    <span>READ THE RECORD</span>
-                    <span>{selected.evidence.length} source links</span>
-                  </div>
-                  {featuredEvidence ? (
-                    <>
-                      <p className="evidence-source-lead__subtitle">
-                        A useful starting point—not a certificate of truth.
-                      </p>
-                      <a
-                        href={featuredEvidence.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="evidence-source-lead__link"
-                      >
-                        {featuredEvidence.title}{" "}
-                        <span aria-hidden="true">↗</span>
-                      </a>
-                      <div className="evidence-source-lead__metadata">
-                        {resolveEvidenceTrust(featuredEvidence).label}
-                        {featuredEvidence.publishedAt
-                          ? " · " + featuredEvidence.publishedAt
-                          : ""}
-                        {resolveEvidenceTrust(featuredEvidence).linkRole ===
-                          "navigation_hub" && (
-                          <span>
-                            {" "}
-                            · Index link: follow through to the underlying
-                            document
-                          </span>
-                        )}
-                      </div>
-                    </>
-                  ) : (
-                    <p className="notebook-context">
-                      No source link is currently recorded for this case.
+              <section
+                className="evidence-source-lead"
+                aria-label="Start with a source"
+              >
+                <div className="evidence-source-lead__eyebrow">
+                  <span>READ THE RECORD</span>
+                  <span>{selected.evidence.length} source links</span>
+                </div>
+                {featuredEvidence ? (
+                  <>
+                    <p className="evidence-source-lead__subtitle">
+                      A useful starting point—not a certificate of truth.
                     </p>
-                  )}
-                  <button
-                    type="button"
-                    className="evidence-source-lead__open"
-                    onClick={() => goTo("intel-evidence")}
-                  >
-                    Browse the full source trail ↓
-                  </button>
-                </section>
+                    <a
+                      href={featuredEvidence.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="evidence-source-lead__link"
+                    >
+                      {featuredEvidence.title} <span aria-hidden="true">↗</span>
+                    </a>
+                    <div className="evidence-source-lead__metadata">
+                      {resolveEvidenceTrust(featuredEvidence).label}
+                      {featuredEvidence.publishedAt
+                        ? " · " + featuredEvidence.publishedAt
+                        : ""}
+                      {resolveEvidenceTrust(featuredEvidence).linkRole ===
+                        "navigation_hub" && (
+                        <span>
+                          {" "}
+                          · Index link: follow through to the underlying
+                          document
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="notebook-context">
+                    No source link is currently recorded for this case.
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="evidence-source-lead__open"
+                  onClick={() => goTo("intel-evidence")}
+                >
+                  Browse the full source trail ↓
+                </button>
+              </section>
 
               <div className="rounded-xl border-2 border-sky-500/50 bg-gradient-to-b from-sky-950/40 to-black/75 px-3 py-3 shadow-[0_0_24px_rgba(56,189,248,0.14)] ring-1 ring-sky-400/20 space-y-3">
                 <div className="pb-2 border-b border-sky-500/30">
