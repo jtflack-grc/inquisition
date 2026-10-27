@@ -374,7 +374,6 @@ export function ScenarioGlobe() {
         : [],
     [selectedPoint, playbackEvent]
   );
-  const fin = selected?.company.financials;
   const globeLesson = selected ? resolveGlobeSecurityLesson(selected) : null;
   const satelliteActive = satelliteReady && satelliteRequested;
   const textureUrl = satelliteActive
