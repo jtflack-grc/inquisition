@@ -161,7 +161,9 @@ export function IncidentIntelPanel() {
       const detail = (event as CustomEvent<NotebookRailDetail>).detail;
       if (detail?.rail !== "evidence" || detail.incidentId !== selected?.id)
         return;
-      goTo(detail.section);
+      // On a narrow screen Layout reveals this rail in response to the
+      // same event; wait a frame so scroll measurements use its new size.
+      window.requestAnimationFrame(() => goTo(detail.section));
     };
     window.addEventListener(NOTEBOOK_RAIL_EVENT, jumpFromNotebook);
     return () =>
