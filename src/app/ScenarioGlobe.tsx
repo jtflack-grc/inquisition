@@ -14,6 +14,8 @@ import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
 import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
+import { CaseNotebook } from "./CaseNotebook";
+import type { NotebookSize } from "./CaseNotebook";
 import { resolveMapPlacard } from "./globeCasePlacard";
 import { supportsWebGL } from "./webglSupport";
 import {
@@ -130,6 +132,7 @@ export function ScenarioGlobe() {
   const playbackStep = useTimelinePlaybackStore((s) => s.step);
   const playbackPlaying = useTimelinePlaybackStore((s) => s.playing);
   const [showPopup, setShowPopup] = useState(true);
+  const [notebookSize, setNotebookSize] = useState<NotebookSize>("standard");
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const globeRef = useRef<GlobeMethods | null>(null);
@@ -696,297 +699,26 @@ export function ScenarioGlobe() {
         )}
       </div>
 
-      {showPopup && selected && globeLesson && (
-        <div
-          key={selected.id}
-          className="case-briefing pointer-events-auto"
-          role="dialog"
-          aria-label="Incident case briefing"
-          aria-modal="false"
+      {showPopup && selected && globeLesson ? (
+        <CaseNotebook
+          incident={selected}
+          lesson={globeLesson}
+          size={notebookSize}
+          onSizeChange={setNotebookSize}
+          onClose={() => setShowPopup(false)}
+        />
+      ) : selected ? (
+        <button
+          type="button"
+          className="notebook-reopen"
+          onClick={() => setShowPopup(true)}
+          aria-label="Reopen case dossier"
         >
-          <div className="case-briefing__head flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="text-[10px] tracking-[0.12em] uppercase text-emerald-400 mb-1 font-semibold">
-                CASE BRIEFING / {selected.company.headquartersLabel}
-              </div>
-              <h2 className="text-lg font-semibold text-war-white mb-1">
-                {selected.company.name}
-              </h2>
-              <p className="text-xs text-war-muted">
-                {selected.company.sector ?? selected.company.type}
-              </p>
-              <p className="text-[11px] text-sky-200/90 mt-2 leading-relaxed">
-                {selected.incidentTitle}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowPopup(false)}
-              className="case-briefing__close text-war-muted hover:text-war-white transition-colors shrink-0"
-              aria-label="Close case briefing to expand globe"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-              <span>Expand map</span>
-            </button>
-          </div>
-
-          <div className="case-briefing__body text-xs">
-            <div className="case-briefing__grid">
-              <div className="case-briefing__column">
-                <div className="case-briefing__section space-y-2">
-                  <h3 className="text-xs font-semibold text-war-muted">
-                    Summary
-                  </h3>
-                  <div className="text-war-white/90 leading-relaxed text-[11px]">
-                    {selected.incidentSummary}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] pt-1 border-t border-war-border/30">
-                    <div>
-                      <span className="text-war-muted">First reported: </span>
-                      <span className="text-war-white">
-                        {selected.firstReportedLabel}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-war-muted">Updated: </span>
-                      <span className="text-war-white">
-                        {selected.lastUpdatedLabel}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="case-briefing__section">
-                  <h3 className="text-xs font-semibold text-war-muted mb-2">
-                    Company
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <div className="text-war-muted text-[10px] mb-0.5">
-                        Headquarters
-                      </div>
-                      <div className="text-war-white font-medium text-[11px] leading-snug">
-                        {selected.company.headquartersLabel}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-war-muted text-[10px] mb-0.5">
-                        Type
-                      </div>
-                      <div className="text-war-white font-medium">
-                        {selected.company.type}
-                      </div>
-                    </div>
-                    {selected.company.employeeCount != null && (
-                      <div>
-                        <div className="text-war-muted text-[10px] mb-0.5">
-                          Employees
-                        </div>
-                        <div className="text-war-white font-medium">
-                          {selected.company.employeeCount.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                    {selected.company.foundedYear != null && (
-                      <div>
-                        <div className="text-war-muted text-[10px] mb-0.5">
-                          Founded
-                        </div>
-                        <div className="text-war-white font-medium">
-                          {selected.company.foundedYear}
-                        </div>
-                      </div>
-                    )}
-                    {selected.company.secCik && (
-                      <div className="col-span-2">
-                        <div className="text-war-muted text-[10px] mb-0.5">
-                          SEC CIK
-                        </div>
-                        <div className="text-war-white font-medium font-mono text-[11px]">
-                          {selected.company.secCik}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="case-briefing__section">
-                  <h3 className="text-xs font-semibold text-war-muted mb-3">
-                    Financial snapshot
-                  </h3>
-                  {fin?.isIllustrative && (
-                    <div className="mb-2 rounded-lg border border-amber-500/40 bg-amber-950/25 px-2 py-1.5 text-[9px] text-amber-100/90">
-                      Illustrative scale for materiality teaching—not filed
-                      cyber loss lines. Confirm in {fin.filingForm ?? "SEC"}{" "}
-                      filings.
-                    </div>
-                  )}
-                  {fin?.fiscalYearLabel && (
-                    <p className="text-[10px] text-war-muted mb-2">
-                      {fin.fiscalYearLabel}
-                      {!fin.isIllustrative
-                        ? " — from public filings (verify)"
-                        : ""}
-                    </p>
-                  )}
-                  {fin?.statementNote && (
-                    <p className="text-[9px] text-war-muted/90 mb-2 leading-relaxed">
-                      {fin.statementNote}
-                    </p>
-                  )}
-                  {fin?.filingUrl && (
-                    <a
-                      href={fin.filingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block text-[10px] text-sky-400 hover:text-sky-300 underline mb-2"
-                    >
-                      Open cited filing index / document →
-                    </a>
-                  )}
-                  {fin?.filingAccessionNumber && (
-                    <p className="text-[9px] text-war-muted font-mono mb-2">
-                      Accession: {fin.filingAccessionNumber}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
-                      <div className="text-war-muted text-[10px] mb-1">
-                        Revenue
-                      </div>
-                      <div className="text-lg font-semibold font-mono text-war-white">
-                        {fin?.revenueUSDm != null
-                          ? `$${fin.revenueUSDm.toLocaleString()}M`
-                          : "—"}
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-black/40 p-2 border border-war-border/30">
-                      <div className="text-war-muted text-[10px] mb-1">
-                        EBITDA
-                      </div>
-                      <div className="text-lg font-semibold font-mono text-emerald-400">
-                        {fin?.ebitdaUSDm != null
-                          ? `$${fin.ebitdaUSDm.toLocaleString()}M`
-                          : "—"}
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-black/40 p-2 border border-war-border/30 col-span-2">
-                      <div className="text-war-muted text-[10px] mb-1">
-                        Net income
-                      </div>
-                      <div className="text-base font-semibold font-mono text-war-white">
-                        {fin?.netIncomeUSDm != null
-                          ? `$${fin.netIncomeUSDm.toLocaleString()}M`
-                          : "—"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="case-briefing__column">
-                <div className="case-briefing__section space-y-2">
-                  <h3 className="text-[10px] font-semibold text-violet-300/95">
-                    Attack type & mechanics
-                  </h3>
-                  <p className="text-[11px] text-war-white/90 leading-relaxed">
-                    {globeLesson.attackMechanism}
-                  </p>
-                </div>
-
-                <div className="case-briefing__section space-y-1.5">
-                  <h3 className="text-[10px] font-semibold text-amber-200/95">
-                    Case-specific analysis
-                  </h3>
-                  <p className="text-[10px] text-amber-50/90 leading-relaxed">
-                    {globeLesson.caseAnalysis}
-                  </p>
-                </div>
-              </div>
-              <div className="case-briefing__column">
-                {(globeLesson.identification.length > 0 ||
-                  globeLesson.prevention.length > 0) && (
-                  <div className="case-briefing__section space-y-2">
-                    <h3 className="text-[10px] font-semibold text-violet-300/95">
-                      Detection & prevention
-                    </h3>
-                    {globeLesson.identification.length > 0 && (
-                      <div>
-                        <div className="text-[9px] text-war-muted mb-1">
-                          Identification & detection
-                        </div>
-                        <ul className="list-disc list-inside space-y-1 text-[10px] text-sky-100/90 leading-relaxed">
-                          {globeLesson.identification.map((line, index) => (
-                            <li key={index}>{line}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {globeLesson.prevention.length > 0 && (
-                      <div>
-                        <div className="text-[9px] text-war-muted mb-1">
-                          Prevention & hardening
-                        </div>
-                        <ul className="list-disc list-inside space-y-1 text-[10px] text-emerald-100/90 leading-relaxed">
-                          {globeLesson.prevention.map((line, index) => (
-                            <li key={index}>{line}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="case-briefing__section space-y-2">
-                  <h3 className="text-[10px] font-semibold text-sky-200/95">
-                    Response & mitigation priorities
-                  </h3>
-                  <p className="text-[9px] text-war-muted/90 leading-relaxed">
-                    Tailored to this incident profile—execute with your IR
-                    retainer, legal, and business continuity leads.
-                  </p>
-                  <ol className="list-decimal list-inside space-y-1.5 text-[10px] text-sky-50/90 leading-relaxed">
-                    {globeLesson.mitigationPriority.map((line, index) => (
-                      <li key={index} className="pl-0.5 marker:text-sky-400/90">
-                        {line}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-
-                <div className="case-briefing__section case-briefing__note space-y-1">
-                  <p className="text-[9px] text-war-muted/85 leading-relaxed">
-                    <span className="text-war-white/70 font-medium">
-                      Injection-style apps (SQL/LDAP/OS):{" "}
-                    </span>
-                    parameterized queries / safe APIs, input validation,
-                    least-privilege data access, and WAF baselines — even when
-                    this case was not injection-led.
-                  </p>
-                  {globeLesson.mergedTaxonomyHints && (
-                    <p className="text-[9px] text-war-muted/70 italic">
-                      Identification/prevention lists include extra bullets from
-                      this incident&apos;s taxonomy tags (merged with any
-                      curator-written notes).
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+          <span>CASE DOSSIER</span>
+          <strong>{selected.company.name}</strong>
+          <span>Open notebook ↑</span>
+        </button>
+      ) : null}
     </div>
   );
 }
