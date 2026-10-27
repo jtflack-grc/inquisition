@@ -851,10 +851,10 @@ function EvidenceSourceLabel({ incident }: { incident: Incident }) {
 
   return (
     <section
-      className="border-[3px] border-black bg-[#f7f7f1] p-2.5 text-black shadow-[6px_6px_0_rgba(52,211,153,.18)] [font-family:Arial,Helvetica,sans-serif]"
+      className="border-[3px] border-[#f2f5f7] bg-[#050708] p-2.5 text-[#f2f5f7] [font-family:Arial,Helvetica,sans-serif]"
       aria-label="Evidence source facts"
     >
-      <div className="border-b-[8px] border-black pb-1">
+      <div className="border-b-[8px] border-[#f2f5f7] pb-1">
         <p className="text-[8px] font-bold uppercase leading-none tracking-[0.08em]">
           INQUISITION · CASE EVIDENCE
         </p>
@@ -862,13 +862,13 @@ function EvidenceSourceLabel({ incident }: { incident: Incident }) {
           Source Facts
         </h3>
       </div>
-      <div className="flex items-end justify-between border-b border-black py-1">
+      <div className="flex items-end justify-between border-b border-[#f2f5f7] py-1">
         <span className="text-[9px] font-bold">Evidence per case</span>
         <span className="text-[18px] font-black leading-none">
           {incident.evidence.length}
         </span>
       </div>
-      <p className="border-b-[4px] border-black py-1 text-[8px] font-bold leading-[1.15]">
+      <p className="border-b-[4px] border-[#f2f5f7] py-1 text-[8px] font-bold leading-[1.15]">
         A compact disclosure of what went into this incident record.
       </p>
       <dl className="text-[10px] leading-[1.15]">
@@ -890,7 +890,7 @@ function EvidenceSourceLabel({ incident }: { incident: Incident }) {
           value="Not systematically evaluated"
         />
       </dl>
-      <p className="border-t-[5px] border-black pt-1 text-[7px] leading-[1.2]">
+      <p className="border-t-[5px] border-[#f2f5f7] pt-1 text-[7px] leading-[1.2]">
         * Source classification describes provenance, not truthfulness. Open the
         underlying artifacts before relying on a claim.
       </p>
@@ -899,7 +899,7 @@ function EvidenceSourceLabel({ incident }: { incident: Incident }) {
           href={companyRecord.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1.5 block border-t border-black pt-1 text-black no-underline"
+          className="mt-1.5 block border-t border-[#f2f5f7] pt-1 text-[#f2f5f7] no-underline"
           title={`Trace ${incident.company.name} to its source record`}
           aria-label={`Open the primary company record for ${incident.company.name}`}
         >
@@ -909,7 +909,7 @@ function EvidenceSourceLabel({ incident }: { incident: Incident }) {
             role="img"
             aria-label={`Source barcode for ${incident.company.name}`}
           >
-            <rect width="240" height="42" fill="#f7f7f1" />
+            <rect width="240" height="42" fill="#050708" />
             {barcodeBars.map((bar, index) => (
               <rect
                 key={index}
@@ -917,7 +917,7 @@ function EvidenceSourceLabel({ incident }: { incident: Incident }) {
                 y="1"
                 width={bar.width}
                 height={bar.tall ? 31 : 27}
-                fill="#000"
+                fill="#f2f5f7"
               />
             ))}
             <text
@@ -927,14 +927,14 @@ function EvidenceSourceLabel({ incident }: { incident: Incident }) {
               fontFamily="Arial, Helvetica, sans-serif"
               fontSize="7"
               letterSpacing="3"
-              fill="#000"
+              fill="#f2f5f7"
             >
               {barcodeDigits}
             </text>
           </svg>
         </a>
       )}
-      <p className="mt-1 border-t border-black pt-1 text-[7px] leading-[1.2] text-black/75">
+      <p className="mt-1 border-t border-[#f2f5f7] pt-1 text-[7px] leading-[1.2] text-slate-300">
         Source-label concept adapted from{" "}
         <a
           href="https://www.linkedin.com/posts/tonymartinvegue_if-i-were-in-charge-of-things-every-security-activity-7459634581730693120-kOrP"
@@ -987,7 +987,7 @@ function LabelRow({
   strong?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[6.8rem_1fr] gap-2 border-b border-black py-1.5 last:border-b-0">
+    <div className="grid grid-cols-[6.8rem_1fr] gap-2 border-b border-[#f2f5f7] py-1.5 last:border-b-0">
       <dt className="font-extrabold">{label}</dt>
       <dd className={`text-right ${strong ? "font-black" : "font-semibold"}`}>
         {value}
