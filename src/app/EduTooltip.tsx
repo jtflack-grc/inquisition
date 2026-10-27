@@ -163,7 +163,8 @@ export function EduTooltip({
               left: placement.left,
               width: placement.width,
               maxHeight: placement.maxHeight,
-              zIndex: 2147483000,
+              // Above every application rail, but beneath modal dialogs (9998+).
+              zIndex: 9000,
             }}
           >
             <div className="inquisition-teachable__header">
