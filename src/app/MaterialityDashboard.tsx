@@ -26,6 +26,7 @@ import { EduTooltip } from "./EduTooltip";
 import { FairMethodologyDeepDive } from "./FairMethodologyDeepDive";
 import { FairNativeMaterialityPanel } from "./FairNativeMaterialityPanel";
 import { ModelLimitsStrip } from "./ModelLimitsStrip";
+import { LossRangeOverview } from "./LossRangeOverview";
 import { NOTEBOOK_RAIL_EVENT } from "./notebookRailNavigation";
 import type { NotebookRailDetail } from "./notebookRailNavigation";
 
@@ -340,309 +341,289 @@ export function MaterialityDashboard() {
           />
         )}
 
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <article className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3">
-            <h3 className="flex items-center gap-1.5 text-xs font-medium text-war-white/90 mb-2">
-              {tab === "basic" ? (
-                <>
-                  Gross direct loss
-                  <EduTooltip
-                    title="Gross direct loss"
-                    body="Estimated primary loss before insurance recovery: data response, lost contribution margin, system recovery and evidenced extortion."
-                    badge="Intro"
-                  />
-                </>
-              ) : tab === "advanced" ? (
-                <>
-                  Gross primary loss (USD)
-                  <EduTooltip
-                    title="Primary loss"
-                    body="Primary loss before insurance recovery: data response, contribution-margin interruption, remediation and evidenced extortion."
-                    badge="FAIR"
-                  />
-                </>
-              ) : (
-                <>
-                  Gross primary LM — deterministic
-                  <EduTooltip
-                    title="vs simulation"
-                    body="These min/mode/max come from the same bridge shown under Assumptions, after stress and before insurance recovery. Simulation reports gross and retained outcomes separately."
-                    badge="FAIR"
-                  />
-                </>
-              )}
-            </h3>
-            <p className="text-lg font-bold text-war-white">
-              {formatRangeM(outputsDisplayed.grossPrimaryTotalUSDm)}
+        {tab === "basic" && (
+          <div className="analysis-inquiry">
+            <span>02 / QUANTIFY</span>
+            <h2>What could this event cost?</h2>
+            <p>
+              Start with modeled loss magnitudes. Challenge their inputs in
+              Assumptions; use Simulation only when you're ready to explore
+              event frequency and uncertainty.
             </p>
-            <p className="text-[10px] text-war-muted mt-1">
-              min · most likely · max (millions USD)
-            </p>
-            {(inputs.insuranceOffsetUSDm ?? 0) > 0 && (
-              <p className="mt-1 text-[10px] text-sky-200/80">
-                Retained after recovery assumption:{" "}
-                {formatRangeM(outputsDisplayed.primaryTotalUSDm)}
-              </p>
+            {(overrides != null || stressPct !== 100) && (
+              <span className="analysis-inquiry__changed">
+                SCENARIO ADJUSTED · not the case baseline
+              </span>
             )}
-          </article>
-          <article className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3">
-            <h3 className="flex items-center gap-1.5 text-xs font-medium text-war-white/90 mb-2">
-              {tab === "basic" ? (
-                <>
-                  External reaction, if it occurs
-                  <EduTooltip
-                    title="Conditional external reaction"
-                    body="Possible loss caused by customers, regulators, litigants or other outside parties. Simulation controls whether that secondary event occurs."
-                    badge="Intro"
-                  />
-                </>
-              ) : tab === "advanced" ? (
-                <>
-                  Conditional secondary loss (USD)
-                  <EduTooltip
-                    title="Secondary loss"
-                    body="Loss caused by outside-party reaction. This is the magnitude if the secondary event occurs, not a claim that it certainly will."
-                    badge="FAIR"
-                  />
-                </>
-              ) : (
-                <>
-                  Conditional secondary LM
-                  <EduTooltip
-                    title="Secondary LM"
-                    body="Magnitude conditional on an outside-party reaction. Simulation applies the selected event probability before including it in retained total loss."
-                    badge="FAIR"
-                  />
-                </>
+          </div>
+        )}
+        {tab === "basic" && (
+          <LossRangeOverview
+            primary={outputsDisplayed.grossPrimaryTotalUSDm}
+            secondary={outputsDisplayed.secondaryTotalUSDm}
+          />
+        )}
+        {["advanced", "fair_native"].includes(tab) && (
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <article className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3">
+              <h3 className="flex items-center gap-1.5 text-xs font-medium text-war-white/90 mb-2">
+                {tab === "basic" ? (
+                  <>
+                    Gross direct loss
+                    <EduTooltip
+                      title="Gross direct loss"
+                      body="Estimated primary loss before insurance recovery: data response, lost contribution margin, system recovery and evidenced extortion."
+                      badge="Intro"
+                    />
+                  </>
+                ) : tab === "advanced" ? (
+                  <>
+                    Gross primary loss (USD)
+                    <EduTooltip
+                      title="Primary loss"
+                      body="Primary loss before insurance recovery: data response, contribution-margin interruption, remediation and evidenced extortion."
+                      badge="FAIR"
+                    />
+                  </>
+                ) : (
+                  <>
+                    Gross primary LM — deterministic
+                    <EduTooltip
+                      title="vs simulation"
+                      body="These min/mode/max come from the same bridge shown under Assumptions, after stress and before insurance recovery. Simulation reports gross and retained outcomes separately."
+                      badge="FAIR"
+                    />
+                  </>
+                )}
+              </h3>
+              <p className="text-lg font-bold text-war-white">
+                {formatRangeM(outputsDisplayed.grossPrimaryTotalUSDm)}
+              </p>
+              <p className="text-[10px] text-war-muted mt-1">
+                min · most likely · max (millions USD)
+              </p>
+              {(inputs.insuranceOffsetUSDm ?? 0) > 0 && (
+                <p className="mt-1 text-[10px] text-sky-200/80">
+                  Retained after recovery assumption:{" "}
+                  {formatRangeM(outputsDisplayed.primaryTotalUSDm)}
+                </p>
               )}
-            </h3>
-            <p className="text-lg font-bold text-emerald-300/90">
-              {formatRangeM(outputsDisplayed.secondaryTotalUSDm)}
-            </p>
-            <p className="text-[10px] text-war-muted mt-1">
-              Conditional magnitude; occurrence probability is set in Simulation
-            </p>
-          </article>
-        </section>
-
+            </article>
+            <article className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3">
+              <h3 className="flex items-center gap-1.5 text-xs font-medium text-war-white/90 mb-2">
+                {tab === "basic" ? (
+                  <>
+                    External reaction, if it occurs
+                    <EduTooltip
+                      title="Conditional external reaction"
+                      body="Possible loss caused by customers, regulators, litigants or other outside parties. Simulation controls whether that secondary event occurs."
+                      badge="Intro"
+                    />
+                  </>
+                ) : tab === "advanced" ? (
+                  <>
+                    Conditional secondary loss (USD)
+                    <EduTooltip
+                      title="Secondary loss"
+                      body="Loss caused by outside-party reaction. This is the magnitude if the secondary event occurs, not a claim that it certainly will."
+                      badge="FAIR"
+                    />
+                  </>
+                ) : (
+                  <>
+                    Conditional secondary LM
+                    <EduTooltip
+                      title="Secondary LM"
+                      body="Magnitude conditional on an outside-party reaction. Simulation applies the selected event probability before including it in retained total loss."
+                      badge="FAIR"
+                    />
+                  </>
+                )}
+              </h3>
+              <p className="text-lg font-bold text-emerald-300/90">
+                {formatRangeM(outputsDisplayed.secondaryTotalUSDm)}
+              </p>
+              <p className="text-[10px] text-war-muted mt-1">
+                Conditional magnitude; occurrence probability is set in
+                Simulation
+              </p>
+            </article>
+          </section>
+        )}
         <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-wide text-war-muted">
-              {tab === "basic" ? "How sure?" : "Confidence"}
+              {tab === "basic" ? "Revenue basis" : "Model confidence flag"}
             </span>
             <span className="text-sm font-semibold text-war-white">
-              {outputs.confidenceLabel}
+              {tab === "basic"
+                ? inputs.revenueUSDm == null
+                  ? "Not supplied"
+                  : "Available"
+                : outputs.confidenceLabel}
             </span>
             <EduTooltip
-              title={tab === "basic" ? "How sure?" : "Confidence label"}
+              title={
+                tab === "basic"
+                  ? "Financial input basis"
+                  : "Heuristic confidence flag"
+              }
               body={
                 tab === "basic"
-                  ? "Simple gut check from the model: if we don’t know revenue scale, bands stay wide. Open Assumptions for the full financial inputs."
-                  : "Heuristic: without disclosed revenue scale, ranges are wider and confidence is lower. Add better financials via overrides."
+                  ? "This tells you only whether a revenue figure is available to the model; it is not a measurement of statistical confidence or the reliability of any claim."
+                  : "Legacy heuristic flag: defaults to Low when revenue is missing and Medium otherwise; a user override may change it. It is not statistically calibrated confidence."
               }
               badge={tab === "basic" ? "Intro" : "FAIR"}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          {tab === "basic" ? (
             <button
               type="button"
-              onClick={exportMaterialityBundle}
-              className="text-[11px] px-3 py-1.5 rounded-lg border border-sky-500/50 text-sky-200 hover:bg-sky-950/40"
+              className="analysis-depth-link"
+              onClick={() => setTab("advanced")}
             >
-              Export JSON
+              Challenge the estimate · Open assumptions ↗
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                clearOverrides(selected.id);
-                setSectorPreset("neutral");
-              }}
-              className="text-[11px] px-3 py-1.5 rounded-lg border border-war-border text-war-muted hover:text-war-white hover:bg-war-border/40"
-            >
-              Reset overrides
-            </button>
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
-          <h3 className="flex items-center gap-1.5 text-xs font-semibold text-war-white/90">
-            {tab === "basic" ? (
-              <>
-                Scenario size
-                <EduTooltip
-                  title="Bigger or smaller?"
-                  body="Slides all dollar bands together—like asking ‘what if this breach is 20% worse than the middle guess?’ Sector shortcuts are under Assumptions and Simulation."
-                  badge="Intro"
-                />
-              </>
-            ) : (
-              <>
-                Scenario stress & sector bias
-                <EduTooltip
-                  title="Why stress & sectors?"
-                  body="Stress scales all category dollars up or down for sensitivity. Sector presets nudge inputs (records, downtime, insurance offset) for common industry patterns; they do not replace case evidence."
-                  badge="FAIR"
-                />
-              </>
-            )}
-          </h3>
-          <div className="space-y-2">
-            <div className="flex justify-between text-[10px] text-war-muted">
-              <span>Stress ({stressPct}%)</span>
-              <span>
-                {tab === "basic"
-                  ? "Scales every band up or down"
-                  : "Scales all displayed ranges"}
-              </span>
-            </div>
-            <input
-              type="range"
-              min={50}
-              max={150}
-              step={5}
-              value={stressPct}
-              onChange={(e) => setStressPct(Number(e.target.value))}
-              className="w-full accent-sky-500"
-              aria-label="Scenario stress percent"
-            />
-          </div>
-          {tab !== "basic" && (
-            <div className="flex flex-wrap gap-1.5">
-              {(
-                [
-                  "neutral",
-                  "healthcare",
-                  "retail_pci",
-                  "financial",
-                  "tech_saas",
-                  "industrial_ot",
-                ] satisfies SectorPresetId[]
-              ).map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => applySector(id)}
-                  className={`text-[10px] px-2.5 py-1.5 rounded-lg border transition-colors ${
-                    sectorPreset === id
-                      ? "border-emerald-400/70 bg-emerald-950/40 text-emerald-200"
-                      : "border-war-border text-war-muted hover:text-war-white hover:bg-war-border/30"
-                  }`}
-                >
-                  {sectorPresetLabel(id)}
-                </button>
-              ))}
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={exportMaterialityBundle}
+                className="text-[11px] px-3 py-1.5 rounded-lg border border-sky-500/50 text-sky-200 hover:bg-sky-950/40"
+              >
+                Export JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearOverrides(selected.id);
+                  setSectorPreset("neutral");
+                }}
+                className="text-[11px] px-3 py-1.5 rounded-lg border border-war-border text-war-muted hover:text-war-white hover:bg-war-border/40"
+              >
+                Reset overrides
+              </button>
             </div>
           )}
         </section>
 
-        <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-3">
-          <h3 className="flex items-center gap-1.5 text-xs font-semibold text-war-white/90">
-            {tab === "basic" ? (
-              <>
-                A few facts from the story
-                <EduTooltip
-                  title="Keep it simple"
-                  body="These three drivers move most of the teaching ranges. Open Assumptions for EBITDA, net income, and insurance offset."
-                  badge="Intro"
+        {["advanced", "fair_native"].includes(tab) && (
+          <>
+            <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
+              <h3 className="flex items-center gap-1.5 text-xs font-semibold text-war-white/90">
+                {tab === "basic" ? (
+                  <>
+                    Scenario size
+                    <EduTooltip
+                      title="Bigger or smaller?"
+                      body="Slides all dollar bands together—like asking ‘what if this breach is 20% worse than the middle guess?’ Sector shortcuts are under Assumptions and Simulation."
+                      badge="Intro"
+                    />
+                  </>
+                ) : (
+                  <>
+                    Scenario stress & sector bias
+                    <EduTooltip
+                      title="Why stress & sectors?"
+                      body="Stress scales all category dollars up or down for sensitivity. Sector presets nudge inputs (records, downtime, insurance offset) for common industry patterns; they do not replace case evidence."
+                      badge="FAIR"
+                    />
+                  </>
+                )}
+              </h3>
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] text-war-muted">
+                  <span>Stress ({stressPct}%)</span>
+                  <span>
+                    {tab === "basic"
+                      ? "Scales every band up or down"
+                      : "Scales all displayed ranges"}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={50}
+                  max={150}
+                  step={5}
+                  value={stressPct}
+                  onChange={(e) => setStressPct(Number(e.target.value))}
+                  className="w-full accent-sky-500"
+                  aria-label="Scenario stress percent"
                 />
-              </>
-            ) : (
-              <>
-                Model inputs
-                <EduTooltip
-                  title="Inputs & provenance"
-                  body="Defaults come from the case record. Edits update the materiality engine immediately; Assumptions shows the formulas tied to these numbers."
-                  badge="FAIR"
-                />
-              </>
-            )}
-          </h3>
-          <div
-            className={`grid gap-3 text-[11px] ${
-              tab === "basic"
-                ? "grid-cols-1 sm:grid-cols-3"
-                : "grid-cols-2 sm:grid-cols-3"
-            }`}
-          >
-            <label className="flex flex-col gap-1">
-              <span className="text-war-muted">
-                Downtime (days)
-                <InputBasis
-                  label={inputBasis(selected, overrides, "downtimeDays")}
-                />
-              </span>
-              <input
-                type="number"
-                min={0}
-                step={1}
-                value={inputs.downtimeDays ?? ""}
-                onChange={(e) =>
-                  setOverrides(selected.id, {
-                    downtimeDays:
-                      e.target.value === "" ? null : Number(e.target.value),
-                  })
-                }
-                className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-war-muted">
-                Records (millions)
-                <InputBasis
-                  label={inputBasis(selected, overrides, "recordsMillions")}
-                />
-              </span>
-              <input
-                type="number"
-                min={0}
-                step={0.1}
-                value={inputs.recordsMillions ?? ""}
-                onChange={(e) =>
-                  setOverrides(selected.id, {
-                    recordsMillions:
-                      e.target.value === "" ? null : Number(e.target.value),
-                  })
-                }
-                className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-war-muted">
-                Revenue ($M)
-                <InputBasis
-                  label={inputBasis(selected, overrides, "revenueUSDm")}
-                />
-              </span>
-              <input
-                type="number"
-                min={0}
-                step={1}
-                value={inputs.revenueUSDm ?? ""}
-                onChange={(e) =>
-                  setOverrides(selected.id, {
-                    revenueUSDm:
-                      e.target.value === "" ? null : Number(e.target.value),
-                  })
-                }
-                className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
-              />
-            </label>
-            {tab !== "basic" && (
-              <>
+              </div>
+              {tab !== "basic" && (
+                <div className="flex flex-wrap gap-1.5">
+                  {(
+                    [
+                      "neutral",
+                      "healthcare",
+                      "retail_pci",
+                      "financial",
+                      "tech_saas",
+                      "industrial_ot",
+                    ] satisfies SectorPresetId[]
+                  ).map((id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => applySector(id)}
+                      className={`text-[10px] px-2.5 py-1.5 rounded-lg border transition-colors ${
+                        sectorPreset === id
+                          ? "border-emerald-400/70 bg-emerald-950/40 text-emerald-200"
+                          : "border-war-border text-war-muted hover:text-war-white hover:bg-war-border/30"
+                      }`}
+                    >
+                      {sectorPresetLabel(id)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-3">
+              <h3 className="flex items-center gap-1.5 text-xs font-semibold text-war-white/90">
+                {tab === "basic" ? (
+                  <>
+                    A few facts from the story
+                    <EduTooltip
+                      title="Keep it simple"
+                      body="These three drivers move most of the teaching ranges. Open Assumptions for EBITDA, net income, and insurance offset."
+                      badge="Intro"
+                    />
+                  </>
+                ) : (
+                  <>
+                    Model inputs
+                    <EduTooltip
+                      title="Inputs & provenance"
+                      body="Defaults come from the case record. Edits update the materiality engine immediately; Assumptions shows the formulas tied to these numbers."
+                      badge="FAIR"
+                    />
+                  </>
+                )}
+              </h3>
+              <div
+                className={`grid gap-3 text-[11px] ${
+                  tab === "basic"
+                    ? "grid-cols-1 sm:grid-cols-3"
+                    : "grid-cols-2 sm:grid-cols-3"
+                }`}
+              >
                 <label className="flex flex-col gap-1">
                   <span className="text-war-muted">
-                    EBITDA ($M)
+                    Downtime (days)
                     <InputBasis
-                      label={inputBasis(selected, overrides, "ebitdaUSDm")}
+                      label={inputBasis(selected, overrides, "downtimeDays")}
                     />
                   </span>
                   <input
                     type="number"
+                    min={0}
                     step={1}
-                    value={inputs.ebitdaUSDm ?? ""}
+                    value={inputs.downtimeDays ?? ""}
                     onChange={(e) =>
                       setOverrides(selected.id, {
-                        ebitdaUSDm:
+                        downtimeDays:
                           e.target.value === "" ? null : Number(e.target.value),
                       })
                     }
@@ -651,43 +632,19 @@ export function MaterialityDashboard() {
                 </label>
                 <label className="flex flex-col gap-1">
                   <span className="text-war-muted">
-                    Net income ($M)
+                    Records (millions)
                     <InputBasis
-                      label={inputBasis(selected, overrides, "netIncomeUSDm")}
-                    />
-                  </span>
-                  <input
-                    type="number"
-                    step={1}
-                    value={inputs.netIncomeUSDm ?? ""}
-                    onChange={(e) =>
-                      setOverrides(selected.id, {
-                        netIncomeUSDm:
-                          e.target.value === "" ? null : Number(e.target.value),
-                      })
-                    }
-                    className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
-                  />
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-war-muted">
-                    Extortion paid / assumed ($M)
-                    <InputBasis
-                      label={inputBasis(
-                        selected,
-                        overrides,
-                        "extortionPaymentUSDm"
-                      )}
+                      label={inputBasis(selected, overrides, "recordsMillions")}
                     />
                   </span>
                   <input
                     type="number"
                     min={0}
                     step={0.1}
-                    value={inputs.extortionPaymentUSDm ?? ""}
+                    value={inputs.recordsMillions ?? ""}
                     onChange={(e) =>
                       setOverrides(selected.id, {
-                        extortionPaymentUSDm:
+                        recordsMillions:
                           e.target.value === "" ? null : Number(e.target.value),
                       })
                     }
@@ -696,34 +653,135 @@ export function MaterialityDashboard() {
                 </label>
                 <label className="flex flex-col gap-1">
                   <span className="text-war-muted">
-                    Insurance recovery ($M)
+                    Revenue ($M)
                     <InputBasis
-                      label={inputBasis(
-                        selected,
-                        overrides,
-                        "insuranceOffsetUSDm"
-                      )}
+                      label={inputBasis(selected, overrides, "revenueUSDm")}
                     />
                   </span>
                   <input
                     type="number"
                     min={0}
-                    step={0.5}
-                    value={inputs.insuranceOffsetUSDm ?? ""}
+                    step={1}
+                    value={inputs.revenueUSDm ?? ""}
                     onChange={(e) =>
                       setOverrides(selected.id, {
-                        insuranceOffsetUSDm:
+                        revenueUSDm:
                           e.target.value === "" ? null : Number(e.target.value),
                       })
                     }
                     className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
                   />
                 </label>
-              </>
-            )}
-          </div>
-        </section>
-
+                {tab !== "basic" && (
+                  <>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-war-muted">
+                        EBITDA ($M)
+                        <InputBasis
+                          label={inputBasis(selected, overrides, "ebitdaUSDm")}
+                        />
+                      </span>
+                      <input
+                        type="number"
+                        step={1}
+                        value={inputs.ebitdaUSDm ?? ""}
+                        onChange={(e) =>
+                          setOverrides(selected.id, {
+                            ebitdaUSDm:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          })
+                        }
+                        className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-war-muted">
+                        Net income ($M)
+                        <InputBasis
+                          label={inputBasis(
+                            selected,
+                            overrides,
+                            "netIncomeUSDm"
+                          )}
+                        />
+                      </span>
+                      <input
+                        type="number"
+                        step={1}
+                        value={inputs.netIncomeUSDm ?? ""}
+                        onChange={(e) =>
+                          setOverrides(selected.id, {
+                            netIncomeUSDm:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          })
+                        }
+                        className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-war-muted">
+                        Extortion paid / assumed ($M)
+                        <InputBasis
+                          label={inputBasis(
+                            selected,
+                            overrides,
+                            "extortionPaymentUSDm"
+                          )}
+                        />
+                      </span>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.1}
+                        value={inputs.extortionPaymentUSDm ?? ""}
+                        onChange={(e) =>
+                          setOverrides(selected.id, {
+                            extortionPaymentUSDm:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          })
+                        }
+                        className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-war-muted">
+                        Insurance recovery ($M)
+                        <InputBasis
+                          label={inputBasis(
+                            selected,
+                            overrides,
+                            "insuranceOffsetUSDm"
+                          )}
+                        />
+                      </span>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        value={inputs.insuranceOffsetUSDm ?? ""}
+                        onChange={(e) =>
+                          setOverrides(selected.id, {
+                            insuranceOffsetUSDm:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          })
+                        }
+                        className="rounded-lg bg-black/50 border border-war-border/60 px-2 py-1.5 text-war-white"
+                      />
+                    </label>
+                  </>
+                )}
+              </div>
+            </section>
+          </>
+        )}
         <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
           <h3 className="text-xs font-semibold tracking-[0.15em] text-war-muted uppercase">
             {tab === "basic"

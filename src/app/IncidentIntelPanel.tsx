@@ -152,6 +152,8 @@ export function IncidentIntelPanel() {
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   const goTo = useCallback((id: string) => {
+    const target = document.getElementById(id);
+    if (target instanceof HTMLDetailsElement) target.open = true;
     scrollPanelToId(scrollAreaRef.current, id);
   }, []);
   useEffect(() => {
@@ -159,7 +161,9 @@ export function IncidentIntelPanel() {
       const detail = (event as CustomEvent<NotebookRailDetail>).detail;
       if (detail?.rail !== "evidence" || detail.incidentId !== selected?.id)
         return;
-      goTo(detail.section);
+      // On a narrow screen Layout reveals this rail in response to the
+      // same event; wait a frame so scroll measurements use its new size.
+      window.requestAnimationFrame(() => goTo(detail.section));
     };
     window.addEventListener(NOTEBOOK_RAIL_EVENT, jumpFromNotebook);
     return () =>
@@ -181,6 +185,18 @@ export function IncidentIntelPanel() {
       if (arr?.length) map.set(g.key, sortEvidenceByTrust(arr));
     }
     return map;
+  }, [selected]);
+
+  const featuredEvidence = useMemo(() => {
+    if (!selected) return null;
+    const sorted = sortEvidenceByTrust(selected.evidence);
+    return (
+      sorted.find(
+        (item) => resolveEvidenceTrust(item).linkRole !== "navigation_hub"
+      ) ??
+      sorted[0] ??
+      null
+    );
   }, [selected]);
 
   const jumpTargets = useMemo(() => {
@@ -220,76 +236,61 @@ export function IncidentIntelPanel() {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="px-5 pt-5 pb-3 border-b border-war-border/60 shrink-0">
-        <div className="flex items-center gap-3 border-l-2 border-emerald-300 pl-3">
-          <div className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-emerald-300/75">
-            Case library
-          </div>
-          <span className="text-[10px] text-war-muted/80">
-            {incidents.length} documented incidents
-          </span>
+      <div className="evidence-header">
+        <div className="evidence-header__eyebrow">
+          <span>01 / EVIDENCE LIBRARY</span>
+          <span>{incidents.length} documented cases</span>
         </div>
-
-        <div className="mt-4 border border-emerald-400/20 bg-[#07110f] px-4 py-3.5 shadow-[0_16px_38px_rgba(0,0,0,.2)]">
-          <div className="mb-3">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300/85">
-              Choose an incident
-            </p>
-            <p className="text-[11px] text-war-muted mt-0.5 leading-relaxed">
-              One selection aligns the evidence record, loss model, and
-              geographic briefing.
-            </p>
-          </div>
-          <label
-            className="mb-1 block font-mono text-[9px] font-semibold uppercase tracking-wide text-emerald-300/65"
-            htmlFor="incident-search"
-          >
-            Filter (optional)
-          </label>
-          <input
-            id="incident-search"
-            type="search"
-            value={incidentQuery}
-            onChange={(e) => setIncidentQuery(e.target.value)}
-            placeholder="Type company name, tag, or breach keyword…"
-            className="w-full border border-emerald-400/15 bg-black/40 px-3 py-2.5 text-xs text-war-white placeholder:text-war-muted/55 focus:outline-none focus:ring-1 focus:ring-emerald-300/60"
-          />
-          <label
-            className="mb-1.5 mt-3 block font-mono text-[9px] font-semibold uppercase tracking-wide text-emerald-300/65"
-            htmlFor="incident-select"
-          >
-            Incident library
-          </label>
-          <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="text-[10px] text-war-muted">
-              Scroll the list or type to narrow
+        <h2>What can we substantiate?</h2>
+        <label htmlFor="incident-select" className="evidence-header__label">
+          SELECT INCIDENT
+        </label>
+        <select
+          id="incident-select"
+          value={selected?.id ?? ""}
+          onChange={(e) => setSelectedIncidentId(e.target.value)}
+          disabled={filtered.length === 0}
+          className="evidence-header__selector"
+        >
+          {filtered.map((inc) => (
+            <option key={inc.id} value={inc.id}>
+              {incidentOptionLabel(inc)}
+            </option>
+          ))}
+        </select>
+        <details className="evidence-search">
+          <summary>
+            <span>
+              {incidentQuery ? "Case filter active" : "Find a case by keyword"}
             </span>
-            <span className="text-[11px] text-emerald-400 font-semibold tabular-nums shrink-0">
-              {filtered.length === incidents.length
-                ? `${filtered.length} cases`
-                : `${filtered.length} match`}
-            </span>
+            <span aria-hidden="true">⌕</span>
+          </summary>
+          <div className="evidence-search__content">
+            <label htmlFor="incident-search">FILTER THE LIBRARY</label>
+            <input
+              id="incident-search"
+              type="search"
+              value={incidentQuery}
+              onChange={(e) => setIncidentQuery(e.target.value)}
+              placeholder="Company, tag, or breach keyword…"
+            />
+            <div className="evidence-search__feedback">
+              <span>
+                {filtered.length} of {incidents.length} cases shown
+              </span>
+              {incidentQuery && (
+                <button type="button" onClick={() => setIncidentQuery("")}>
+                  Clear filter
+                </button>
+              )}
+            </div>
           </div>
-          <select
-            id="incident-select"
-            value={selected?.id ?? ""}
-            onChange={(e) => setSelectedIncidentId(e.target.value)}
-            disabled={filtered.length === 0}
-            className="[color-scheme:dark] w-full border border-emerald-300/30 bg-black/55 px-3 py-3 text-sm font-medium text-war-white focus:outline-none focus:ring-1 focus:ring-emerald-300/70 disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            {filtered.map((inc) => (
-              <option key={inc.id} value={inc.id}>
-                {incidentOptionLabel(inc)}
-              </option>
-            ))}
-          </select>
-          {filtered.length === 0 && (
-            <p className="text-[11px] text-amber-200/90 mt-2">
-              No matches—clear the filter above.
-            </p>
-          )}
-        </div>
-
+        </details>
+        {filtered.length === 0 && (
+          <p className="evidence-search__error">
+            No matches. Clear your filter to restore the library.
+          </p>
+        )}
         <details className="mt-3 rounded-lg border border-war-border/55 bg-black/45 [&_summary::-webkit-details-marker]:hidden">
           <summary className="cursor-pointer list-none flex items-center justify-between gap-2 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-war-muted hover:text-war-white/90 transition-colors">
             <span>Panel tips · map · trust glossary</span>
@@ -403,6 +404,56 @@ export function IncidentIntelPanel() {
                 )}
               </nav>
 
+              <section
+                className="evidence-source-lead"
+                aria-label="Start with a source"
+              >
+                <div className="evidence-source-lead__eyebrow">
+                  <span>READ THE RECORD</span>
+                  <span>{selected.evidence.length} source links</span>
+                </div>
+                {featuredEvidence ? (
+                  <>
+                    <p className="evidence-source-lead__subtitle">
+                      A useful starting point—not a certificate of truth.
+                    </p>
+                    <a
+                      href={featuredEvidence.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="evidence-source-lead__link"
+                    >
+                      {featuredEvidence.title} <span aria-hidden="true">↗</span>
+                    </a>
+                    <div className="evidence-source-lead__metadata">
+                      {resolveEvidenceTrust(featuredEvidence).label}
+                      {featuredEvidence.publishedAt
+                        ? " · " + featuredEvidence.publishedAt
+                        : ""}
+                      {resolveEvidenceTrust(featuredEvidence).linkRole ===
+                        "navigation_hub" && (
+                        <span>
+                          {" "}
+                          · Index link: follow through to the underlying
+                          document
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="notebook-context">
+                    No source link is currently recorded for this case.
+                  </p>
+                )}
+                <button
+                  type="button"
+                  className="evidence-source-lead__open"
+                  onClick={() => goTo("intel-evidence")}
+                >
+                  Browse the full source trail ↓
+                </button>
+              </section>
+
               <div className="rounded-xl border-2 border-sky-500/50 bg-gradient-to-b from-sky-950/40 to-black/75 px-3 py-3 shadow-[0_0_24px_rgba(56,189,248,0.14)] ring-1 ring-sky-400/20 space-y-3">
                 <div className="pb-2 border-b border-sky-500/30">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-sky-200">
@@ -510,57 +561,68 @@ export function IncidentIntelPanel() {
 
                 {selected.disclosureTimeline &&
                   selected.disclosureTimeline.length > 0 && (
-                    <div
+                    <details
                       id="intel-timeline"
-                      className="scroll-mt-4 rounded-lg bg-black/50 border border-sky-500/25 px-3 py-2.5 space-y-2"
+                      className="evidence-disclosure"
                     >
-                      <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80 font-semibold">
-                        Disclosure &amp; filing trail
-                      </p>
-                      <p className="text-[10px] text-war-muted/90 leading-relaxed">
-                        Human-readable milestones (not a minute-by-minute IR
-                        timeline). Compare gaps between intrusion narrative,
-                        public story, and issuer/regulator artifacts.
-                      </p>
-                      <TimelinePlaybackControls incident={selected} />
-                      <ol className="space-y-2.5 list-decimal list-inside marker:text-sky-500/80">
-                        {selected.disclosureTimeline.map((ev, idx) => (
-                          <li
-                            key={idx}
-                            className="text-[11px] text-war-muted leading-relaxed pl-0.5"
-                          >
-                            <span className="text-war-white font-medium">
-                              {ev.label}
-                            </span>
-                            <span className="text-war-muted">
-                              {" "}
-                              — {ev.dateLabel}
-                            </span>
-                            {ev.detail && (
-                              <span className="block mt-0.5 text-[10px] text-war-muted/85 pl-4">
-                                {ev.detail}
+                      <summary className="evidence-disclosure__summary">
+                        <span>Disclosure & filing timeline</span>
+                        <span>
+                          {selected.disclosureTimeline.length} milestones
+                        </span>
+                      </summary>
+                      <div className="evidence-disclosure__body">
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-sky-200/80 font-semibold">
+                          Disclosure &amp; filing trail
+                        </p>
+                        <p className="text-[10px] text-war-muted/90 leading-relaxed">
+                          Human-readable milestones (not a minute-by-minute IR
+                          timeline). Compare gaps between intrusion narrative,
+                          public story, and issuer/regulator artifacts.
+                        </p>
+                        <TimelinePlaybackControls incident={selected} />
+                        <ol className="space-y-2.5 list-decimal list-inside marker:text-sky-500/80">
+                          {selected.disclosureTimeline.map((ev, idx) => (
+                            <li
+                              key={idx}
+                              className="text-[11px] text-war-muted leading-relaxed pl-0.5"
+                            >
+                              <span className="text-war-white font-medium">
+                                {ev.label}
                               </span>
-                            )}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
+                              <span className="text-war-muted">
+                                {" "}
+                                — {ev.dateLabel}
+                              </span>
+                              {ev.detail && (
+                                <span className="block mt-0.5 text-[10px] text-war-muted/85 pl-4">
+                                  {ev.detail}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    </details>
                   )}
 
                 {selected.limitations && selected.limitations.length > 0 && (
-                  <div
-                    id="intel-limits"
-                    className="scroll-mt-4 rounded-lg border border-rose-500/40 bg-rose-950/20 px-3 py-2.5 space-y-1.5"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-rose-300/90 font-semibold">
-                      What we don’t know
-                    </p>
-                    <ul className="space-y-1 text-[11px] text-rose-100/85 leading-relaxed list-disc list-inside">
-                      {selected.limitations.map((line, i) => (
-                        <li key={i}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  <details id="intel-limits" className="evidence-disclosure">
+                    <summary className="evidence-disclosure__summary">
+                      <span>Known limits & open questions</span>
+                      <span>{selected.limitations.length} caveats</span>
+                    </summary>
+                    <div className="evidence-disclosure__body">
+                      <p className="text-[11px] uppercase tracking-[0.15em] text-rose-300/90 font-semibold">
+                        What we don’t know
+                      </p>
+                      <ul className="space-y-1 text-[11px] text-rose-100/85 leading-relaxed list-disc list-inside">
+                        {selected.limitations.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </details>
                 )}
               </div>
 
@@ -578,7 +640,13 @@ export function IncidentIntelPanel() {
                     and “why it matters” note.
                   </p>
                 </div>
-                <EvidenceSourceLabel incident={selected} />
+                <details className="evidence-source-facts">
+                  <summary>
+                    <span>Source Facts · provenance label and barcode</span>
+                    <span aria-hidden="true">+</span>
+                  </summary>
+                  <EvidenceSourceLabel incident={selected} />
+                </details>
                 {EVIDENCE_GROUP_ORDER.map(({ key, label }) => {
                   const items = groupedEvidence.get(key) ?? [];
                   if (items.length === 0) return null;

@@ -82,12 +82,14 @@ export function CaseNotebook({
   onClose,
   size,
   onSizeChange,
+  showSizeControls = true,
 }: {
   incident: Incident;
   lesson: ResolvedGlobeSecurityLesson;
   onClose: () => void;
   size: NotebookSize;
   onSizeChange: (size: NotebookSize) => void;
+  showSizeControls?: boolean;
 }) {
   const [tab, setTab] = useState<NotebookTab>("case");
   const scroller = useRef<HTMLDivElement | null>(null);
@@ -147,24 +149,34 @@ export function CaseNotebook({
           <p>{incident.incidentTitle}</p>
         </div>
         <div className="notebook-header__actions">
-          <span className="notebook-header__size-label">DOCK</span>
-          <div
-            className="notebook-size-controls"
-            role="group"
-            aria-label="Dossier height"
-          >
-            {(["compact", "standard", "expanded"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={size === option}
-                onClick={() => onSizeChange(option)}
-                title={option + " dossier height"}
+          {showSizeControls && (
+            <>
+              <span className="notebook-header__size-label">DOCK</span>
+              <div
+                className="notebook-size-controls"
+                role="group"
+                aria-label="Dossier height"
               >
-                {option === "compact" ? "S" : option === "standard" ? "M" : "L"}
-              </button>
-            ))}
-          </div>
+                {(["compact", "standard", "expanded"] as const).map(
+                  (option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      aria-pressed={size === option}
+                      onClick={() => onSizeChange(option)}
+                      title={option + " dossier height"}
+                    >
+                      {option === "compact"
+                        ? "S"
+                        : option === "standard"
+                          ? "M"
+                          : "L"}
+                    </button>
+                  )
+                )}
+              </div>
+            </>
+          )}
           <button
             type="button"
             className="notebook-map-button"

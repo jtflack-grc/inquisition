@@ -79,6 +79,8 @@ Do not replace hotspots with a single selected marker. That would remove a core 
 
 The evidence rail can be dense, but it should not feel like a stack of glowing cards.
 
+First contact should answer **what incident is selected, and which cited source can I open?** Keep incident selection and a clearly qualified source link visible. Put search, complete Source Facts, source metadata, disclosure timeline and caveats behind easily opened local disclosures. Deep-links from the notebook must expand their targets before scrolling. Counts and provenance tiers are classifications, never confidence or truth scores.
+
 - Search and incident selection are primary controls and should be visually calm.
 - Evidence trust tiers may use restrained color distinctions.
 - Provenance, retrieval dates, filing identifiers, and source roles should favor mono text and alignment.
@@ -94,6 +96,9 @@ The materiality rail shares IMPACT's analytical language but focuses on ranges a
 - Use mono numerals for dollar outputs and technical parameters.
 - Keep controls compact and explicit.
 - Do not visually collapse deterministic estimates, assumptions, and simulation outputs into one undifferentiated layer.
+- Estimate starts with an honest common-dollar-scale visualization of gross primary and **conditional** secondary loss magnitudes, not a probability chart. Scenario stress, editable inputs and model export/reset belong in Assumptions or Simulation, and notebook links continue to navigate to precise categories.
+- Replace beginner-facing heuristic 'confidence' with an explicit input-basis description; historical model confidence remains described as a non-calibrated flag in deeper views. No uncertainty metric implies statistical confidence without actual calibration.
+- On mobile, offer Evidence / Loss model / Notebook views. The 3D globe remains a desktop visualization, but its case notebook and cross-rail learning flow must remain accessible on narrow screens.
 
 # Dialogs
 
