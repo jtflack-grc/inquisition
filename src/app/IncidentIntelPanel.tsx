@@ -466,9 +466,8 @@ export function IncidentIntelPanel() {
                     Case file
                   </p>
                   <p className="text-[10px] text-war-muted mt-0.5 leading-snug">
-                    A concise account of the selected incident. Check the cited
-                    sources before relying on{" "}
-                    <span className="text-emerald-200/85">evidence</span> below.
+                    Curated context for the selected incident, not a substitute
+                    for checking the cited primary records.
                   </p>
                 </div>
 
