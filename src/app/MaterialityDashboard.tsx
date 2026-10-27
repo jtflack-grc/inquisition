@@ -363,7 +363,7 @@ export function MaterialityDashboard() {
             secondary={outputsDisplayed.secondaryTotalUSDm}
           />
         )}
-        {tab !== "basic" && (
+        {["advanced", "fair_native"].includes(tab) && (
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <article className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-3">
               <h3 className="flex items-center gap-1.5 text-xs font-medium text-war-white/90 mb-2">
@@ -507,7 +507,7 @@ export function MaterialityDashboard() {
           )}
         </section>
 
-        {tab !== "basic" && (
+        {["advanced", "fair_native"].includes(tab) && (
           <>
             <section className="rounded-xl border border-war-border/80 bg-black/60 px-4 py-4 space-y-4">
               <h3 className="flex items-center gap-1.5 text-xs font-semibold text-war-white/90">
