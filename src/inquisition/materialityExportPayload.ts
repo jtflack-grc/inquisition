@@ -96,8 +96,7 @@ export function buildMaterialityExportPayload(params: {
               comparator: "Voicu and Jones TEF Estimator 1.3.0, reference only",
               comparatorUrl:
                 "https://github.com/security-decision-science/security-decision-labs/tree/main/tools/tef-estimator",
-              note:
-                "Historical curated incidents do not establish a risk population or TEF denominator.",
+              note: "Historical curated incidents do not establish a risk population or TEF denominator.",
             }
           : undefined,
       sectorPreset,
