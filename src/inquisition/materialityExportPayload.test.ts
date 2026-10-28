@@ -6,7 +6,10 @@ import {
   normalizeExportForSnapshot,
 } from "./materialityExportPayload";
 import { SEEDED_INCIDENTS } from "./seedIncidents";
-import { runReproducibleRiskSimulation, seedForIncident } from "./lossExceedance";
+import {
+  runReproducibleRiskSimulation,
+  seedForIncident,
+} from "./lossExceedance";
 
 describe("buildMaterialityExportPayload", () => {
   const incident = SEEDED_INCIDENTS[0]!;
@@ -113,14 +116,11 @@ describe("buildMaterialityExportPayload", () => {
     expect(mat.monteCarlo.totalLmUsdM.p90).toBe(
       displayed.perEvent.totalLmUsdM.p90
     );
-    expect(mat.monteCarlo.annualAggregate).toEqual(
-      displayed.annualAggregate
-    );
+    expect(mat.monteCarlo.annualAggregate).toEqual(displayed.annualAggregate);
     expect(mat.monteCarlo.perEventExceedance).toEqual(
       displayed.perEventExceedance
     );
     expect(mat.frequencyProvenance.calibration).toBe("none");
     expect(mat.frequencyProvenance.basis).toContain("illustrative");
   });
-
 });
