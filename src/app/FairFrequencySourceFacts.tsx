@@ -1,9 +1,12 @@
 import { type ReproducibleRiskSimulation } from "../inquisition/lossExceedance";
+import type { AppliedTefCalibration } from "../inquisition/tefCalibration";
 
 export function FairFrequencySourceFacts({
   risk,
+  calibration,
 }: {
   risk: ReproducibleRiskSimulation;
+  calibration: AppliedTefCalibration | null;
 }) {
   return (
     <section className="space-y-2 border border-war-border/60 bg-[#0d1115] px-3 py-3">
@@ -12,7 +15,7 @@ export function FairFrequencySourceFacts({
           Frequency · Source facts
         </h3>
         <span className="font-mono text-[9px] uppercase tracking-wide text-amber-200/90">
-          Assumption · not measured
+          {calibration ? "External TEF + elicited susceptibility" : "Assumption · not measured"}
         </span>
       </header>
       <div className="grid grid-cols-2 gap-3 text-[10px]">
@@ -30,9 +33,9 @@ export function FairFrequencySourceFacts({
         </div>
       </div>
       <p className="text-[10px] leading-relaxed text-war-muted">
-        This is a user-entered hypothetical loss-event rate. The 34 selected
-        historical incidents are documented outcomes, not a population with an
-        observed denominator from which to infer attack frequency.
+        {calibration
+          ? "This is a present-day hypothetical analogue using imported TEF and independently elicited susceptibility, not an estimate of this historical case's past frequency."
+          : "This is a user-entered hypothetical loss-event rate. The 34 selected historical incidents do not provide a frequency denominator."}
       </p>
       <details className="border-t border-war-border/45 pt-2 text-[10px] text-war-muted">
         <summary className="cursor-pointer font-medium text-[#a5c3d3]">
@@ -40,10 +43,10 @@ export function FairFrequencySourceFacts({
         </summary>
         <div className="mt-2 space-y-2 leading-relaxed">
           <p>
-            <strong className="text-war-white">Input:</strong> illustrative LEF
-            (successful loss events per year), default 1.00; bounded 0–10 for
-            this educational simulation. No organization-specific TEF,
-            susceptibility or population exposure is measured here.
+            <strong className="text-war-white">Input:</strong>{" "}
+            {calibration
+              ? `External ${calibration.estimate.scenario} report (dated ${calibration.estimate.estimateDate}), ${calibration.estimate.profile}. Its positioned median TEF is ${calibration.estimate.positionedTefMedian.toFixed(3)}/year. Per-vector susceptibility is an independent analyst assumption, not from that TEF report.`
+              : "User-entered hypothetical LEF, default 1.00/year, bounded 0–10; no observed attack denominator or calibrated susceptibility is supplied."}
           </p>
           <p>
             <strong className="text-war-white">Assumptions:</strong> P(≥1) = 1 −
@@ -53,7 +56,7 @@ export function FairFrequencySourceFacts({
           </p>
           <p>
             <strong className="text-war-white">
-              External methodology; not imported calibration:
+              External methodology and input status:
             </strong>{" "}
             <a
               className="text-[#a5c3d3] underline underline-offset-2"
@@ -63,10 +66,10 @@ export function FairFrequencySourceFacts({
             >
               Laura Voicu &amp; Jack Jones · TEF Estimator 1.3.0
             </a>{" "}
-            documents frequency of attempted threat events by access vector with
-            a provenance trail. Its model, data and dispersion parameters are
-            not incorporated here, and historical cases are not assigned
-            contemporary TEF estimates.
+            documents attempted threat events by vector.{" "}
+            {calibration
+              ? "A user-provided report has been imported for a present-day analogue, but its library and code remain external, and neither susceptibility nor annual dispersion has been calibrated here."
+              : "No external report, estimator code, or source data has been incorporated. Historical cases are not assigned contemporary TEF estimates."}
           </p>
         </div>
       </details>
