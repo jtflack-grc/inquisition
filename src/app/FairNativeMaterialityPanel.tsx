@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import {
-  runLossMagnitudeMonteCarlo,
-  type LmStatBlock,
-  type MonteCarloLmSummary,
-} from "../inquisition/fairLmMonteCarlo";
+import { type LmStatBlock } from "../inquisition/fairLmMonteCarlo";
 import type { CategoryEstimate } from "../inquisition/types";
+import { runReproducibleRiskSimulation } from "../inquisition/lossExceedance";
+import { FairFrequencySourceFacts } from "./FairFrequencySourceFacts";
+import { LossExceedanceView } from "./LossExceedanceView";
+import { AnnualExposureView } from "./AnnualExposureView";
 import { EduTooltip } from "./EduTooltip";
 import { FairNativeReferenceSections } from "./FairNativeReferenceSections";
 
@@ -21,6 +21,7 @@ export type FairNativeMaterialityPanelProps = {
   lefAnnual: number;
   onLefAnnualChange: (v: number) => void;
   secondaryEventProbabilityPct: number;
+  simulationSeed: number;
   onSecondaryEventProbabilityPctChange: (v: number) => void;
 };
 
@@ -33,21 +34,28 @@ export function FairNativeMaterialityPanel({
   onLefAnnualChange,
   secondaryEventProbabilityPct,
   onSecondaryEventProbabilityPctChange,
+  simulationSeed,
 }: FairNativeMaterialityPanelProps) {
-  const mc: MonteCarloLmSummary = useMemo(
+  const risk = useMemo(
     () =>
-      runLossMagnitudeMonteCarlo(
+      runReproducibleRiskSimulation({
         categories,
         insuranceOffsetUSDm,
         iterations,
-        Math.random,
-        secondaryEventProbabilityPct / 100
-      ),
-    [categories, insuranceOffsetUSDm, iterations, secondaryEventProbabilityPct]
+        secondaryEventProbability: secondaryEventProbabilityPct / 100,
+        lefAnnual,
+        seed: simulationSeed,
+      }),
+    [
+      categories,
+      insuranceOffsetUSDm,
+      iterations,
+      secondaryEventProbabilityPct,
+      lefAnnual,
+      simulationSeed,
+    ]
   );
-
-  const ealMean = mc.totalLmUsdM.mean * lefAnnual;
-  const ealP90 = mc.totalLmUsdM.p90 * lefAnnual;
+  const mc = risk.perEvent;
 
   return (
     <section className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-b from-amber-950/25 to-black/70 px-4 py-4 space-y-4">
@@ -122,20 +130,27 @@ export function FairNativeMaterialityPanel({
             LEF — loss events / year
             <EduTooltip
               title="Loss Event Frequency (LEF)"
-              body="In full FAIR™, LEF comes from threat event frequency and vulnerability. Here you set a scalar annual rate for teaching—LM below is still for one modeled scenario; multiply by LEF for a crude expected annual loss (EAL) illustration."
+              body="This user-entered loss-event rate is hypothetical, not inferred from the historical case. TEF means attempted threat events; deriving LEF requires scenario-specific susceptibility. The initial value of 1/year is not empirically calibrated."
               badge="FAIR"
             />
           </span>
           <input
             type="number"
             min={0}
+            max={10}
             step={0.05}
             value={Number.isFinite(lefAnnual) ? lefAnnual : 0}
-            onChange={(e) => onLefAnnualChange(Number(e.target.value))}
+            onChange={(e) =>
+              onLefAnnualChange(
+                Math.max(0, Math.min(10, Number(e.target.value)))
+              )
+            }
             className="rounded-lg bg-black/60 border border-amber-500/35 px-2 py-2 text-war-white"
           />
         </label>
       </div>
+
+      <FairFrequencySourceFacts risk={risk} />
 
       <div className="rounded-lg border border-war-border/50 bg-black/45 px-3 py-3 space-y-3">
         <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/90">
@@ -182,28 +197,9 @@ export function FairNativeMaterialityPanel({
         )}
       </div>
 
-      <div className="rounded-lg border border-violet-500/30 bg-violet-950/15 px-3 py-2.5 space-y-1">
-        <h3 className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-200/90">
-          Exposure sketch (EAL)
-        </h3>
-        <p className="text-[10px] text-violet-50/95 leading-relaxed">
-          <strong className="text-violet-100 font-medium">
-            EAL (illustrative)
-          </strong>{" "}
-          ≈ E[LM<sub>total</sub>] × LEF ≈{" "}
-          <span className="font-mono text-violet-100">
-            ${ealMean.toFixed(2)}M / yr
-          </span>
-          {" · "}
-          <span className="text-violet-200/90">
-            P90 LM × LEF ≈ ${ealP90.toFixed(2)}M / yr
-          </span>
-        </p>
-        <p className="text-[9px] text-slate-300/95">
-          Conversation starter only—real FAIR™ frequency work needs calibrated
-          TEF/vulnerability distributions.
-        </p>
-      </div>
+      <LossExceedanceView risk={risk} />
+
+      <AnnualExposureView risk={risk} />
 
       <FairNativeReferenceSections />
     </section>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { computeMateriality } from "../inquisition/computeMateriality";
+import { seedForIncident } from "../inquisition/lossExceedance";
 import {
   buildMaterialityExportPayload,
   insuranceOffsetUSDmFromInputs,
@@ -169,6 +170,7 @@ export function MaterialityDashboard() {
   const [sectorPreset, setSectorPreset] = useState<SectorPresetId>("neutral");
   const [mcIterations, setMcIterations] = useState(10_000);
   const [lefAnnual, setLefAnnual] = useState(1);
+  const simulationSeed = selected ? seedForIncident(selected.id) : 0;
   const [secondaryEventProbabilityPct, setSecondaryEventProbabilityPct] =
     useState(50);
 
@@ -230,6 +232,7 @@ export function MaterialityDashboard() {
       tab,
       lefAnnual,
       mcIterations,
+      simulationSeed,
       secondaryEventProbabilityPct,
       sectorPreset,
       stressPct,
@@ -338,6 +341,7 @@ export function MaterialityDashboard() {
             onIterationsChange={setMcIterations}
             lefAnnual={lefAnnual}
             onLefAnnualChange={setLefAnnual}
+            simulationSeed={simulationSeed}
             secondaryEventProbabilityPct={secondaryEventProbabilityPct}
             onSecondaryEventProbabilityPctChange={
               setSecondaryEventProbabilityPct

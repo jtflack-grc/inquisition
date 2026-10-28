@@ -1,4 +1,7 @@
-import { runLossMagnitudeMonteCarlo } from "./fairLmMonteCarlo";
+import {
+  runReproducibleRiskSimulation,
+  seedForIncident,
+} from "./lossExceedance";
 import type { Incident, MaterialityInputs, MaterialityOutputs } from "./types";
 import type { MaterialityViewTab } from "./materialityViewTab";
 
@@ -18,6 +21,7 @@ export function buildMaterialityExportPayload(params: {
   tab: MaterialityViewTab;
   lefAnnual: number;
   mcIterations: number;
+  simulationSeed?: number;
   secondaryEventProbabilityPct: number;
   sectorPreset: string;
   stressPct: number;
@@ -30,6 +34,7 @@ export function buildMaterialityExportPayload(params: {
     tab,
     lefAnnual,
     mcIterations,
+    simulationSeed,
     secondaryEventProbabilityPct,
     sectorPreset,
     stressPct,
@@ -38,16 +43,30 @@ export function buildMaterialityExportPayload(params: {
     outputsDisplayed,
   } = params;
 
-  const mcSummary =
+  const run =
     tab === "fair_native"
-      ? runLossMagnitudeMonteCarlo(
-          outputsDisplayed.categories,
-          insuranceOffsetUSDmFromInputs(inputs),
-          mcIterations,
-          Math.random,
-          secondaryEventProbabilityPct / 100
-        )
+      ? runReproducibleRiskSimulation({
+          categories: outputsDisplayed.categories,
+          insuranceOffsetUSDm: insuranceOffsetUSDmFromInputs(inputs),
+          iterations: mcIterations,
+          secondaryEventProbability: secondaryEventProbabilityPct / 100,
+          lefAnnual,
+          seed: simulationSeed ?? seedForIncident(selected.id),
+        })
       : undefined;
+
+  // Preserve the original per-event summary fields for existing JSON readers.
+  // Append explicitly separate conditional exceedance and annual aggregates.
+  const mcSummary = run
+    ? {
+        ...run.perEvent,
+        modelVersion: run.modelVersion,
+        seed: run.seed,
+        perEventExceedance: run.perEventExceedance,
+        annualAggregate: run.annualAggregate,
+        chanceAtLeastOneEvent: run.chanceAtLeastOneEvent,
+      }
+    : undefined;
 
   return {
     exportedAt: new Date().toISOString(),
@@ -64,6 +83,22 @@ export function buildMaterialityExportPayload(params: {
       secondaryEventProbabilityPct:
         tab === "fair_native" ? secondaryEventProbabilityPct : undefined,
       monteCarlo: mcSummary,
+      frequencyProvenance:
+        tab === "fair_native"
+          ? {
+              definition: "Loss Event Frequency (LEF), not attempted TEF",
+              basis: "user-entered illustrative assumption",
+              calibration: "none",
+              observationWindow: null,
+              sourcePopulation: null,
+              eventModel: "constant-rate independent Poisson",
+              ratePerYear: run?.lefAnnual,
+              comparator: "Voicu and Jones TEF Estimator 1.3.0, reference only",
+              comparatorUrl:
+                "https://github.com/security-decision-science/security-decision-labs/tree/main/tools/tef-estimator",
+              note: "Historical curated incidents do not establish a risk population or TEF denominator.",
+            }
+          : undefined,
       sectorPreset,
       stressPercent: stressPct,
       inputs,
@@ -71,7 +106,7 @@ export function buildMaterialityExportPayload(params: {
       outputsStressed: outputsDisplayed,
       disclaimer:
         tab === "fair_native"
-          ? "Simulation adds independent triangular loss-magnitude sampling, conditional secondary loss and an optional LEF sketch. It is not FAIR Institute–certified analysis or a full factor tree. Not legal, investment, or actuarial advice."
+          ? "Deterministic seeded simulation of conditional per-event triangular loss magnitude, with an optional illustrative compound-Poisson annual loss distribution. Frequency is user assumed; no empirical TEF or susceptibility is inferred from this retrospective library. Independent loss buckets and events are modeled without correlation or a full FAIR factor tree. Not FAIR Institute–certified analysis or legal, investment, or actuarial advice."
           : "Illustrative teaching bridge to loss magnitude using an original incident-cost taxonomy. Estimate and Assumptions are deterministic; Simulation samples the same ranges. Not legal, investment, or actuarial advice.",
     },
     evidenceIndex: selected.evidence.map((e) => ({
