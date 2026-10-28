@@ -22,9 +22,9 @@ describe("user imported TEF Estimator JSON", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.estimate.positionedTefMedian).toBe(0.4);
-    expect(result.estimate.vectors.map((v) => v.shareOfRawVectors)).toEqual([
-      0.6, 0.3, 0.1,
-    ]);
+    result.estimate.vectors.forEach((vector, i) => {
+      expect(vector.shareOfRawVectors).toBeCloseTo([0.6, 0.3, 0.1][i]!);
+    });
     expect(deriveLefFromTef(result.estimate, [20, 50, 10])).toBeCloseTo(
       0.4 * (0.6 * 0.2 + 0.3 * 0.5 + 0.1 * 0.1),
       8
