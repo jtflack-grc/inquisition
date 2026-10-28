@@ -22,9 +22,7 @@ export function AnnualExposureView({
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
-          <div className="text-[10px] text-war-muted">
-            Expected annual loss
-          </div>
+          <div className="text-[10px] text-war-muted">Expected annual loss</div>
           <div className="font-mono text-base text-war-white">
             $${eal.toFixed(2)}M
           </div>
@@ -33,9 +31,7 @@ export function AnnualExposureView({
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-war-muted">
-            Annual aggregate P90
-          </div>
+          <div className="text-[10px] text-war-muted">Annual aggregate P90</div>
           <div className="font-mono text-base text-war-white">
             $${risk.annualAggregate.p90.toFixed(2)}M
           </div>
@@ -57,15 +53,14 @@ export function AnnualExposureView({
       </div>
       <p className="text-[9px] leading-relaxed text-war-muted">
         Annual P95 $${risk.annualAggregate.p95.toFixed(2)}M. This simple
-        compound-Poisson sketch assumes independent arrivals, stable
-        exposure and independently resampled per-event losses. It excludes
-        campaign clustering, shared recovery dependencies, changing
-        susceptibility, annual insurance exhaustion and correlated costs.
+        compound-Poisson sketch assumes independent arrivals, stable exposure
+        and independently resampled per-event losses. It excludes campaign
+        clustering, shared recovery dependencies, changing susceptibility,
+        annual insurance exhaustion and correlated costs.
       </p>
       <div className="border-t border-war-border/40 pt-2 font-mono text-[9px] text-war-muted">
-        Reproducibility · seed {risk.seed} ·{" "}
-        {risk.iterations.toLocaleString()} draws · model{" "}
-        {risk.modelVersion}
+        Reproducibility · seed {risk.seed} · {risk.iterations.toLocaleString()}{" "}
+        draws · model {risk.modelVersion}
       </div>
     </section>
   );
