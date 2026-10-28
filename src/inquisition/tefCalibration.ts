@@ -73,7 +73,7 @@ export function parseTefEstimateJson(
     typeof scenario !== "string" ||
     typeof profile !== "string" ||
     typeof estimateDate !== "string" ||
-    !/^\\d{4}-\\d{2}-\\d{2}$/.test(estimateDate)
+    !/^\d{4}-\d{2}-\d{2}$/.test(estimateDate)
   )
     return {
       ok: false,
