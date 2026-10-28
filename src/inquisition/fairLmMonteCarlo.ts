@@ -87,7 +87,8 @@ export function runLossMagnitudeMonteCarlo(
   insuranceOffsetUSDm: number,
   iterations: number,
   rnd: () => number = Math.random,
-  secondaryEventProbability = 1
+  secondaryEventProbability = 1,
+  totalSamplesCollector?: number[]
 ): MonteCarloLmSummary {
   const offset = Math.max(0, insuranceOffsetUSDm);
   const secondaryProbability = Math.min(
@@ -118,6 +119,7 @@ export function runLossMagnitudeMonteCarlo(
     primarySamples.push(primaryAdj);
     secondarySamples.push(secondaryRealized);
     totalSamples.push(primaryAdj + secondaryRealized);
+    totalSamplesCollector?.push(primaryAdj + secondaryRealized);
   }
 
   return {
