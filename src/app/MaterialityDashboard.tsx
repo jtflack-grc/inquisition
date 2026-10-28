@@ -172,7 +172,8 @@ export function MaterialityDashboard() {
   const [sectorPreset, setSectorPreset] = useState<SectorPresetId>("neutral");
   const [mcIterations, setMcIterations] = useState(10_000);
   const [lefAnnual, setLefAnnual] = useState(1);
-  const [tefCalibration, setTefCalibration] = useState<AppliedTefCalibration | null>(null);
+  const [tefCalibration, setTefCalibration] =
+    useState<AppliedTefCalibration | null>(null);
   const setManualLef = (value: number) => {
     setLefAnnual(value);
     setTefCalibration(null);

@@ -49,7 +49,8 @@ export function TefCalibrationPanel({
         />
       </header>
       <p className="text-[10px] leading-relaxed text-war-muted">
-        Import a report generated separately by Laura Voicu and Jack Jones&apos;s{" "}
+        Import a report generated separately by Laura Voicu and Jack
+        Jones&apos;s{" "}
         <a
           href="https://github.com/security-decision-science/security-decision-labs/tree/main/tools/tef-estimator"
           className="text-[#a5c3d3] underline"
@@ -67,9 +68,8 @@ export function TefCalibrationPanel({
             Applied hypothetical LEF:{" "}
             <span className="font-mono">
               {applied.derivedLefAnnual.toFixed(3)}/year
-            </span>
-            {" "}· {applied.estimate.scenario} ·{" "}
-            {applied.estimate.estimateDate}
+            </span>{" "}
+            · {applied.estimate.scenario} · {applied.estimate.estimateDate}
           </p>
           <button
             type="button"
@@ -129,11 +129,11 @@ export function TefCalibrationPanel({
                 </p>
               </div>
               <p className="text-[10px] leading-relaxed text-war-muted">
-                Enter your own P(loss event | attempt) for every vector.
-                These percentages are <strong className="text-war-white">not</strong>{" "}
-                provided by the imported report. Unspecified values remain blank,
-                not zero. Vector shares are normalized before multiplying by
-                the overall positioned TEF to avoid double-counting.
+                Enter your own P(loss event | attempt) for every vector. These
+                percentages are <strong className="text-war-white">not</strong>{" "}
+                provided by the imported report. Unspecified values remain
+                blank, not zero. Vector shares are normalized before multiplying
+                by the overall positioned TEF to avoid double-counting.
               </p>
               <div className="grid gap-2">
                 {estimate.vectors.map((vector, i) => (
@@ -144,7 +144,8 @@ export function TefCalibrationPanel({
                     <span className="text-war-white">
                       {vector.name}{" "}
                       <span className="text-war-muted">
-                        ({(vector.shareOfRawVectors * 100).toFixed(1)}% relative share)
+                        ({(vector.shareOfRawVectors * 100).toFixed(1)}% relative
+                        share)
                       </span>
                     </span>
                     <span className="flex items-center gap-1">
@@ -196,11 +197,14 @@ export function TefCalibrationPanel({
                   className="mt-0.5 accent-[#64a783]"
                 />
                 <span>
-                  I am deliberately modeling a <strong className="text-war-white">present-day
-                  hypothetical analogue</strong>. The imported TEF, profile
-                  alignment and my susceptibility estimates do not establish
-                  the actual historical incident&apos;s probability or a
-                  calibrated loss-event distribution.
+                  I am deliberately modeling a{" "}
+                  <strong className="text-war-white">
+                    present-day hypothetical analogue
+                  </strong>
+                  . The imported TEF, profile alignment and my susceptibility
+                  estimates do not establish the actual historical
+                  incident&apos;s probability or a calibrated loss-event
+                  distribution.
                 </span>
               </label>
               <button

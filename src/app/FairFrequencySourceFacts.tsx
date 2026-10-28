@@ -15,7 +15,9 @@ export function FairFrequencySourceFacts({
           Frequency · Source facts
         </h3>
         <span className="font-mono text-[9px] uppercase tracking-wide text-amber-200/90">
-          {calibration ? "External TEF + elicited susceptibility" : "Assumption · not measured"}
+          {calibration
+            ? "External TEF + elicited susceptibility"
+            : "Assumption · not measured"}
         </span>
       </header>
       <div className="grid grid-cols-2 gap-3 text-[10px]">

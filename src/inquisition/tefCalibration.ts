@@ -53,7 +53,10 @@ export function parseTefEstimateJson(
   try {
     json = JSON.parse(input);
   } catch {
-    return { ok: false, error: "Paste valid JSON from tef-estimator estimate --json." };
+    return {
+      ok: false,
+      error: "Paste valid JSON from tef-estimator estimate --json.",
+    };
   }
   const root = record(json);
   const summary = record(root?.summary);
@@ -61,11 +64,15 @@ export function parseTefEstimateJson(
   if (!root || !summary || !analysis)
     return {
       ok: false,
-      error: "Expected a single TEF Estimator estimate JSON with summary and analysis (not a compare response).",
+      error:
+        "Expected a single TEF Estimator estimate JSON with summary and analysis (not a compare response).",
     };
   const positionedTefMedian = rate(summary.positioned_median);
   if (positionedTefMedian === null || positionedTefMedian > 1_000_000)
-    return { ok: false, error: "Missing or invalid summary.positioned_median annual TEF." };
+    return {
+      ok: false,
+      error: "Missing or invalid summary.positioned_median annual TEF.",
+    };
   const scenario = root.scenario;
   const profile = root.profile;
   const estimateDate = root.estimate_date;
@@ -79,19 +86,37 @@ export function parseTefEstimateJson(
       ok: false,
       error: "Missing scenario, organization profile, or ISO estimate date.",
     };
-  if (!Array.isArray(analysis.vectors) || analysis.vectors.length === 0 || analysis.vectors.length > 20)
-    return { ok: false, error: "Expected 1–20 access vectors in analysis.vectors." };
+  if (
+    !Array.isArray(analysis.vectors) ||
+    analysis.vectors.length === 0 ||
+    analysis.vectors.length > 20
+  )
+    return {
+      ok: false,
+      error: "Expected 1–20 access vectors in analysis.vectors.",
+    };
   const raw: Array<{ name: string; value: number }> = [];
   for (const value of analysis.vectors) {
     const vector = record(value);
     const median = rate(vector?.positioned_median);
-    if (median === null || typeof vector?.name !== "string" || !vector.name.trim())
-      return { ok: false, error: "Each access vector needs a name and nonnegative positioned_median." };
+    if (
+      median === null ||
+      typeof vector?.name !== "string" ||
+      !vector.name.trim()
+    )
+      return {
+        ok: false,
+        error:
+          "Each access vector needs a name and nonnegative positioned_median.",
+      };
     raw.push({ name: vector.name.trim().slice(0, 90), value: median });
   }
   const sum = raw.reduce((acc, entry) => acc + entry.value, 0);
   if (sum <= 0 && positionedTefMedian > 0)
-    return { ok: false, error: "Nonzero overall TEF requires positive vector frequencies." };
+    return {
+      ok: false,
+      error: "Nonzero overall TEF requires positive vector frequencies.",
+    };
   const rawInputs = root.inputs;
   return {
     ok: true,
@@ -101,7 +126,10 @@ export function parseTefEstimateJson(
       estimateDate,
       positionedTefMedian,
       inputs: Array.isArray(rawInputs)
-        ? rawInputs.filter((v): v is string => typeof v === "string").slice(0, 30).map(v => v.slice(0, 300))
+        ? rawInputs
+            .filter((v): v is string => typeof v === "string")
+            .slice(0, 30)
+            .map((v) => v.slice(0, 300))
         : [],
       vectors: raw.map(({ name, value }) => ({
         name,

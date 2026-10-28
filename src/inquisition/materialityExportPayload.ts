@@ -2,7 +2,12 @@ import {
   runReproducibleRiskSimulation,
   seedForIncident,
 } from "./lossExceedance";
-import type { Incident, MaterialityInputs, MaterialityOutputs, MaterialityOverrides } from "./types";
+import type {
+  Incident,
+  MaterialityInputs,
+  MaterialityOutputs,
+  MaterialityOverrides,
+} from "./types";
 import type { MaterialityViewTab } from "./materialityViewTab";
 import type { AppliedTefCalibration } from "./tefCalibration";
 import { interrogateModel } from "./modelCrossExamination";
@@ -102,9 +107,8 @@ export function buildMaterialityExportPayload(params: {
               tefCalibration,
             })
           : undefined,
-      tefCalibration: tab === "fair_native" && tefCalibration
-        ? tefCalibration
-        : undefined,
+      tefCalibration:
+        tab === "fair_native" && tefCalibration ? tefCalibration : undefined,
       frequencyProvenance:
         tab === "fair_native"
           ? {
