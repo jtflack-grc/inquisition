@@ -1,7 +1,5 @@
 import { useMemo } from "react";
-import {
-  type LmStatBlock,
-} from "../inquisition/fairLmMonteCarlo";
+import { type LmStatBlock } from "../inquisition/fairLmMonteCarlo";
 import type { CategoryEstimate } from "../inquisition/types";
 import { runReproducibleRiskSimulation } from "../inquisition/lossExceedance";
 import { FairFrequencySourceFacts } from "./FairFrequencySourceFacts";
