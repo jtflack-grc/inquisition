@@ -2,7 +2,7 @@ import {
   runReproducibleRiskSimulation,
   seedForIncident,
 } from "./lossExceedance";
-import type { Incident, MaterialityInputs, MaterialityOutputs } from "./types";
+import type { Incident, MaterialityInputs, MaterialityOutputs, MaterialityOverrides } from "./types";
 import type { MaterialityViewTab } from "./materialityViewTab";
 import type { AppliedTefCalibration } from "./tefCalibration";
 import { interrogateModel } from "./modelCrossExamination";
@@ -25,6 +25,7 @@ export function buildMaterialityExportPayload(params: {
   mcIterations: number;
   simulationSeed?: number;
   tefCalibration?: AppliedTefCalibration | null;
+  overrides?: MaterialityOverrides;
   secondaryEventProbabilityPct: number;
   sectorPreset: string;
   stressPct: number;
@@ -39,6 +40,7 @@ export function buildMaterialityExportPayload(params: {
     mcIterations,
     simulationSeed,
     tefCalibration,
+    overrides,
     secondaryEventProbabilityPct,
     sectorPreset,
     stressPct,
@@ -93,6 +95,7 @@ export function buildMaterialityExportPayload(params: {
               incident: selected,
               inputs,
               outputs: outputsDisplayed,
+              overrides,
               stressPercent: stressPct,
               lefAnnual,
               secondaryProbabilityPercent: secondaryEventProbabilityPct,
