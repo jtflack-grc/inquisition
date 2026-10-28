@@ -31,8 +31,8 @@ export function FairFrequencySourceFacts({
       </div>
       <p className="text-[10px] leading-relaxed text-war-muted">
         This is a user-entered hypothetical loss-event rate. The 34 selected
-        historical incidents are documented outcomes, not a population with
-        an observed denominator from which to infer attack frequency.
+        historical incidents are documented outcomes, not a population with an
+        observed denominator from which to infer attack frequency.
       </p>
       <details className="border-t border-war-border/45 pt-2 text-[10px] text-war-muted">
         <summary className="cursor-pointer font-medium text-[#a5c3d3]">
@@ -40,14 +40,14 @@ export function FairFrequencySourceFacts({
         </summary>
         <div className="mt-2 space-y-2 leading-relaxed">
           <p>
-            <strong className="text-war-white">Input:</strong> illustrative
-            LEF (successful loss events per year), default 1.00; bounded 0–10
-            for this educational simulation. No organization-specific TEF,
+            <strong className="text-war-white">Input:</strong> illustrative LEF
+            (successful loss events per year), default 1.00; bounded 0–10 for
+            this educational simulation. No organization-specific TEF,
             susceptibility or population exposure is measured here.
           </p>
           <p>
-            <strong className="text-war-white">Assumptions:</strong> P(≥1)
-            = 1 − exp(−LEF), assuming independent constant-rate Poisson events.
+            <strong className="text-war-white">Assumptions:</strong> P(≥1) = 1 −
+            exp(−LEF), assuming independent constant-rate Poisson events.
             Expected annual loss = mean conditional event loss × LEF. Per-event
             P90 × LEF is not an annual aggregate percentile.
           </p>
@@ -63,9 +63,9 @@ export function FairFrequencySourceFacts({
             >
               Laura Voicu &amp; Jack Jones · TEF Estimator 1.3.0
             </a>{" "}
-            documents frequency of attempted threat events by access vector
-            with a provenance trail. Its model, data and dispersion parameters
-            are not incorporated here, and historical cases are not assigned
+            documents frequency of attempted threat events by access vector with
+            a provenance trail. Its model, data and dispersion parameters are
+            not incorporated here, and historical cases are not assigned
             contemporary TEF estimates.
           </p>
         </div>
