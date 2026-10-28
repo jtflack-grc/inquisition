@@ -49,12 +49,7 @@ describe("FAIR event-frequency boundary", () => {
 
 describe("compound-Poisson annual loss sketch", () => {
   it("has a zero P90 for a rare fixed-cost event but a nonzero P95", () => {
-    const annual = simulateAnnualAggregate(
-      [20],
-      0.1,
-      100_000,
-      mulberry32(42)
-    );
+    const annual = simulateAnnualAggregate([20], 0.1, 100_000, mulberry32(42));
     expect(annual.p90).toBe(0);
     expect(annual.p95).toBe(20);
     expect(annual.mean).toBeCloseTo(2, 1);
@@ -62,12 +57,7 @@ describe("compound-Poisson annual loss sketch", () => {
   });
 
   it("returns zero annual loss when annual event frequency is zero", () => {
-    const annual = simulateAnnualAggregate(
-      [25],
-      0,
-      2000,
-      mulberry32(31)
-    );
+    const annual = simulateAnnualAggregate([25], 0, 2000, mulberry32(31));
     expect(annual.mean).toBe(0);
     expect(annual.p90).toBe(0);
     expect(annual.zeroEventYearShare).toBe(1);
