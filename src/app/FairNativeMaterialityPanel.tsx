@@ -5,6 +5,8 @@ import { runReproducibleRiskSimulation } from "../inquisition/lossExceedance";
 import { FairFrequencySourceFacts } from "./FairFrequencySourceFacts";
 import { LossExceedanceView } from "./LossExceedanceView";
 import { AnnualExposureView } from "./AnnualExposureView";
+import { TefCalibrationPanel } from "./TefCalibrationPanel";
+import type { AppliedTefCalibration } from "../inquisition/tefCalibration";
 import { EduTooltip } from "./EduTooltip";
 import { FairNativeReferenceSections } from "./FairNativeReferenceSections";
 
@@ -22,6 +24,9 @@ export type FairNativeMaterialityPanelProps = {
   onLefAnnualChange: (v: number) => void;
   secondaryEventProbabilityPct: number;
   simulationSeed: number;
+  tefCalibration: AppliedTefCalibration | null;
+  onApplyTef: (value: AppliedTefCalibration) => void;
+  onClearTef: () => void;
   onSecondaryEventProbabilityPctChange: (v: number) => void;
 };
 
@@ -35,6 +40,9 @@ export function FairNativeMaterialityPanel({
   secondaryEventProbabilityPct,
   onSecondaryEventProbabilityPctChange,
   simulationSeed,
+  tefCalibration,
+  onApplyTef,
+  onClearTef,
 }: FairNativeMaterialityPanelProps) {
   const risk = useMemo(
     () =>
@@ -150,7 +158,13 @@ export function FairNativeMaterialityPanel({
         </label>
       </div>
 
-      <FairFrequencySourceFacts risk={risk} />
+      <FairFrequencySourceFacts risk={risk} calibration={tefCalibration} />
+
+      <TefCalibrationPanel
+        applied={tefCalibration}
+        onApply={onApplyTef}
+        onClear={onClearTef}
+      />
 
       <div className="rounded-lg border border-war-border/50 bg-black/45 px-3 py-3 space-y-3">
         <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200/90">

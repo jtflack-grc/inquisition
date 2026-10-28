@@ -2,8 +2,15 @@ import {
   runReproducibleRiskSimulation,
   seedForIncident,
 } from "./lossExceedance";
-import type { Incident, MaterialityInputs, MaterialityOutputs } from "./types";
+import type {
+  Incident,
+  MaterialityInputs,
+  MaterialityOutputs,
+  MaterialityOverrides,
+} from "./types";
 import type { MaterialityViewTab } from "./materialityViewTab";
+import type { AppliedTefCalibration } from "./tefCalibration";
+import { interrogateModel } from "./modelCrossExamination";
 
 export type { MaterialityViewTab };
 
@@ -22,6 +29,8 @@ export function buildMaterialityExportPayload(params: {
   lefAnnual: number;
   mcIterations: number;
   simulationSeed?: number;
+  tefCalibration?: AppliedTefCalibration | null;
+  overrides?: MaterialityOverrides;
   secondaryEventProbabilityPct: number;
   sectorPreset: string;
   stressPct: number;
@@ -35,6 +44,8 @@ export function buildMaterialityExportPayload(params: {
     lefAnnual,
     mcIterations,
     simulationSeed,
+    tefCalibration,
+    overrides,
     secondaryEventProbabilityPct,
     sectorPreset,
     stressPct,
@@ -83,16 +94,37 @@ export function buildMaterialityExportPayload(params: {
       secondaryEventProbabilityPct:
         tab === "fair_native" ? secondaryEventProbabilityPct : undefined,
       monteCarlo: mcSummary,
+      modelCrossExamination:
+        tab !== "basic"
+          ? interrogateModel({
+              incident: selected,
+              inputs,
+              outputs: outputsDisplayed,
+              overrides,
+              stressPercent: stressPct,
+              lefAnnual,
+              secondaryProbabilityPercent: secondaryEventProbabilityPct,
+              tefCalibration,
+            })
+          : undefined,
+      tefCalibration:
+        tab === "fair_native" && tefCalibration ? tefCalibration : undefined,
       frequencyProvenance:
         tab === "fair_native"
           ? {
               definition: "Loss Event Frequency (LEF), not attempted TEF",
-              basis: "user-entered illustrative assumption",
-              calibration: "none",
+              basis: tefCalibration
+                ? "user-imported external TEF median and independently elicited susceptibility"
+                : "user-entered illustrative assumption",
+              calibration: tefCalibration
+                ? "prospective analogy point estimate; no TEF uncertainty propagation"
+                : "none",
               observationWindow: null,
-              sourcePopulation: null,
+              sourcePopulation: tefCalibration?.estimate.profile ?? null,
               eventModel: "constant-rate independent Poisson",
               ratePerYear: run?.lefAnnual,
+              estimateDate: tefCalibration?.estimate.estimateDate ?? null,
+              scenario: tefCalibration?.estimate.scenario ?? null,
               comparator: "Voicu and Jones TEF Estimator 1.3.0, reference only",
               comparatorUrl:
                 "https://github.com/security-decision-science/security-decision-labs/tree/main/tools/tef-estimator",
