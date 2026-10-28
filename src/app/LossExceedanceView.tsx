@@ -18,10 +18,7 @@ export function LossExceedanceView({
     point?.probability ?? 0
   );
   const path = risk.perEventExceedance
-    .map(
-      (row, i) =>
-        `${42 + i * 13.5},${139 - row.probability * 118}`
-    )
+    .map((row, i) => `${42 + i * 13.5},${139 - row.probability * 118}`)
     .join(" ");
 
   return (
@@ -83,13 +80,7 @@ export function LossExceedanceView({
         <text x="42" y="160" fill="#8b949e" fontSize="10">
           $0M
         </text>
-        <text
-          x="474"
-          y="160"
-          fill="#8b949e"
-          fontSize="10"
-          textAnchor="end"
-        >
+        <text x="474" y="160" fill="#8b949e" fontSize="10" textAnchor="end">
           $${risk.perEventExceedance[32]?.thresholdUSDm.toFixed(1) ?? "0"}M
         </text>
       </svg>
