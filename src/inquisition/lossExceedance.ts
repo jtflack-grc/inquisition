@@ -1,4 +1,9 @@
-import { mulberry32, runLossMagnitudeMonteCarlo, type LmStatBlock, type MonteCarloLmSummary } from "./fairLmMonteCarlo";
+import {
+  mulberry32,
+  runLossMagnitudeMonteCarlo,
+  type LmStatBlock,
+  type MonteCarloLmSummary,
+} from "./fairLmMonteCarlo";
 import type { CategoryEstimate } from "./types";
 
 export const MAX_ILLUSTRATIVE_LEF = 10;
@@ -45,7 +50,10 @@ export function chanceAtLeastOneEvent(rate: number): number {
 }
 
 /** Strictly greater than the threshold, conditional on a realized modeled event. */
-export function conditionalExceedanceProbability(samples: number[], thresholdUSDm: number): number {
+export function conditionalExceedanceProbability(
+  samples: number[],
+  thresholdUSDm: number
+): number {
   if (samples.length === 0) return 0;
   const threshold = Math.max(0, thresholdUSDm);
   let exceed = 0;
@@ -59,8 +67,13 @@ export function conditionalExceedanceProbability(samples: number[], thresholdUSD
  * P(>=1 event exceeding threshold in 12 months). This is NOT the probability
  * that the annual sum of event losses exceeds the threshold.
  */
-export function annualChanceOfOneExceedingEvent(rate: number, conditionalChance: number): number {
-  return -Math.expm1(-boundedIllustrativeLef(rate) * Math.max(0, Math.min(1, conditionalChance)));
+export function annualChanceOfOneExceedingEvent(
+  rate: number,
+  conditionalChance: number
+): number {
+  return -Math.expm1(
+    -boundedIllustrativeLef(rate) * Math.max(0, Math.min(1, conditionalChance))
+  );
 }
 
 function percentile(sorted: number[], fraction: number): number {
@@ -107,7 +120,10 @@ export function simulateAnnualAggregate(
     let total = 0;
     for (let j = 0; j < events; j += 1) {
       if (perEventLossSamples.length) {
-        total += perEventLossSamples[Math.floor(random() * perEventLossSamples.length)] ?? 0;
+        total +=
+          perEventLossSamples[
+            Math.floor(random() * perEventLossSamples.length)
+          ] ?? 0;
       }
     }
     samples.push(total);
@@ -137,7 +153,10 @@ export function runReproducibleRiskSimulation(params: {
   lefAnnual: number;
   seed: number;
 }): ReproducibleRiskSimulation {
-  const iterations = Math.max(1, Math.min(50_000, Math.floor(params.iterations)));
+  const iterations = Math.max(
+    1,
+    Math.min(50_000, Math.floor(params.iterations))
+  );
   const seed = params.seed >>> 0;
   const rate = boundedIllustrativeLef(params.lefAnnual);
   const samples: number[] = [];
@@ -150,13 +169,16 @@ export function runReproducibleRiskSimulation(params: {
     samples
   );
   const max = Math.max(0, ...samples);
-  const perEventExceedance: ExceedancePoint[] = Array.from({ length: 33 }, (_, index) => {
-    const thresholdUSDm = (max * index) / 32;
-    return {
-      thresholdUSDm,
-      probability: conditionalExceedanceProbability(samples, thresholdUSDm),
-    };
-  });
+  const perEventExceedance: ExceedancePoint[] = Array.from(
+    { length: 33 },
+    (_, index) => {
+      const thresholdUSDm = (max * index) / 32;
+      return {
+        thresholdUSDm,
+        probability: conditionalExceedanceProbability(samples, thresholdUSDm),
+      };
+    }
+  );
   const annualAggregate = simulateAnnualAggregate(
     samples,
     rate,
