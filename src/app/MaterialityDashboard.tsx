@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { computeMateriality } from "../inquisition/computeMateriality";
 import { seedForIncident } from "../inquisition/lossExceedance";
+import type { AppliedTefCalibration } from "../inquisition/tefCalibration";
+import { ModelCrossExamination } from "./ModelCrossExamination";
 import {
   buildMaterialityExportPayload,
   insuranceOffsetUSDmFromInputs,
@@ -170,6 +172,15 @@ export function MaterialityDashboard() {
   const [sectorPreset, setSectorPreset] = useState<SectorPresetId>("neutral");
   const [mcIterations, setMcIterations] = useState(10_000);
   const [lefAnnual, setLefAnnual] = useState(1);
+  const [tefCalibration, setTefCalibration] = useState<AppliedTefCalibration | null>(null);
+  const setManualLef = (value: number) => {
+    setLefAnnual(value);
+    setTefCalibration(null);
+  };
+  const applyTef = (value: AppliedTefCalibration) => {
+    setTefCalibration(value);
+    setLefAnnual(value.derivedLefAnnual);
+  };
   const simulationSeed = selected ? seedForIncident(selected.id) : 0;
   const [secondaryEventProbabilityPct, setSecondaryEventProbabilityPct] =
     useState(50);
@@ -179,6 +190,7 @@ export function MaterialityDashboard() {
     setSectorPreset("neutral");
     setMcIterations(10_000);
     setLefAnnual(1);
+    setTefCalibration(null);
     setSecondaryEventProbabilityPct(50);
   }, [selected?.id]);
 
@@ -233,6 +245,7 @@ export function MaterialityDashboard() {
       lefAnnual,
       mcIterations,
       simulationSeed,
+      tefCalibration,
       secondaryEventProbabilityPct,
       sectorPreset,
       stressPct,
@@ -331,7 +344,21 @@ export function MaterialityDashboard() {
       <ModelLimitsStrip />
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-transparent px-6 pb-6 pt-4">
-        {tab === "advanced" && <FairMethodologyDeepDive />}
+        {tab === "advanced" && (
+          <>
+            <ModelCrossExamination
+              incident={selected}
+              inputs={inputs}
+              outputs={outputsDisplayed}
+              overrides={overrides}
+              stressPercent={stressPct}
+              lefAnnual={lefAnnual}
+              secondaryProbabilityPercent={secondaryEventProbabilityPct}
+              tefCalibration={tefCalibration}
+            />
+            <FairMethodologyDeepDive />
+          </>
+        )}
 
         {tab === "fair_native" && (
           <FairNativeMaterialityPanel
@@ -340,8 +367,11 @@ export function MaterialityDashboard() {
             iterations={mcIterations}
             onIterationsChange={setMcIterations}
             lefAnnual={lefAnnual}
-            onLefAnnualChange={setLefAnnual}
+            onLefAnnualChange={setManualLef}
             simulationSeed={simulationSeed}
+            tefCalibration={tefCalibration}
+            onApplyTef={applyTef}
+            onClearTef={() => setTefCalibration(null)}
             secondaryEventProbabilityPct={secondaryEventProbabilityPct}
             onSecondaryEventProbabilityPctChange={
               setSecondaryEventProbabilityPct
