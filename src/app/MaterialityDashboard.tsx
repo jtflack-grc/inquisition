@@ -246,6 +246,7 @@ export function MaterialityDashboard() {
       mcIterations,
       simulationSeed,
       tefCalibration,
+      overrides,
       secondaryEventProbabilityPct,
       sectorPreset,
       stressPct,
@@ -371,7 +372,7 @@ export function MaterialityDashboard() {
             simulationSeed={simulationSeed}
             tefCalibration={tefCalibration}
             onApplyTef={applyTef}
-            onClearTef={() => setTefCalibration(null)}
+            onClearTef={() => setManualLef(1)}
             secondaryEventProbabilityPct={secondaryEventProbabilityPct}
             onSecondaryEventProbabilityPctChange={
               setSecondaryEventProbabilityPct
