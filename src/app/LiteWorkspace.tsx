@@ -451,7 +451,7 @@ export function LiteWorkspace({ onExit }: { onExit: (incident: Incident, overrid
                         ? "This lever does not change the current illustration. Check whether the selected loss pathway is actually in the model."
                         : `The illustrative difference is ${usd(difference)}. That result is conditional on the assumption, not evidence that a control delivers it.`}
                   </p>
-                  {!theft && decision !== "evidence" && difference > 0 && (
+                  {decision !== "evidence" && difference > 0 && (
                     <button
                       type="button"
                       onClick={() => {
