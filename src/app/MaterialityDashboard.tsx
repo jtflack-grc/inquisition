@@ -5,7 +5,10 @@ import type { AppliedTefCalibration } from "../inquisition/tefCalibration";
 import { ModelCrossExamination } from "./ModelCrossExamination";
 import { IRISResearchContext } from "./IRISResearchContext";
 import { GoldenInvestigations } from "./GoldenInvestigations";
-import { GUIDED_CASES_DETAILS_ID, INQUISITION_OPEN_GUIDED_CASES_EVENT } from "./guidedInvestigationsNavigation";
+import {
+  GUIDED_CASES_DETAILS_ID,
+  INQUISITION_OPEN_GUIDED_CASES_EVENT,
+} from "./guidedInvestigationsNavigation";
 import {
   buildMaterialityExportPayload,
   insuranceOffsetUSDmFromInputs,

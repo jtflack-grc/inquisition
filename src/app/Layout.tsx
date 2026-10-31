@@ -79,7 +79,8 @@ export function Layout() {
               </span>
             </div>
             <p className="mt-0.5 hidden text-[11px] text-war-muted sm:block">
-              {incidentCount} curated public incidents · evidence, assumptions &amp; loss pathways
+              {incidentCount} curated public incidents · evidence, assumptions
+              &amp; loss pathways
             </p>
           </div>
 

@@ -102,7 +102,8 @@ export function WelcomePopup() {
           </h1>
           <p className="mt-5 max-w-lg text-sm leading-6 text-slate-300">
             Reconstruct {incidentCount} public incidents from cited evidence,
-            challenge the loss assumptions, and watch the materiality range move.
+            challenge the loss assumptions, and watch the materiality range
+            move.
           </p>
 
           <div className="mt-8 grid gap-px border border-emerald-400/15 bg-emerald-400/15 sm:grid-cols-3">
