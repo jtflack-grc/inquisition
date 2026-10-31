@@ -1,0 +1,31 @@
+name: Temporary branch Prettier
+on:
+  push:
+    branches:
+      - feature/iris-xtreme-50-case-golden-walkthroughs
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Format exactly the new research and teaching files
+        run: npx prettier --write src/inquisition/catalog/xtremeContextSeeds.ts src/inquisition/seedIncidents.ts src/inquisition/irisXtremeResearch.ts src/app/IRISResearchContext.tsx src/inquisition/goldenExamples.ts src/app/GoldenInvestigations.tsx src/app/MaterialityDashboard.tsx src/inquisition/computeMateriality.ts src/inquisition/types.ts src/app/IncidentIntelPanel.tsx src/inquisition/modelCrossExamination.ts src/inquisition/irisXtremeResearch.test.ts
+      - name: Commit formatting once
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/inquisition/catalog/xtremeContextSeeds.ts src/inquisition/seedIncidents.ts src/inquisition/irisXtremeResearch.ts src/app/IRISResearchContext.tsx src/inquisition/goldenExamples.ts src/app/GoldenInvestigations.tsx src/app/MaterialityDashboard.tsx src/inquisition/computeMateriality.ts src/inquisition/types.ts src/app/IncidentIntelPanel.tsx src/inquisition/modelCrossExamination.ts src/inquisition/irisXtremeResearch.test.ts
+          if ! git diff --staged --quiet; then
+            git commit -m "Apply project Prettier to IRIS Xtreme feature"
+            git push origin HEAD:feature/iris-xtreme-50-case-golden-walkthroughs
+          fi
