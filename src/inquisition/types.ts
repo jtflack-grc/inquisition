@@ -1,5 +1,5 @@
 export type EvidenceType =
-  "sec_8k" | "sec_other" | "lawsuit" | "regulator" | "news";
+  "sec_8k" | "sec_other" | "issuer" | "lawsuit" | "regulator" | "news";
 
 export type EvidenceSource =
   "seed" | "sec_edgar" | "courtlistener" | "gdelt" | "rss";
