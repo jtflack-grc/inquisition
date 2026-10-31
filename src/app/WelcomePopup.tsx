@@ -199,7 +199,7 @@ export function WelcomePopup() {
                   Start with one case →
                 </span>
                 <span className="mt-1 block text-xs leading-relaxed text-slate-400">
-                  Five handpicked examples. Evidence first, then assumptions,
+                  {GOLDEN_EXAMPLES.length} handpicked examples. Evidence first, then assumptions,
                   then the decision. No fire hose.
                 </span>
               </button>
@@ -258,7 +258,7 @@ export function WelcomePopup() {
                   </span>
                   <span>
                     <span className="block text-sm font-medium text-white">
-                      {item.title.replace(/^\\d{2} · /, "").split(" / ")[0]}
+                      {item.title.replace(/^\d{2} · /, "").split(" / ")[0]}
                     </span>
                     <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-400">
                       {item.premise}
