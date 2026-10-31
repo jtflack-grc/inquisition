@@ -11,6 +11,8 @@ import {
 } from "../store/incidentStore";
 import { MaterialityDashboard } from "./MaterialityDashboard";
 import { WelcomePopup } from "./WelcomePopup";
+import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
+import { INQUISITION_OPEN_GUIDED_CASES_EVENT } from "./guidedInvestigationsNavigation";
 
 const ScenarioGlobe = lazy(() =>
   import("./ScenarioGlobe").then((m) => ({ default: m.ScenarioGlobe }))
@@ -33,6 +35,7 @@ export function Layout() {
     "evidence" | "model" | "notebook"
   >("evidence");
   const selected = useIncidentStore(selectSelectedIncident);
+  const incidentCount = useIncidentStore((state) => state.incidents.length);
   const lesson = useMemo(
     () => (selected ? resolveGlobeSecurityLesson(selected) : null),
     [selected]
@@ -50,33 +53,56 @@ export function Layout() {
       window.removeEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
   }, []);
 
+  useEffect(() => {
+    const showGuidedCases = () => setMobilePane("model");
+    window.addEventListener(
+      INQUISITION_OPEN_GUIDED_CASES_EVENT,
+      showGuidedCases
+    );
+    return () =>
+      window.removeEventListener(
+        INQUISITION_OPEN_GUIDED_CASES_EVENT,
+        showGuidedCases
+      );
+  }, []);
+
   return (
     <>
       <div className="inquisition-shell relative flex h-screen flex-col overflow-hidden text-war-white">
         <header className="inquisition-topbar relative z-10 flex shrink-0 items-center justify-between border-b border-war-border px-4 py-3 md:px-6">
           <div className="min-w-0">
             <div className="flex items-baseline gap-3">
-              <h1 className="truncate text-xl font-semibold tracking-[0.14em] text-war-white md:text-2xl">
+              <h1 className="truncate text-lg font-semibold tracking-[0.14em] text-war-white sm:text-xl md:text-2xl">
                 INQUISITION
               </h1>
               <span className="hidden font-mono text-[10px] text-war-muted lg:inline">
                 PUBLIC CYBER MATERIALITY CASEBOOK
               </span>
             </div>
-            <p className="mt-0.5 text-[11px] text-war-muted">
-              Evidence, assumptions, and loss range across 34 public incidents
+            <p className="mt-0.5 hidden text-[11px] text-war-muted sm:block">
+              {incidentCount} curated public incidents · evidence, assumptions
+              &amp; loss pathways
             </p>
           </div>
 
-          <div className="hidden items-center gap-4 text-[10px] text-war-muted xl:flex">
-            <span>Evidence-led</span>
-            <span className="h-3 w-px bg-war-border" aria-hidden="true" />
-            <span>FAIR-informed</span>
-            <span className="h-3 w-px bg-war-border" aria-hidden="true" />
-            <span>Retrospective</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex shrink-0 items-center gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent(INQUISITION_OPEN_GUIDED_CASES_EVENT)
+                )
+              }
+              className="inline-flex min-h-10 items-center gap-2 border border-[#7ea4bf]/35 px-2.5 font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-slate-200 transition-colors hover:border-[#7ea4bf]/80 hover:bg-[#132029] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7ea4bf] sm:px-3"
+              aria-label={`Explore ${GOLDEN_EXAMPLES.length} guided case investigations`}
+              title="Open five evidence-to-decision investigations"
+            >
+              <span className="hidden sm:inline">Guided cases</span>
+              <span className="sm:hidden">Guided</span>
+              <span className="border-l border-war-border/70 pl-2 text-[#a5c3d3]">
+                {String(GOLDEN_EXAMPLES.length).padStart(2, "0")}
+              </span>
+            </button>
             <CreditsPopup />
           </div>
         </header>

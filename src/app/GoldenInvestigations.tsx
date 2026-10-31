@@ -1,6 +1,7 @@
 import type { MaterialityViewTab } from "../inquisition/materialityViewTab";
 import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
 import { IRIS_XTREME_2026 } from "../inquisition/irisXtremeResearch";
+import { GUIDED_CASES_DETAILS_ID } from "./guidedInvestigationsNavigation";
 
 export function GoldenInvestigations({
   selectedId,
@@ -14,7 +15,7 @@ export function GoldenInvestigations({
   const active = GOLDEN_EXAMPLES.find((example) => example.id === selectedId);
   return (
     <section className="border border-war-border/70 bg-[#0d1115] px-3 py-3">
-      <details>
+      <details id={GUIDED_CASES_DETAILS_ID}>
         <summary className="flex cursor-pointer items-center justify-between gap-2 text-[11px] font-semibold text-war-white">
           <span>Five guided investigations · demo / teachables</span>
           <span className="font-mono text-[9px] font-normal text-[#a5c3d3]">
