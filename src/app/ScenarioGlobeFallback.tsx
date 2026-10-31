@@ -58,10 +58,12 @@ export function ScenarioGlobeFallback({
   hotspots,
   selectedId,
   onSelect,
+  compact = false,
 }: {
   hotspots: Incident[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  compact?: boolean;
 }) {
   const selected = useMemo(
     () => hotspots.find((incident) => incident.id === selectedId),
@@ -74,9 +76,11 @@ export function ScenarioGlobeFallback({
       role="region"
       aria-label="Interactive fallback incident map"
     >
-      <div className="absolute left-3 top-3 z-10 max-w-[70%] font-mono text-[10px] uppercase tracking-widest text-slate-300">
-        Case geography / 2D backup
-      </div>
+      {!compact && (
+        <div className="absolute left-3 top-3 z-10 max-w-[70%] font-mono text-[10px] uppercase tracking-widest text-slate-300">
+          Case geography / 2D backup
+        </div>
+      )}
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         preserveAspectRatio="xMidYMid meet"
@@ -164,10 +168,12 @@ export function ScenarioGlobeFallback({
             );
           })()}
       </svg>
-      <p className="absolute bottom-3 left-3 right-3 text-[10px] leading-relaxed text-slate-300">
-        3D rendering unavailable in this browser. Case markers, evidence, and
-        FAIR-informed analysis remain interactive.
-      </p>
+      {!compact && (
+        <p className="absolute bottom-3 left-3 right-3 text-[10px] leading-relaxed text-slate-300">
+          3D rendering unavailable in this browser. Case markers, evidence, and
+          FAIR-informed analysis remain interactive.
+        </p>
+      )}
     </div>
   );
 }
