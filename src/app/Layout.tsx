@@ -11,6 +11,8 @@ import {
 } from "../store/incidentStore";
 import { MaterialityDashboard } from "./MaterialityDashboard";
 import { WelcomePopup } from "./WelcomePopup";
+import { LiteWorkspace } from "./LiteWorkspace";
+import type { Incident, MaterialityOverrides } from "../inquisition/types";
 import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
 import { INQUISITION_OPEN_GUIDED_CASES_EVENT } from "./guidedInvestigationsNavigation";
 
@@ -34,6 +36,10 @@ export function Layout() {
   const [mobilePane, setMobilePane] = useState<
     "evidence" | "model" | "notebook"
   >("evidence");
+  const [liteActive, setLiteActive] = useState(false);
+  const setSelectedIncidentId = useIncidentStore((state) => state.setSelectedIncidentId);
+  const setIncidentQuery = useIncidentStore((state) => state.setIncidentQuery);
+  const setMaterialityOverrides = useIncidentStore((state) => state.setMaterialityOverridesForIncident);
   const selected = useIncidentStore(selectSelectedIncident);
   const incidentCount = useIncidentStore((state) => state.incidents.length);
   const lesson = useMemo(
@@ -53,6 +59,20 @@ export function Layout() {
       window.removeEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
   }, []);
 
+  const enterLite = (id: string) => {
+    setIncidentQuery("");
+    setSelectedIncidentId(id);
+    setLiteActive(true);
+  };
+  const leaveLite = (incident: Incident, overrides?: MaterialityOverrides) => {
+    setSelectedIncidentId(incident.id);
+    setIncidentQuery("");
+    // Explicit scenario transfer, not historical fact mutation.
+    if (overrides) setMaterialityOverrides(incident.id, overrides);
+    setMobilePane(overrides ? "model" : "evidence");
+    setLiteActive(false);
+  };
+
   return (
     <>
       <div className="inquisition-shell relative flex h-screen flex-col overflow-hidden text-war-white">
@@ -67,8 +87,7 @@ export function Layout() {
               </span>
             </div>
             <p className="mt-0.5 hidden text-[11px] text-war-muted sm:block">
-              {incidentCount} curated public incidents · evidence, assumptions
-              &amp; loss pathways
+              {liteActive ? "Lite / a focused investigative workspace" : <>{incidentCount} curated public incidents · evidence, assumptions &amp; loss pathways</>}
             </p>
           </div>
 
@@ -82,7 +101,7 @@ export function Layout() {
               }
               className="inline-flex min-h-10 items-center gap-2 border border-[#7ea4bf]/35 px-2.5 font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-slate-200 transition-colors hover:border-[#7ea4bf]/80 hover:bg-[#132029] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7ea4bf] sm:px-3"
               aria-label={`Explore ${GOLDEN_EXAMPLES.length} guided case investigations`}
-              title="Open five evidence-to-decision investigations"
+              title="Choose one of five functional Lite investigations"
             >
               <span className="hidden sm:inline">Guided cases</span>
               <span className="sm:hidden">Guided</span>
@@ -94,6 +113,10 @@ export function Layout() {
           </div>
         </header>
 
+        {liteActive ? (
+          <LiteWorkspace onExit={leaveLite} />
+        ) : (
+          <>
         <nav
           className="relative z-10 grid shrink-0 grid-cols-3 border-b border-war-border bg-[#0a0d10] xl:hidden"
           aria-label="Mobile workspace"
@@ -165,6 +188,8 @@ export function Layout() {
             </Suspense>
           </section>
         </main>
+          </>
+        )}
 
         <footer className="relative z-10 shrink-0 border-t border-war-border bg-[#07090b] px-4 py-2 md:px-6">
           <p className="mx-auto max-w-7xl text-center text-[10px] leading-snug text-war-muted md:text-left">
@@ -184,7 +209,7 @@ export function Layout() {
           </p>
         </footer>
       </div>
-      <WelcomePopup />
+      <WelcomePopup onEnterLite={enterLite} />
     </>
   );
 }
