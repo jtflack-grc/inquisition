@@ -209,7 +209,7 @@ export function Layout() {
           </p>
         </footer>
       </div>
-      <WelcomePopup onEnterLite={enterLite} />
+      <WelcomePopup onEnterLite={enterLite} onOpenFull={() => setLiteActive(false)} />
     </>
   );
 }
