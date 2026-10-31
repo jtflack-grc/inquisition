@@ -42,7 +42,11 @@ function markIntroDismissed() {
   }
 }
 
-const LESSON_STAGES = ["Source facts", "Challenge the model", "Make a decision"] as const;
+const LESSON_STAGES = [
+  "Source facts",
+  "Challenge the model",
+  "Make a decision",
+] as const;
 
 export function WelcomePopup() {
   const incidents = useIncidentStore((state) => state.incidents);
@@ -52,7 +56,9 @@ export function WelcomePopup() {
   const setIncidentQuery = useIncidentStore((state) => state.setIncidentQuery);
   const [isVisible, setIsVisible] = useState(false);
   const [screen, setScreen] = useState<IntroScreen>("intro");
-  const [selectedExampleId, setSelectedExampleId] = useState<string | null>(null);
+  const [selectedExampleId, setSelectedExampleId] = useState<string | null>(
+    null
+  );
   const [stage, setStage] = useState<LessonStage>(0);
   const [showFacilitatorNotes, setShowFacilitatorNotes] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -141,9 +147,9 @@ export function WelcomePopup() {
 
   const example = GOLDEN_EXAMPLES.find((item) => item.id === selectedExampleId);
   const incident = incidents.find((item) => item.id === selectedExampleId);
-  const firstSource = incident?.evidence.find(
-    (item) => item.linkRole === "deep_link"
-  ) ?? incident?.evidence[0];
+  const firstSource =
+    incident?.evidence.find((item) => item.linkRole === "deep_link") ??
+    incident?.evidence[0];
 
   if (!isVisible) return null;
 
@@ -167,7 +173,9 @@ export function WelcomePopup() {
           className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center text-emerald-100/55 transition-colors hover:bg-emerald-300/10 hover:text-white"
           aria-label="Close introduction and open casebook"
         >
-          <span aria-hidden="true" className="text-xl">×</span>
+          <span aria-hidden="true" className="text-xl">
+            ×
+          </span>
         </button>
 
         {screen === "intro" && (
@@ -183,7 +191,8 @@ export function WelcomePopup() {
             </h1>
             <p className="mt-4 max-w-lg text-sm leading-6 text-slate-300">
               {incidents.length} public cyber incidents, their source evidence,
-              and an illustrative model you can challenge. There are two ways in.
+              and an illustrative model you can challenge. There are two ways
+              in.
             </p>
             <div className="mt-7 grid gap-2 sm:grid-cols-2">
               <button
@@ -199,8 +208,8 @@ export function WelcomePopup() {
                   Start with one case →
                 </span>
                 <span className="mt-1 block text-xs leading-relaxed text-slate-400">
-                  {GOLDEN_EXAMPLES.length} handpicked examples. Evidence first, then assumptions,
-                  then the decision. No fire hose.
+                  {GOLDEN_EXAMPLES.length} handpicked examples. Evidence first,
+                  then assumptions, then the decision. No fire hose.
                 </span>
               </button>
               <button
@@ -221,9 +230,9 @@ export function WelcomePopup() {
               </button>
             </div>
             <p className="mt-5 text-[10px] leading-5 text-slate-500">
-              Educational and retrospective. The loss model is illustrative,
-              not a certified FAIR assessment. You can return to guided cases
-              from the header at any time.
+              Educational and retrospective. The loss model is illustrative, not
+              a certified FAIR assessment. You can return to guided cases from
+              the header at any time.
             </p>
           </div>
         )}
@@ -264,7 +273,10 @@ export function WelcomePopup() {
                       {item.premise}
                     </span>
                   </span>
-                  <span aria-hidden="true" className="ml-auto text-emerald-300/70">
+                  <span
+                    aria-hidden="true"
+                    className="ml-auto text-emerald-300/70"
+                  >
                     →
                   </span>
                 </button>
@@ -294,7 +306,10 @@ export function WelcomePopup() {
             <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70">
               Guided investigation / {String(stage + 1).padStart(2, "0")} of 03
             </p>
-            <div className="mb-4 grid grid-cols-3 gap-1" aria-label="Investigation progress">
+            <div
+              className="mb-4 grid grid-cols-3 gap-1"
+              aria-label="Investigation progress"
+            >
               {LESSON_STAGES.map((label, index) => (
                 <div
                   key={label}
@@ -369,8 +384,8 @@ export function WelcomePopup() {
                       {incident.modelingDefaults?.downtimeDays == null
                         ? "Not supplied"
                         : `${incident.modelingDefaults.downtimeDays} days (illustrative)`}
-                    </strong>
-                    {" "}· Records:{" "}
+                    </strong>{" "}
+                    · Records:{" "}
                     <strong className="text-white">
                       {incident.modelingDefaults?.recordsMillions == null
                         ? "Not supplied"
@@ -393,7 +408,9 @@ export function WelcomePopup() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => setShowFacilitatorNotes((previous) => !previous)}
+                  onClick={() =>
+                    setShowFacilitatorNotes((previous) => !previous)
+                  }
                   className="border border-slate-700 px-3 py-2 text-[11px] text-emerald-200 transition-colors hover:border-emerald-400/60"
                 >
                   {showFacilitatorNotes ? "Hide" : "Reveal"} teaching notes
