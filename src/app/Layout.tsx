@@ -40,6 +40,7 @@ export function Layout() {
   const setSelectedIncidentId = useIncidentStore((state) => state.setSelectedIncidentId);
   const setIncidentQuery = useIncidentStore((state) => state.setIncidentQuery);
   const setMaterialityOverrides = useIncidentStore((state) => state.setMaterialityOverridesForIncident);
+  const markLiteScenarioTransfer = useIncidentStore((state) => state.markLiteScenarioTransfer);
   const selected = useIncidentStore(selectSelectedIncident);
   const incidentCount = useIncidentStore((state) => state.incidents.length);
   const lesson = useMemo(
@@ -68,7 +69,10 @@ export function Layout() {
     setSelectedIncidentId(incident.id);
     setIncidentQuery("");
     // Explicit scenario transfer, not historical fact mutation.
-    if (overrides) setMaterialityOverrides(incident.id, overrides);
+    if (overrides) {
+      setMaterialityOverrides(incident.id, overrides);
+      markLiteScenarioTransfer(incident.id);
+    }
     setMobilePane(overrides ? "model" : "evidence");
     setLiteActive(false);
   };
