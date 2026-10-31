@@ -308,12 +308,14 @@ h3 {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  isolation: isolate;
 }
 
 /* Do not expose react-globe.gl's default distant camera during first paint. */
 .globe-scene {
   position: absolute;
   inset: 0;
+  z-index: 0;
   opacity: 0;
   pointer-events: none;
 }
@@ -327,7 +329,8 @@ h3 {
    Active risk is red; an unselected case preview uses informational blue. */
 .map-case-placard {
   position: absolute;
-  z-index: 12;
+  /* Above the map's html-element pin layer; never part of its stacking context. */
+  z-index: 30;
   top: 12px;
   left: 12px;
   box-sizing: border-box;
@@ -336,9 +339,11 @@ h3 {
   overflow: hidden;
   border: 1px solid #313b45;
   border-left: 3px solid var(--inq-risk);
-  background: rgba(9, 13, 17, 0.96);
+  /* A real opaque field-note surface: even high-contrast / animated pins
+     cannot ghost through the card or capture a click behind its text. */
+  background: #090d11;
   color: var(--inq-text);
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .map-case-placard--preview {
@@ -352,7 +357,7 @@ h3 {
   gap: 8px;
   padding: 7px 10px;
   border-bottom: 1px solid #283139;
-  background: rgba(25, 31, 38, 0.7);
+  background: #191f26;
   font:
     500 9px "IBM Plex Mono",
     monospace;
