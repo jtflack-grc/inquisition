@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
 import { IRIS_XTREME_2026 } from "../inquisition/irisXtremeResearch";
 import {
@@ -19,6 +19,12 @@ import {
   useIncidentStore,
 } from "../store/incidentStore";
 import type { Incident } from "../inquisition/types";
+
+const LiteGlobe = lazy(() =>
+  import("./ScenarioGlobe").then((module) => ({
+    default: module.ScenarioGlobe,
+  }))
+);
 
 type LiteStep = 0 | 1 | 2;
 const STEP_LABELS = ["Investigate", "Model", "Decide"] as const;
@@ -261,6 +267,20 @@ export function LiteWorkspace({
     [current, decision, theft]
   );
 
+  // The five globe pins and the case chooser share the exact same action.
+  // Keep its identity stable when a model slider changes.
+  const goCase = useCallback(
+    (id: string) => {
+      clearQuery("");
+      setSelectedId(id);
+      setStep(0);
+      setDecision("evidence");
+      setShowNotes(false);
+      setApplied(false);
+    },
+    [clearQuery, setSelectedId]
+  );
+
   if (!incident || !example || !current || !alternative) {
     return (
       <div className="p-8 text-slate-300">
@@ -277,15 +297,6 @@ export function LiteWorkspace({
         ...patch,
       }),
     }));
-    setApplied(false);
-  };
-
-  const goCase = (id: string) => {
-    clearQuery("");
-    setSelectedId(id);
-    setStep(0);
-    setDecision("evidence");
-    setShowNotes(false);
     setApplied(false);
   };
 
@@ -341,34 +352,79 @@ export function LiteWorkspace({
           </button>
         </div>
 
-        <div className="mt-5">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-wider text-slate-500">
-            Choose one of five investigations
-          </p>
-          <div
-            className="flex gap-1.5 overflow-x-auto pb-2"
-            role="group"
-            aria-label="Guided incident cases"
+        <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(300px,.94fr)]">
+          <section className="flex min-w-0 flex-col border border-[#2b3936] bg-[#0c1112] p-4 sm:p-5">
+            <div>
+              <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-emerald-300/70">
+                Five investigations / choose a case
+              </p>
+              <p className="mt-1 text-[11px] leading-5 text-slate-400">
+                Pick a case here or select a pulse on the globe. The evidence,
+                assumptions and decision exercise follow your selection.
+              </p>
+            </div>
+            <div
+              className="mt-4 grid grid-cols-2 gap-2"
+              role="group"
+              aria-label="Guided incident cases"
+            >
+              {GOLDEN_EXAMPLES.map((item, index) => {
+                const active = incident.id === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => goCase(item.id)}
+                    className={`min-h-12 border px-3 py-2 text-left text-[11px] leading-5 transition-colors ${
+                      active
+                        ? "border-emerald-300/80 bg-[#10211b] text-white"
+                        : "border-slate-700 text-slate-400 hover:border-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <span className="mr-2 font-mono text-[9px] text-emerald-300/65">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    {item.title.replace(/^\d{2} · /, "").split(" / ")[0]}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 border-t border-[#35413d] pt-3">
+              <p className="font-mono text-[9px] uppercase tracking-wide text-slate-500">
+                In focus / {incident.company.headquartersLabel}
+              </p>
+              <p className="mt-1 text-xs text-slate-200">{example.premise}</p>
+            </div>
+          </section>
+          <section
+            className="relative h-[266px] min-h-0 overflow-hidden border border-[#34434a] bg-black sm:h-[300px] lg:h-[316px]"
+            aria-label="Interactive 3D globe showing the five INQUISITION Lite cases"
           >
-            {GOLDEN_EXAMPLES.map((item) => {
-              const active = incident.id === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => goCase(item.id)}
-                  className={`min-h-11 shrink-0 border px-3 text-left text-[11px] transition-colors ${
-                    active
-                      ? "border-emerald-300/80 bg-[#10211b] text-white"
-                      : "border-slate-700 text-slate-400 hover:border-slate-400 hover:text-white"
-                  }`}
+            <Suspense
+              fallback={
+                <div
+                  role="status"
+                  className="flex h-full items-center justify-center bg-[#070b0e] text-xs text-slate-400"
                 >
-                  {item.title.replace(/^\d{2} · /, "").split(" / ")[0]}
-                </button>
-              );
-            })}
-          </div>
+                  Loading the case globe…
+                </div>
+              }
+            >
+              <LiteGlobe mode="lite" onLiteSelect={goCase} />
+            </Suspense>
+            <div className="pointer-events-none absolute left-3 top-3 z-20 border border-[#52606c]/60 bg-[#090d11]/95 px-2.5 py-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
+              Five locations · interactive
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 border-t border-[#34434a] bg-[#090d11]/95 px-3 py-2 text-[10px] leading-5 text-slate-300">
+              <span className="font-semibold text-white">
+                {incident.company.name}
+              </span>
+              <span className="ml-2 text-slate-400">
+                Rotate to explore · select a pulse to switch cases
+              </span>
+            </div>
+          </section>
         </div>
 
         <section className="mt-6 border border-[#2b3936] bg-[#0c1112]">
