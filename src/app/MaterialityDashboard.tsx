@@ -4,11 +4,6 @@ import { seedForIncident } from "../inquisition/lossExceedance";
 import type { AppliedTefCalibration } from "../inquisition/tefCalibration";
 import { ModelCrossExamination } from "./ModelCrossExamination";
 import { IRISResearchContext } from "./IRISResearchContext";
-import { GoldenInvestigations } from "./GoldenInvestigations";
-import {
-  GUIDED_CASES_DETAILS_ID,
-  INQUISITION_OPEN_GUIDED_CASES_EVENT,
-} from "./guidedInvestigationsNavigation";
 import {
   buildMaterialityExportPayload,
   insuranceOffsetUSDmFromInputs,
@@ -131,10 +126,6 @@ function InputBasis({ label }: { label: ReturnType<typeof inputBasis> }) {
 
 export function MaterialityDashboard() {
   const selected = useIncidentStore(selectSelectedIncident);
-  const setSelectedIncidentId = useIncidentStore(
-    (state) => state.setSelectedIncidentId
-  );
-  const setIncidentQuery = useIncidentStore((state) => state.setIncidentQuery);
   const overrides = useIncidentStore((s) =>
     selected ? s.materialityOverridesByIncidentId[selected.id] : undefined
   );
@@ -147,32 +138,6 @@ export function MaterialityDashboard() {
 
   const [tab, setTab] = useState<MaterialityViewTab>("basic");
   const [notebookCategory, setNotebookCategory] = useState<string | null>(null);
-
-  useEffect(() => {
-    const openGuidedCases = () => {
-      setTab("basic");
-      // Change the visible mobile pane before opening and scrolling the
-      // existing disclosure; never mount a duplicate floating panel.
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          const target = document.getElementById(GUIDED_CASES_DETAILS_ID);
-          if (!(target instanceof HTMLDetailsElement)) return;
-          target.open = true;
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-          target.querySelector("summary")?.focus({ preventScroll: true });
-        });
-      });
-    };
-    window.addEventListener(
-      INQUISITION_OPEN_GUIDED_CASES_EVENT,
-      openGuidedCases
-    );
-    return () =>
-      window.removeEventListener(
-        INQUISITION_OPEN_GUIDED_CASES_EVENT,
-        openGuidedCases
-      );
-  }, []);
 
   useEffect(() => {
     const navigateFromNotebook = (event: Event) => {
@@ -382,14 +347,6 @@ export function MaterialityDashboard() {
       <ModelLimitsStrip />
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-transparent px-6 pb-6 pt-4">
-        <GoldenInvestigations
-          selectedId={selected.id}
-          onSelectCase={(id) => {
-            setIncidentQuery("");
-            setSelectedIncidentId(id);
-          }}
-          onNavigate={setTab}
-        />
         <IRISResearchContext incident={selected} />
         {tab === "advanced" && (
           <>

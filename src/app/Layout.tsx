@@ -53,19 +53,6 @@ export function Layout() {
       window.removeEventListener(NOTEBOOK_RAIL_EVENT, followNotebook);
   }, []);
 
-  useEffect(() => {
-    const showGuidedCases = () => setMobilePane("model");
-    window.addEventListener(
-      INQUISITION_OPEN_GUIDED_CASES_EVENT,
-      showGuidedCases
-    );
-    return () =>
-      window.removeEventListener(
-        INQUISITION_OPEN_GUIDED_CASES_EVENT,
-        showGuidedCases
-      );
-  }, []);
-
   return (
     <>
       <div className="inquisition-shell relative flex h-screen flex-col overflow-hidden text-war-white">
