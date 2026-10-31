@@ -11,6 +11,7 @@ import {
 } from "../store/incidentStore";
 import { MaterialityDashboard } from "./MaterialityDashboard";
 import { WelcomePopup } from "./WelcomePopup";
+import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
 import { INQUISITION_OPEN_GUIDED_CASES_EVENT } from "./guidedInvestigationsNavigation";
 
 const ScenarioGlobe = lazy(() =>
@@ -93,13 +94,13 @@ export function Layout() {
                 )
               }
               className="inline-flex min-h-10 items-center gap-2 border border-[#7ea4bf]/35 px-2.5 font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-slate-200 transition-colors hover:border-[#7ea4bf]/80 hover:bg-[#132029] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7ea4bf] sm:px-3"
-              aria-label="Explore five guided case investigations"
+              aria-label={`Explore ${GOLDEN_EXAMPLES.length} guided case investigations`}
               title="Open five evidence-to-decision investigations"
             >
               <span className="hidden sm:inline">Guided cases</span>
               <span className="sm:hidden">Guided</span>
               <span className="border-l border-war-border/70 pl-2 text-[#a5c3d3]">
-                05
+                {String(GOLDEN_EXAMPLES.length).padStart(2, "0")}
               </span>
             </button>
             <CreditsPopup />
