@@ -24,8 +24,8 @@ export function GoldenInvestigations({
         <div className="mt-3 space-y-3">
           <p className="max-w-prose text-[10px] leading-relaxed text-war-muted">
             Each path deliberately separates source evidence, analyst
-            assumptions and what would change the decision. Select a case
-            and use the left evidence rail, then examine the model.
+            assumptions and what would change the decision. Select a case and
+            use the left evidence rail, then examine the model.
           </p>
           <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
             {GOLDEN_EXAMPLES.map((example) => (
@@ -73,7 +73,9 @@ export function GoldenInvestigations({
                 onClick={() => onNavigate(active.modelTab)}
                 className="mt-3 border border-[#7ea4bf]/70 px-3 py-1.5 font-medium text-war-white"
               >
-                Open {active.modelTab === "advanced" ? "Assumptions" : "Simulation"} →
+                Open{" "}
+                {active.modelTab === "advanced" ? "Assumptions" : "Simulation"}{" "}
+                →
               </button>
               <details className="mt-3 border-t border-war-border/60 pt-2">
                 <summary className="cursor-pointer font-medium text-[#a5c3d3]">

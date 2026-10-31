@@ -50,7 +50,8 @@ const STALE_RETRIEVED_DAYS = 365;
 function bucketForEvidence(
   e: EvidenceItem
 ): "sec" | "lawsuit" | "regulator" | "news" {
-  if (e.type === "sec_8k" || e.type === "sec_other" || e.type === "issuer") return "sec";
+  if (e.type === "sec_8k" || e.type === "sec_other" || e.type === "issuer")
+    return "sec";
   if (e.type === "lawsuit") return "lawsuit";
   if (e.type === "regulator") return "regulator";
   return "news";

@@ -5,7 +5,8 @@
  * Table 1 below reproduces IRIS 2025 overall-incident figures as quoted by Xtreme 2026.
  */
 export const IRIS_XTREME_2026 = {
-  sourceUrl: "https://www.cyentia.com/wp-content/uploads/2026/10/IRIS2026-Xtreme.pdf",
+  sourceUrl:
+    "https://www.cyentia.com/wp-content/uploads/2026/10/IRIS2026-Xtreme.pdf",
   publicationUrl: "https://www.cyentia.com/publication/iris-xtreme-2026/",
   publisher: "Cyentia Institute",
   edition: "2026 IRIS Xtreme",
@@ -30,10 +31,15 @@ export type RevenueBenchmark = {
 };
 
 /** NOT the 136 extreme cases. Table 1 cites Cyentia IRIS 2025 overall incidents. */
-export function irisRevenueBenchmark(revenueUSDm: number | null): RevenueBenchmark | null {
+export function irisRevenueBenchmark(
+  revenueUSDm: number | null
+): RevenueBenchmark | null {
   if (revenueUSDm === null || !Number.isFinite(revenueUSDm) || revenueUSDm <= 0)
     return null;
-  const common = { population: "IRIS 2025 all-incident reported loss sample", sourcePage: 5 };
+  const common = {
+    population: "IRIS 2025 all-incident reported loss sample",
+    sourcePage: 5,
+  };
   if (revenueUSDm < 100)
     return { label: "Under $100M", p50USDm: 0.357, p95USDm: 9.1, ...common };
   if (revenueUSDm < 1000)
@@ -43,10 +49,16 @@ export function irisRevenueBenchmark(revenueUSDm: number | null): RevenueBenchma
   return { label: "Above $10B", p50USDm: 2.2, p95USDm: 266.2, ...common };
 }
 
-export function irisResearchPrompts(tags: string[]): { title: string; body: string; page: number }[] {
+export function irisResearchPrompts(
+  tags: string[]
+): { title: string; body: string; page: number }[] {
   const set = new Set(tags);
   const prompts: { title: string; body: string; page: number }[] = [];
-  if (set.has("outage") || set.has("business_interruption") || set.has("manufacturing")) {
+  if (
+    set.has("outage") ||
+    set.has("business_interruption") ||
+    set.has("manufacturing")
+  ) {
     prompts.push({
       title: "Disruption versus breach counts",
       body: "Disruption was the primary outcome in 43.1% of the extreme sample versus 7.8% of the broader incident mix (Figure 9). This is a cross-sample composition comparison, not an event probability for this company.",
@@ -83,9 +95,11 @@ export function irisResearchPrompts(tags: string[]): { title: string; body: stri
   }
   return prompts.length
     ? prompts.slice(0, 2)
-    : [{
-        title: "Selection bias and comparability",
-        body: "The 136 extreme incidents are a selected financial-loss tail, not a representative incident frequency sample. This historical case was not verified as part of Cyentia's underlying data.",
-        page: 2,
-      }];
+    : [
+        {
+          title: "Selection bias and comparability",
+          body: "The 136 extreme incidents are a selected financial-loss tail, not a representative incident frequency sample. This historical case was not verified as part of Cyentia's underlying data.",
+          page: 2,
+        },
+      ];
 }

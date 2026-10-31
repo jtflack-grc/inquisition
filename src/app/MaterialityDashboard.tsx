@@ -127,7 +127,9 @@ function InputBasis({ label }: { label: ReturnType<typeof inputBasis> }) {
 
 export function MaterialityDashboard() {
   const selected = useIncidentStore(selectSelectedIncident);
-  const setSelectedIncidentId = useIncidentStore((state) => state.setSelectedIncidentId);
+  const setSelectedIncidentId = useIncidentStore(
+    (state) => state.setSelectedIncidentId
+  );
   const overrides = useIncidentStore((s) =>
     selected ? s.materialityOverridesByIncidentId[selected.id] : undefined
   );

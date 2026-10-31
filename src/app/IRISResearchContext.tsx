@@ -27,15 +27,18 @@ export function IRISResearchContext({
         <div className="mt-3 space-y-3 text-[10px] leading-relaxed text-war-muted">
           <p>
             <strong className="text-war-white">Population:</strong> Cyentia
-            Institute's 2026 Xtreme study examined 136 selected high-loss
-            events totaling $26.4B in reported losses. It does not publish a
-            named, ranked event roster. This case has{" "}
+            Institute's 2026 Xtreme study examined 136 selected high-loss events
+            totaling $26.4B in reported losses. It does not publish a named,
+            ranked event roster. This case has{" "}
             <strong className="text-war-white">not</strong> been verified as
             belonging to that sample.
           </p>
           <div className="space-y-2 border-t border-war-border/60 pt-2">
             {prompts.map((prompt) => (
-              <div key={prompt.title} className="border-l border-[#7ea4bf]/50 pl-3">
+              <div
+                key={prompt.title}
+                className="border-l border-[#7ea4bf]/50 pl-3"
+              >
                 <div className="font-medium text-war-white">{prompt.title}</div>
                 <p>{prompt.body}</p>
                 <a
@@ -57,7 +60,9 @@ export function IRISResearchContext({
               <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div>
                   Revenue group:{" "}
-                  <span className="font-mono text-war-white">{benchmark.label}</span>
+                  <span className="font-mono text-war-white">
+                    {benchmark.label}
+                  </span>
                   <div>
                     All-incident P95:{" "}
                     <span className="font-mono text-war-white">
@@ -67,7 +72,8 @@ export function IRISResearchContext({
                 </div>
                 {modeledEventP90USDm !== undefined && (
                   <div>
-                    INQUISITION modeled <strong className="text-war-white">per-event P90</strong>:{" "}
+                    INQUISITION modeled{" "}
+                    <strong className="text-war-white">per-event P90</strong>:{" "}
                     <span className="font-mono text-war-white">
                       $${modeledEventP90USDm.toFixed(1)}M
                     </span>
@@ -95,9 +101,9 @@ export function IRISResearchContext({
             >
               Read the full Cyentia IRIS Xtreme 2026 study
             </a>
-            . All dollar values cited from the study are inflation-adjusted
-            2025 USD; INQUISITION's case model is a separate illustrative
-            teaching estimate. Report figures are paraphrased and attributed.
+            . All dollar values cited from the study are inflation-adjusted 2025
+            USD; INQUISITION's case model is a separate illustrative teaching
+            estimate. Report figures are paraphrased and attributed.
           </p>
         </div>
       </details>

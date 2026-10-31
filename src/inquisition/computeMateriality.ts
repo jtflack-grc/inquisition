@@ -158,7 +158,9 @@ export function computeMateriality(
         mostLikelyMultiplier: 1.0,
         maxMultiplier: 2.2,
       },
-      ["Illustrative notification/response proxy only: IRIS Xtreme 2026 Figure 11 finds record count does not reliably predict total event loss. Verify itemized costs; this is NOT a calibrated loss distribution."],
+      [
+        "Illustrative notification/response proxy only: IRIS Xtreme 2026 Figure 11 finds record count does not reliably predict total event loss. Verify itemized costs; this is NOT a calibrated loss distribution.",
+      ],
       {
         hint: "This is an illustrative notification/response component, NOT a predictor of total breach cost. IRIS Xtreme 2026 Figure 11 shows stolen record counts do not reliably predict reported total losses. Regulatory action and litigation belong in conditional external reaction when not already known.",
         controlQuestions: [
