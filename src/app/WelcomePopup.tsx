@@ -31,7 +31,7 @@ function markIntroDismissed() {
  * The introduction is now a doorway, not a pseudo-tutorial.
  * The working three-step investigation lives in LiteWorkspace.
  */
-export function WelcomePopup({ onEnterLite }: { onEnterLite: (id: string) => void }) {
+export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: string) => void; onOpenFull: () => void }) {
   const incidentCount = useIncidentStore((state) => state.incidents.length);
   const [visible, setVisible] = useState(false);
   const [screen, setScreen] = useState<Screen>("intro");
@@ -62,6 +62,11 @@ export function WelcomePopup({ onEnterLite }: { onEnterLite: (id: string) => voi
 
   const enterLite = (id: string) => {
     onEnterLite(id);
+    close();
+  };
+
+  const enterFull = () => {
+    onOpenFull();
     close();
   };
 
@@ -145,7 +150,7 @@ export function WelcomePopup({ onEnterLite }: { onEnterLite: (id: string) => voi
               </button>
               <button
                 type="button"
-                onClick={close}
+                onClick={enterFull}
                 className="min-h-36 border border-slate-700 bg-[#0b1214] p-4 text-left transition-colors hover:border-slate-400"
               >
                 <span className="font-mono text-[9px] uppercase tracking-wide text-slate-400">
@@ -202,7 +207,7 @@ export function WelcomePopup({ onEnterLite }: { onEnterLite: (id: string) => voi
               <button type="button" onClick={() => setScreen("intro")} className="text-slate-300 underline-offset-4 hover:underline">
                 ← Back
               </button>
-              <button type="button" onClick={close} className="text-slate-400 underline-offset-4 hover:text-white hover:underline">
+              <button type="button" onClick={enterFull} className="text-slate-400 underline-offset-4 hover:text-white hover:underline">
                 Skip to full casebook
               </button>
             </div>
