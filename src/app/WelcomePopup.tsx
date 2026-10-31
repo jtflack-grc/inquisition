@@ -209,7 +209,7 @@ export function WelcomePopup() {
                 className="min-h-28 border border-slate-700 bg-[#0c1414] p-4 text-left transition-colors hover:border-emerald-300/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200"
               >
                 <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-slate-400">
-                  Full casebook / 50 cases
+                  Full casebook / {incidents.length} cases
                 </span>
                 <span className="mt-2 block text-base font-semibold text-white">
                   Explore independently →
@@ -258,7 +258,7 @@ export function WelcomePopup() {
                   </span>
                   <span>
                     <span className="block text-sm font-medium text-white">
-                      {item.title.split(" / ")[1]?.split(" · ")[0] ?? item.title}
+                      {item.title.replace(/^\\d{2} · /, "").split(" / ")[0]}
                     </span>
                     <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-400">
                       {item.premise}
