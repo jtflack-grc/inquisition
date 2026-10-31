@@ -69,11 +69,16 @@ export const useIncidentStore = create<IncidentState>((set, get) => ({
       const liteTransfers = { ...s.liteScenarioTransfers };
       delete next[incidentId];
       delete liteTransfers[incidentId];
-      return { materialityOverridesByIncidentId: next, liteScenarioTransfers: liteTransfers };
+      return {
+        materialityOverridesByIncidentId: next,
+        liteScenarioTransfers: liteTransfers,
+      };
     }),
 
   markLiteScenarioTransfer: (incidentId) =>
-    set((s) => ({ liteScenarioTransfers: { ...s.liteScenarioTransfers, [incidentId]: true } })),
+    set((s) => ({
+      liteScenarioTransfers: { ...s.liteScenarioTransfers, [incidentId]: true },
+    })),
 
   getMaterialityOverrides: (incidentId) =>
     get().materialityOverridesByIncidentId[incidentId],

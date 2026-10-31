@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
 import { useIncidentStore } from "../store/incidentStore";
 import { INQUISITION_OPEN_GUIDED_CASES_EVENT } from "./guidedInvestigationsNavigation";
@@ -11,7 +17,10 @@ export const INQUISITION_SHOW_INTRO_EVENT = "inquisition-show-intro";
 
 function hasDismissedIntro(): boolean {
   try {
-    return typeof localStorage !== "undefined" && localStorage.getItem(DISMISS_KEY) === "1";
+    return (
+      typeof localStorage !== "undefined" &&
+      localStorage.getItem(DISMISS_KEY) === "1"
+    );
   } catch {
     return false;
   }
@@ -31,7 +40,13 @@ function markIntroDismissed() {
  * The introduction is now a doorway, not a pseudo-tutorial.
  * The working three-step investigation lives in LiteWorkspace.
  */
-export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: string) => void; onOpenFull: () => void }) {
+export function WelcomePopup({
+  onEnterLite,
+  onOpenFull,
+}: {
+  onEnterLite: (id: string) => void;
+  onOpenFull: () => void;
+}) {
   const incidentCount = useIncidentStore((state) => state.incidents.length);
   const [visible, setVisible] = useState(false);
   const [screen, setScreen] = useState<Screen>("intro");
@@ -40,18 +55,30 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
 
   useEffect(() => {
     if (hasDismissedIntro()) return;
-    const timer = window.setTimeout(() => { setScreen("intro"); setVisible(true); }, 180);
+    const timer = window.setTimeout(() => {
+      setScreen("intro");
+      setVisible(true);
+    }, 180);
     return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    const showIntro = () => { setScreen("intro"); setVisible(true); };
-    const showGuides = () => { setScreen("choose"); setVisible(true); };
+    const showIntro = () => {
+      setScreen("intro");
+      setVisible(true);
+    };
+    const showGuides = () => {
+      setScreen("choose");
+      setVisible(true);
+    };
     window.addEventListener(INQUISITION_SHOW_INTRO_EVENT, showIntro);
     window.addEventListener(INQUISITION_OPEN_GUIDED_CASES_EVENT, showGuides);
     return () => {
       window.removeEventListener(INQUISITION_SHOW_INTRO_EVENT, showIntro);
-      window.removeEventListener(INQUISITION_OPEN_GUIDED_CASES_EVENT, showGuides);
+      window.removeEventListener(
+        INQUISITION_OPEN_GUIDED_CASES_EVENT,
+        showGuides
+      );
     };
   }, []);
 
@@ -73,7 +100,11 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
   useEffect(() => {
     if (!visible) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); close(); return; }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+        return;
+      }
       if (event.key !== "Tab") return;
       const controls = Array.from(
         dialogRef.current?.querySelectorAll<HTMLElement>(
@@ -83,16 +114,20 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
       const first = controls[0];
       const last = controls[controls.length - 1];
       if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault(); last?.focus();
+        event.preventDefault();
+        last?.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault(); first?.focus();
+        event.preventDefault();
+        first?.focus();
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [visible, close]);
 
-  useLayoutEffect(() => { if (visible) firstRef.current?.focus(); }, [visible, screen]);
+  useLayoutEffect(() => {
+    if (visible) firstRef.current?.focus();
+  }, [visible, screen]);
 
   if (!visible) return null;
 
@@ -116,7 +151,9 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
           className="absolute right-3 top-3 grid h-10 w-10 place-items-center text-slate-400 hover:text-white"
           aria-label="Close introduction"
         >
-          <span aria-hidden="true" className="text-xl">×</span>
+          <span aria-hidden="true" className="text-xl">
+            ×
+          </span>
         </button>
 
         {screen === "intro" ? (
@@ -124,12 +161,16 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
             <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-300/75">
               INQUISITION / start here
             </p>
-            <h1 id="welcome-title" className="mt-4 text-3xl leading-[1.05] tracking-tight text-white sm:text-4xl">
+            <h1
+              id="welcome-title"
+              className="mt-4 text-3xl leading-[1.05] tracking-tight text-white sm:text-4xl"
+            >
               Interrogate the loss story.
             </h1>
             <p className="mt-4 max-w-lg text-sm leading-6 text-slate-300">
-              {incidentCount} public cyber incidents, curated source material and assumptions
-              you can challenge. Decide how deeply you want to begin.
+              {incidentCount} public cyber incidents, curated source material
+              and assumptions you can challenge. Decide how deeply you want to
+              begin.
             </p>
             <div className="mt-6 grid gap-2 sm:grid-cols-2">
               <button
@@ -145,7 +186,8 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
                   Investigate one case →
                 </span>
                 <span className="mt-2 block text-[11px] leading-5 text-slate-300">
-                  A working, simplified casebook. Explore evidence, move the model and test a decision.
+                  A working, simplified casebook. Explore evidence, move the
+                  model and test a decision.
                 </span>
               </button>
               <button
@@ -160,13 +202,14 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
                   Open the full casebook →
                 </span>
                 <span className="mt-2 block text-[11px] leading-5 text-slate-400">
-                  The evidence library, FAIR assumptions, simulation, notebook and interactive globe.
+                  The evidence library, FAIR assumptions, simulation, notebook
+                  and interactive globe.
                 </span>
               </button>
             </div>
             <p className="mt-5 text-[10px] leading-5 text-slate-500">
-              Both paths separate documented facts from hypothetical loss. Method and credits
-              remain available from the header.
+              Both paths separate documented facts from hypothetical loss.
+              Method and credits remain available from the header.
             </p>
           </div>
         ) : (
@@ -174,12 +217,16 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
             <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-300/75">
               Lite / choose one of five
             </p>
-            <h1 id="welcome-title" className="mt-3 text-2xl tracking-tight text-white sm:text-3xl">
+            <h1
+              id="welcome-title"
+              className="mt-3 text-2xl tracking-tight text-white sm:text-3xl"
+            >
               Which loss story will you investigate?
             </h1>
             <p className="mt-2 text-xs leading-5 text-slate-400">
-              Each opens a smaller but functional workspace. Change a scenario, inspect the source
-              and take your case into full INQUISITION when ready.
+              Each opens a smaller but functional workspace. Change a scenario,
+              inspect the source and take your case into full INQUISITION when
+              ready.
             </p>
             <div className="mt-5 space-y-2">
               {GOLDEN_EXAMPLES.map((item, index) => (
@@ -197,17 +244,29 @@ export function WelcomePopup({ onEnterLite, onOpenFull }: { onEnterLite: (id: st
                     <span className="block text-xs font-medium text-white">
                       {item.title.replace(/^\d{2} · /, "").split(" / ")[0]}
                     </span>
-                    <span className="mt-1 block text-[11px] leading-5 text-slate-400">{item.premise}</span>
+                    <span className="mt-1 block text-[11px] leading-5 text-slate-400">
+                      {item.premise}
+                    </span>
                   </span>
-                  <span className="ml-auto text-emerald-200" aria-hidden="true">→</span>
+                  <span className="ml-auto text-emerald-200" aria-hidden="true">
+                    →
+                  </span>
                 </button>
               ))}
             </div>
             <div className="mt-5 flex flex-wrap gap-5 text-[11px]">
-              <button type="button" onClick={() => setScreen("intro")} className="text-slate-300 underline-offset-4 hover:underline">
+              <button
+                type="button"
+                onClick={() => setScreen("intro")}
+                className="text-slate-300 underline-offset-4 hover:underline"
+              >
                 ← Back
               </button>
-              <button type="button" onClick={enterFull} className="text-slate-400 underline-offset-4 hover:text-white hover:underline">
+              <button
+                type="button"
+                onClick={enterFull}
+                className="text-slate-400 underline-offset-4 hover:text-white hover:underline"
+              >
                 Skip to full casebook
               </button>
             </div>

@@ -37,10 +37,16 @@ export function Layout() {
     "evidence" | "model" | "notebook"
   >("evidence");
   const [liteActive, setLiteActive] = useState(false);
-  const setSelectedIncidentId = useIncidentStore((state) => state.setSelectedIncidentId);
+  const setSelectedIncidentId = useIncidentStore(
+    (state) => state.setSelectedIncidentId
+  );
   const setIncidentQuery = useIncidentStore((state) => state.setIncidentQuery);
-  const setMaterialityOverrides = useIncidentStore((state) => state.setMaterialityOverridesForIncident);
-  const markLiteScenarioTransfer = useIncidentStore((state) => state.markLiteScenarioTransfer);
+  const setMaterialityOverrides = useIncidentStore(
+    (state) => state.setMaterialityOverridesForIncident
+  );
+  const markLiteScenarioTransfer = useIncidentStore(
+    (state) => state.markLiteScenarioTransfer
+  );
   const selected = useIncidentStore(selectSelectedIncident);
   const incidentCount = useIncidentStore((state) => state.incidents.length);
   const lesson = useMemo(
@@ -91,7 +97,14 @@ export function Layout() {
               </span>
             </div>
             <p className="mt-0.5 hidden text-[11px] text-war-muted sm:block">
-              {liteActive ? "Lite / a focused investigative workspace" : <>{incidentCount} curated public incidents · evidence, assumptions &amp; loss pathways</>}
+              {liteActive ? (
+                "Lite / a focused investigative workspace"
+              ) : (
+                <>
+                  {incidentCount} curated public incidents · evidence,
+                  assumptions &amp; loss pathways
+                </>
+              )}
             </p>
           </div>
 
@@ -121,77 +134,77 @@ export function Layout() {
           <LiteWorkspace onExit={leaveLite} />
         ) : (
           <>
-        <nav
-          className="relative z-10 grid shrink-0 grid-cols-3 border-b border-war-border bg-[#0a0d10] xl:hidden"
-          aria-label="Mobile workspace"
-        >
-          {(["evidence", "model", "notebook"] as const).map((pane) => (
-            <button
-              key={pane}
-              type="button"
-              onClick={() => setMobilePane(pane)}
-              className={`min-h-11 border-b-2 text-xs font-medium transition-colors ${
-                mobilePane === pane
-                  ? "border-slate-200 text-war-white"
-                  : "border-transparent text-war-muted hover:text-war-white"
-              }`}
-              aria-current={mobilePane === pane ? "page" : undefined}
+            <nav
+              className="relative z-10 grid shrink-0 grid-cols-3 border-b border-war-border bg-[#0a0d10] xl:hidden"
+              aria-label="Mobile workspace"
             >
-              {pane === "evidence"
-                ? "Evidence"
-                : pane === "model"
-                  ? "Loss model"
-                  : "Notebook"}
-            </button>
-          ))}
-        </nav>
+              {(["evidence", "model", "notebook"] as const).map((pane) => (
+                <button
+                  key={pane}
+                  type="button"
+                  onClick={() => setMobilePane(pane)}
+                  className={`min-h-11 border-b-2 text-xs font-medium transition-colors ${
+                    mobilePane === pane
+                      ? "border-slate-200 text-war-white"
+                      : "border-transparent text-war-muted hover:text-war-white"
+                  }`}
+                  aria-current={mobilePane === pane ? "page" : undefined}
+                >
+                  {pane === "evidence"
+                    ? "Evidence"
+                    : pane === "model"
+                      ? "Loss model"
+                      : "Notebook"}
+                </button>
+              ))}
+            </nav>
 
-        <main className="relative z-10 flex flex-1 flex-col overflow-hidden xl:flex-row">
-          <section
-            className={`evidence-rail ${mobilePane === "evidence" ? "flex" : "hidden"} min-h-0 w-full flex-1 flex-col border-r border-war-border xl:flex xl:w-[410px] xl:flex-none`}
-          >
-            <IncidentIntelPanel />
-          </section>
+            <main className="relative z-10 flex flex-1 flex-col overflow-hidden xl:flex-row">
+              <section
+                className={`evidence-rail ${mobilePane === "evidence" ? "flex" : "hidden"} min-h-0 w-full flex-1 flex-col border-r border-war-border xl:flex xl:w-[410px] xl:flex-none`}
+              >
+                <IncidentIntelPanel />
+              </section>
 
-          <section
-            className={`analysis-rail ${mobilePane === "model" ? "block" : "hidden"} min-h-0 min-w-0 flex-1 overflow-y-auto border-r border-war-border xl:block xl:min-w-[390px] xl:max-w-[650px]`}
-          >
-            <MaterialityDashboard />
-          </section>
+              <section
+                className={`analysis-rail ${mobilePane === "model" ? "block" : "hidden"} min-h-0 min-w-0 flex-1 overflow-y-auto border-r border-war-border xl:block xl:min-w-[390px] xl:max-w-[650px]`}
+              >
+                <MaterialityDashboard />
+              </section>
 
-          <section
-            className={
-              mobilePane === "notebook"
-                ? "mobile-notebook-rail flex min-h-0 flex-1 flex-col xl:hidden"
-                : "hidden"
-            }
-            aria-label="Mobile case notebook"
-          >
-            {selected && lesson ? (
-              <CaseNotebook
-                incident={selected}
-                lesson={lesson}
-                size="expanded"
-                showSizeControls={false}
-                onSizeChange={() => {}}
-                closeLabel="Evidence"
-                onClose={() => setMobilePane("evidence")}
-              />
-            ) : (
-              <p className="p-5 text-war-muted">
-                Select an incident to open its notebook.
-              </p>
-            )}
-          </section>
+              <section
+                className={
+                  mobilePane === "notebook"
+                    ? "mobile-notebook-rail flex min-h-0 flex-1 flex-col xl:hidden"
+                    : "hidden"
+                }
+                aria-label="Mobile case notebook"
+              >
+                {selected && lesson ? (
+                  <CaseNotebook
+                    incident={selected}
+                    lesson={lesson}
+                    size="expanded"
+                    showSizeControls={false}
+                    onSizeChange={() => {}}
+                    closeLabel="Evidence"
+                    onClose={() => setMobilePane("evidence")}
+                  />
+                ) : (
+                  <p className="p-5 text-war-muted">
+                    Select an incident to open its notebook.
+                  </p>
+                )}
+              </section>
 
-          <section className="globe-rail relative hidden min-h-0 min-w-0 flex-1 flex-col bg-black xl:flex xl:min-w-[430px]">
-            <Suspense fallback={<GlobeLoadingFallback />}>
-              <div className="flex-1 min-h-0 flex flex-col">
-                <ScenarioGlobe />
-              </div>
-            </Suspense>
-          </section>
-        </main>
+              <section className="globe-rail relative hidden min-h-0 min-w-0 flex-1 flex-col bg-black xl:flex xl:min-w-[430px]">
+                <Suspense fallback={<GlobeLoadingFallback />}>
+                  <div className="flex-1 min-h-0 flex flex-col">
+                    <ScenarioGlobe />
+                  </div>
+                </Suspense>
+              </section>
+            </main>
           </>
         )}
 
@@ -213,7 +226,10 @@ export function Layout() {
           </p>
         </footer>
       </div>
-      <WelcomePopup onEnterLite={enterLite} onOpenFull={() => setLiteActive(false)} />
+      <WelcomePopup
+        onEnterLite={enterLite}
+        onOpenFull={() => setLiteActive(false)}
+      />
     </>
   );
 }

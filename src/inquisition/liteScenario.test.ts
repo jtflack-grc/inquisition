@@ -44,12 +44,16 @@ describe("INQUISITION Lite functional learning workspace", () => {
     const beforeCase = JSON.stringify(jlr);
     const start = defaultLiteInputs(jlr);
     const larger = { ...start, downtimeDays: start.downtimeDays + 5 };
-    const baselineLoss = calculateLiteScenario(jlr, start).outputs?.categories.find(
-      (c) => c.category === "business_interruption"
-    )?.rangeUSDm.mostLikely;
-    const changedLoss = calculateLiteScenario(jlr, larger).outputs?.categories.find(
-      (c) => c.category === "business_interruption"
-    )?.rangeUSDm.mostLikely;
+    const baselineLoss = calculateLiteScenario(
+      jlr,
+      start
+    ).outputs?.categories.find((c) => c.category === "business_interruption")
+      ?.rangeUSDm.mostLikely;
+    const changedLoss = calculateLiteScenario(
+      jlr,
+      larger
+    ).outputs?.categories.find((c) => c.category === "business_interruption")
+      ?.rangeUSDm.mostLikely;
     expect(changedLoss).toBeGreaterThan(baselineLoss ?? 0);
     expect(JSON.stringify(jlr)).toBe(beforeCase);
   });
@@ -60,12 +64,20 @@ describe("INQUISITION Lite functional learning workspace", () => {
     const changed = { ...start, recordsMillions: 3 };
     const base = calculateLiteScenario(equifax, start);
     const next = calculateLiteScenario(equifax, changed);
-    const privacy = (value: typeof base) => value.outputs?.categories.find(
-      (c) => c.category === "information_privacy"
-    )?.rangeUSDm.mostLikely;
+    const privacy = (value: typeof base) =>
+      value.outputs?.categories.find(
+        (c) => c.category === "information_privacy"
+      )?.rangeUSDm.mostLikely;
     expect(privacy(next)).toBeGreaterThan(privacy(base) ?? 0);
-    expect(next.outputs?.categories.find((c) => c.category === "business_interruption")?.rangeUSDm)
-      .toEqual(base.outputs?.categories.find((c) => c.category === "business_interruption")?.rangeUSDm);
+    expect(
+      next.outputs?.categories.find(
+        (c) => c.category === "business_interruption"
+      )?.rangeUSDm
+    ).toEqual(
+      base.outputs?.categories.find(
+        (c) => c.category === "business_interruption"
+      )?.rangeUSDm
+    );
   });
 
   it("flags direct asset theft as outside full LM rather than remapping theft as extortion", () => {
@@ -73,19 +85,34 @@ describe("INQUISITION Lite functional learning workspace", () => {
     const start = defaultLiteInputs(bybit);
     expect(isDirectTheftExample(bybit)).toBe(true);
     expect(calculateLiteScenario(bybit, start).outputs).toBeNull();
-    expect(calculateLiteScenario(bybit, start).unrecoveredAssetExposureUSDm).toBe(1500);
+    expect(
+      calculateLiteScenario(bybit, start).unrecoveredAssetExposureUSDm
+    ).toBe(1500);
     const hypothetical = { ...start, recoveredTheftPct: 20 };
-    expect(calculateLiteScenario(bybit, hypothetical).unrecoveredAssetExposureUSDm).toBe(1200);
+    expect(
+      calculateLiteScenario(bybit, hypothetical).unrecoveredAssetExposureUSDm
+    ).toBe(1200);
   });
 
   it("has explicit bounded counterfactuals and no magical effectiveness claim", () => {
-    const start = { downtimeDays: 12, recordsMillions: 8, recoveredTheftPct: 10 };
+    const start = {
+      downtimeDays: 12,
+      recordsMillions: 8,
+      recoveredTheftPct: 10,
+    };
     expect(liteCounterfactual(start, "recovery", false).downtimeDays).toBe(9);
     expect(liteCounterfactual(start, "records", false).recordsMillions).toBe(6);
     expect(liteCounterfactual(start, "evidence", false)).toEqual(start);
-    expect(liteCounterfactual(start, "recovery", true).recoveredTheftPct).toBe(35);
+    expect(liteCounterfactual(start, "recovery", true).recoveredTheftPct).toBe(
+      35
+    );
     expect(liteCounterfactual(start, "records", true)).toEqual(start);
-    expect(clampLiteInputs({ downtimeDays: Infinity, recordsMillions: 1000, recoveredTheftPct: -4 }))
-      .toEqual({ downtimeDays: 0, recordsMillions: 50, recoveredTheftPct: 0 });
+    expect(
+      clampLiteInputs({
+        downtimeDays: Infinity,
+        recordsMillions: 1000,
+        recoveredTheftPct: -4,
+      })
+    ).toEqual({ downtimeDays: 0, recordsMillions: 50, recoveredTheftPct: 0 });
   });
 });

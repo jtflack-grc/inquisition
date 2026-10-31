@@ -1,5 +1,9 @@
 import { computeMateriality } from "./computeMateriality";
-import type { Incident, MaterialityOutputs, MaterialityOverrides } from "./types";
+import type {
+  Incident,
+  MaterialityOutputs,
+  MaterialityOverrides,
+} from "./types";
 
 /**
  * Lite does not estimate losses already incurred by the named victim.
@@ -23,8 +27,22 @@ export function isDirectTheftExample(incident: Incident): boolean {
 
 export function defaultLiteInputs(incident: Incident): LiteInputs {
   return {
-    downtimeDays: Math.min(30, Math.max(0, incident.modelingDefaults?.downtimeDays ?? (incident.taxonomyTags.includes("outage") ? 5 : 0))),
-    recordsMillions: Math.min(50, Math.max(0, incident.modelingDefaults?.recordsMillions ?? (incident.taxonomyTags.includes("data_exfiltration") ? 2 : 0))),
+    downtimeDays: Math.min(
+      30,
+      Math.max(
+        0,
+        incident.modelingDefaults?.downtimeDays ??
+          (incident.taxonomyTags.includes("outage") ? 5 : 0)
+      )
+    ),
+    recordsMillions: Math.min(
+      50,
+      Math.max(
+        0,
+        incident.modelingDefaults?.recordsMillions ??
+          (incident.taxonomyTags.includes("data_exfiltration") ? 2 : 0)
+      )
+    ),
     recoveredTheftPct: 0,
   };
 }
@@ -49,7 +67,10 @@ export function liteOverrides(input: LiteInputs): MaterialityOverrides {
   };
 }
 
-export function calculateLiteScenario(incident: Incident, input: LiteInputs): {
+export function calculateLiteScenario(
+  incident: Incident,
+  input: LiteInputs
+): {
   inputs: LiteInputs;
   outputs: MaterialityOutputs | null;
   /** This is arithmetic, NOT the full model's loss magnitude. */
@@ -81,17 +102,20 @@ export const LITE_DECISION_OPTIONS: ReadonlyArray<{
   {
     id: "recovery",
     title: "Test faster recovery",
-    description: "What if disruption duration were 25% shorter? A hypothesis, not an assured control benefit.",
+    description:
+      "What if disruption duration were 25% shorter? A hypothesis, not an assured control benefit.",
   },
   {
     id: "records",
     title: "Test data minimization",
-    description: "What if affected-record scope were 25% smaller? This adjusts one model component only.",
+    description:
+      "What if affected-record scope were 25% smaller? This adjusts one model component only.",
   },
   {
     id: "evidence",
     title: "Improve the evidence",
-    description: "Keep assumptions unchanged. Identify the source or control test needed before making a claim.",
+    description:
+      "Keep assumptions unchanged. Identify the source or control test needed before making a claim.",
   },
 ];
 
@@ -105,10 +129,21 @@ export function liteCounterfactual(
     // An independently labeled asset recovery what-if; no claimed
     // correspondence to a control or a category in full model.
     return selected === "recovery"
-      ? { ...safe, recoveredTheftPct: Math.min(100, safe.recoveredTheftPct + 25) }
+      ? {
+          ...safe,
+          recoveredTheftPct: Math.min(100, safe.recoveredTheftPct + 25),
+        }
       : safe;
   }
-  if (selected === "recovery") return { ...safe, downtimeDays: Number((safe.downtimeDays * 0.75).toFixed(1)) };
-  if (selected === "records") return { ...safe, recordsMillions: Number((safe.recordsMillions * 0.75).toFixed(1)) };
+  if (selected === "recovery")
+    return {
+      ...safe,
+      downtimeDays: Number((safe.downtimeDays * 0.75).toFixed(1)),
+    };
+  if (selected === "records")
+    return {
+      ...safe,
+      recordsMillions: Number((safe.recordsMillions * 0.75).toFixed(1)),
+    };
   return safe;
 }

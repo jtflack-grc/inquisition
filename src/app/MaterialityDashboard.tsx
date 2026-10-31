@@ -126,7 +126,9 @@ function InputBasis({ label }: { label: ReturnType<typeof inputBasis> }) {
 
 export function MaterialityDashboard() {
   const selected = useIncidentStore(selectSelectedIncident);
-  const cameFromLite = useIncidentStore((state) => selected ? Boolean(state.liteScenarioTransfers[selected.id]) : false);
+  const cameFromLite = useIncidentStore((state) =>
+    selected ? Boolean(state.liteScenarioTransfers[selected.id]) : false
+  );
   const overrides = useIncidentStore((s) =>
     selected ? s.materialityOverridesByIncidentId[selected.id] : undefined
   );
@@ -348,7 +350,11 @@ export function MaterialityDashboard() {
       <ModelLimitsStrip />
       {cameFromLite && (
         <p className="mx-6 mt-3 border-l-2 border-[#729b8a] bg-[#10211b] px-3 py-2 text-[10px] leading-relaxed text-slate-200">
-          <strong>LITE SCENARIO IMPORTED.</strong> These inputs started as a fictional $500M-revenue / $75M-EBITDA learning scenario and may have been edited since. They are not the selected company’s verified financials. Review the sources and replace assumptions before using this loss range as decision evidence.
+          <strong>LITE SCENARIO IMPORTED.</strong> These inputs started as a
+          fictional $500M-revenue / $75M-EBITDA learning scenario and may have
+          been edited since. They are not the selected company’s verified
+          financials. Review the sources and replace assumptions before using
+          this loss range as decision evidence.
         </p>
       )}
 
