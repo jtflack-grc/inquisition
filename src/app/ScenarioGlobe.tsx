@@ -13,7 +13,7 @@ import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
-import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
+import { visibleGlobeCases } from "./globeCaseSelection";
 import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
 import { CaseNotebook } from "./CaseNotebook";
 import type { NotebookSize } from "./CaseNotebook";
@@ -166,14 +166,8 @@ export function ScenarioGlobe({
   );
 
   const hotspots = useMemo(
-    () =>
-      incidents.filter(
-        (incident) =>
-          (!lite || GOLDEN_EXAMPLES.some((item) => item.id === incident.id)) &&
-          Number.isFinite(incident.company.hqLat) &&
-          Number.isFinite(incident.company.hqLon)
-      ),
-    [incidents, lite]
+    () => visibleGlobeCases(incidents, mode),
+    [incidents, mode]
   );
   const points = useMemo<GlobePoint[]>(
     () =>
@@ -468,6 +462,7 @@ export function ScenarioGlobe({
             hotspots={hotspots}
             selectedId={selectedId}
             onSelect={chooseIncident}
+            compact={lite}
           />
         ) : (
           <GlobeErrorBoundary onFailure={() => setMapError(true)}>
