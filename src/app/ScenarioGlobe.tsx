@@ -185,9 +185,7 @@ export function ScenarioGlobe({
   const hoveredIncident =
     hotspots.find((incident) => incident.id === hoveredIncidentId) ?? null;
   // Show the selected case from first render; hovering another pulse previews it.
-  const mapPlacard = lite
-    ? null
-    : resolveMapPlacard(selected, hoveredIncident);
+  const mapPlacard = lite ? null : resolveMapPlacard(selected, hoveredIncident);
   const placardCaseNumber = mapPlacard
     ? incidents.findIndex(
         (incident) => incident.id === mapPlacard.incident.id
@@ -454,7 +452,9 @@ export function ScenarioGlobe({
       className={`globe-field relative h-full w-full overflow-hidden bg-black ${
         lite ? "globe-field--lite min-h-[220px]" : "min-h-[320px]"
       }`}
-      aria-label={lite ? "Interactive globe of five guided incidents" : undefined}
+      aria-label={
+        lite ? "Interactive globe of five guided incidents" : undefined
+      }
     >
       <div className="globe-map-stage" ref={stageRef}>
         {mapError ? (
@@ -558,67 +558,66 @@ export function ScenarioGlobe({
         )}
 
         {!lite && (
-        <div className="absolute left-3 bottom-3 z-10 flex items-center gap-1">
-          {!mapError && (
-            <>
-              <button
-                type="button"
-                onClick={() => changeZoom(-0.16)}
-                disabled={cameraAltitude <= MIN_FOCUS_ALTITUDE}
-                className="border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-xs text-slate-200 hover:border-slate-300 disabled:opacity-40"
-                aria-label="Zoom globe in toward the selected incident"
-                title="Zoom in"
-              >
-                +
-              </button>
-              <button
-                type="button"
-                onClick={() => changeZoom(0.16)}
-                disabled={cameraAltitude >= MAX_FOCUS_ALTITUDE}
-                className="border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-xs text-slate-200 hover:border-slate-300 disabled:opacity-40"
-                aria-label="Zoom globe out from the selected incident"
-                title="Zoom out"
-              >
-                −
-              </button>
-            </>
-          )}
-        </div>
-
+          <div className="absolute left-3 bottom-3 z-10 flex items-center gap-1">
+            {!mapError && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => changeZoom(-0.16)}
+                  disabled={cameraAltitude <= MIN_FOCUS_ALTITUDE}
+                  className="border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-xs text-slate-200 hover:border-slate-300 disabled:opacity-40"
+                  aria-label="Zoom globe in toward the selected incident"
+                  title="Zoom in"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changeZoom(0.16)}
+                  disabled={cameraAltitude >= MAX_FOCUS_ALTITUDE}
+                  className="border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-xs text-slate-200 hover:border-slate-300 disabled:opacity-40"
+                  aria-label="Zoom globe out from the selected incident"
+                  title="Zoom out"
+                >
+                  −
+                </button>
+              </>
+            )}
+          </div>
         )}
         {!lite && (
-        <div className="globe-map-mode-controls absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
-          <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
-            {hotspots.length} cases ·{" "}
-            {mapError
-              ? "2D backup"
-              : satelliteActive
-                ? "satellite texture"
-                : "charcoal globe"}
-          </span>
-          {!mapError && (
-            <button
-              type="button"
-              onClick={() => {
-                setSatelliteRequested((current) => !current);
-                setSatelliteUnavailable(false);
-              }}
-              className="rounded border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-[10px] text-slate-200 hover:border-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
-              aria-pressed={satelliteRequested}
-              aria-label={
-                satelliteRequested
-                  ? "Use charcoal map texture"
-                  : "Use optional satellite image texture"
-              }
-            >
-              {satelliteRequested
-                ? satelliteReady
-                  ? "Charcoal view"
-                  : "Loading satellite…"
-                : "Satellite view"}
-            </button>
-          )}
-        </div>
+          <div className="globe-map-mode-controls absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
+            <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
+              {hotspots.length} cases ·{" "}
+              {mapError
+                ? "2D backup"
+                : satelliteActive
+                  ? "satellite texture"
+                  : "charcoal globe"}
+            </span>
+            {!mapError && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSatelliteRequested((current) => !current);
+                  setSatelliteUnavailable(false);
+                }}
+                className="rounded border border-white/20 bg-black/85 px-2.5 py-1.5 font-mono text-[10px] text-slate-200 hover:border-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+                aria-pressed={satelliteRequested}
+                aria-label={
+                  satelliteRequested
+                    ? "Use charcoal map texture"
+                    : "Use optional satellite image texture"
+                }
+              >
+                {satelliteRequested
+                  ? satelliteReady
+                    ? "Charcoal view"
+                    : "Loading satellite…"
+                  : "Satellite view"}
+              </button>
+            )}
+          </div>
         )}
         {satelliteUnavailable && !mapError && !lite && (
           <p className="absolute right-3 top-12 z-10 bg-black/90 p-2 text-[10px] text-amber-200">

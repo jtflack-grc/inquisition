@@ -21,7 +21,9 @@ import {
 import type { Incident } from "../inquisition/types";
 
 const LiteGlobe = lazy(() =>
-  import("./ScenarioGlobe").then((module) => ({ default: module.ScenarioGlobe }))
+  import("./ScenarioGlobe").then((module) => ({
+    default: module.ScenarioGlobe,
+  }))
 );
 
 type LiteStep = 0 | 1 | 2;
@@ -298,8 +300,6 @@ export function LiteWorkspace({
     setApplied(false);
   };
 
-
-
   const handOff = () => {
     // Direct asset theft cannot be smuggled into a nonexistent LM category.
     // Other Lite assumptions transfer explicitly as overrides, not "source facts".
@@ -363,7 +363,11 @@ export function LiteWorkspace({
                 assumptions and decision exercise follow your selection.
               </p>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2" role="group" aria-label="Guided incident cases">
+            <div
+              className="mt-4 grid grid-cols-2 gap-2"
+              role="group"
+              aria-label="Guided incident cases"
+            >
               {GOLDEN_EXAMPLES.map((item, index) => {
                 const active = incident.id === item.id;
                 return (
@@ -390,9 +394,7 @@ export function LiteWorkspace({
               <p className="font-mono text-[9px] uppercase tracking-wide text-slate-500">
                 In focus / {incident.company.headquartersLabel}
               </p>
-              <p className="mt-1 text-xs text-slate-200">
-                {example.premise}
-              </p>
+              <p className="mt-1 text-xs text-slate-200">{example.premise}</p>
             </div>
           </section>
           <section
@@ -401,7 +403,10 @@ export function LiteWorkspace({
           >
             <Suspense
               fallback={
-                <div role="status" className="flex h-full items-center justify-center bg-[#070b0e] text-xs text-slate-400">
+                <div
+                  role="status"
+                  className="flex h-full items-center justify-center bg-[#070b0e] text-xs text-slate-400"
+                >
                   Loading the case globe…
                 </div>
               }
@@ -412,7 +417,9 @@ export function LiteWorkspace({
               Five locations · interactive
             </div>
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 border-t border-[#34434a] bg-[#090d11]/95 px-3 py-2 text-[10px] leading-5 text-slate-300">
-              <span className="font-semibold text-white">{incident.company.name}</span>
+              <span className="font-semibold text-white">
+                {incident.company.name}
+              </span>
               <span className="ml-2 text-slate-400">
                 Rotate to explore · select a pulse to switch cases
               </span>
