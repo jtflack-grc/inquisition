@@ -13,6 +13,7 @@ import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countriesTopologyJson from "world-atlas/countries-110m.json";
 import { resolveGlobeSecurityLesson } from "../inquisition/globeSecurityLesson";
+import { GOLDEN_EXAMPLES } from "../inquisition/goldenExamples";
 import { ScenarioGlobeFallback } from "./ScenarioGlobeFallback";
 import { CaseNotebook } from "./CaseNotebook";
 import type { NotebookSize } from "./CaseNotebook";
@@ -121,7 +122,14 @@ class GlobeErrorBoundary extends Component<
   }
 }
 
-export function ScenarioGlobe() {
+export function ScenarioGlobe({
+  mode = "full",
+  onLiteSelect,
+}: {
+  mode?: "full" | "lite";
+  onLiteSelect?: (incidentId: string) => void;
+} = {}) {
+  const lite = mode === "lite";
   const incidents = useIncidentStore((s) => s.incidents);
   const selectedId = useIncidentStore((s) => s.selectedIncidentId);
   const setSelectedIncidentId = useIncidentStore(
@@ -147,7 +155,9 @@ export function ScenarioGlobe() {
   const [mapError, setMapError] = useState(() => !supportsWebGL());
   const [countries, setCountries] = useState<CountryFeature[]>(COUNTRIES);
   const [nightTextureReady, setNightTextureReady] = useState(false);
-  const [cameraAltitude, setCameraAltitude] = useState(DEFAULT_FOCUS_ALTITUDE);
+  const [cameraAltitude, setCameraAltitude] = useState(
+    lite ? 1.03 : DEFAULT_FOCUS_ALTITUDE
+  );
   const [satelliteRequested, setSatelliteRequested] = useState(false);
   const [satelliteReady, setSatelliteReady] = useState(false);
   const [satelliteUnavailable, setSatelliteUnavailable] = useState(false);
@@ -159,10 +169,11 @@ export function ScenarioGlobe() {
     () =>
       incidents.filter(
         (incident) =>
+          (!lite || GOLDEN_EXAMPLES.some((item) => item.id === incident.id)) &&
           Number.isFinite(incident.company.hqLat) &&
           Number.isFinite(incident.company.hqLon)
       ),
-    [incidents]
+    [incidents, lite]
   );
   const points = useMemo<GlobePoint[]>(
     () =>
@@ -180,7 +191,9 @@ export function ScenarioGlobe() {
   const hoveredIncident =
     hotspots.find((incident) => incident.id === hoveredIncidentId) ?? null;
   // Show the selected case from first render; hovering another pulse previews it.
-  const mapPlacard = resolveMapPlacard(selected, hoveredIncident);
+  const mapPlacard = lite
+    ? null
+    : resolveMapPlacard(selected, hoveredIncident);
   const placardCaseNumber = mapPlacard
     ? incidents.findIndex(
         (incident) => incident.id === mapPlacard.incident.id
@@ -342,8 +355,8 @@ export function ScenarioGlobe() {
 
   // During an evidence timeline replay, the timeline callout takes precedence.
   useEffect(() => {
-    setShowPopup(!playbackEvent);
-  }, [selectedId, playbackEvent]);
+    setShowPopup(!playbackEvent && !lite);
+  }, [selectedId, playbackEvent, lite]);
 
   useEffect(() => {
     if (!showPopup) return;
@@ -393,10 +406,11 @@ export function ScenarioGlobe() {
   const headquarters = selected?.company.headquartersLabel ?? "";
   const chooseIncident = useCallback(
     (id: string) => {
-      setSelectedIncidentId(id);
-      setShowPopup(true);
+      if (lite && onLiteSelect) onLiteSelect(id);
+      else setSelectedIncidentId(id);
+      if (!lite) setShowPopup(true);
     },
-    [setSelectedIncidentId]
+    [lite, onLiteSelect, setSelectedIncidentId]
   );
 
   // HTML-marked hotspots are deliberate: a 32px DOM hit target remains clickable
@@ -442,7 +456,12 @@ export function ScenarioGlobe() {
   );
 
   return (
-    <div className="globe-field relative w-full h-full min-h-[320px] bg-black overflow-hidden">
+    <div
+      className={`globe-field relative h-full w-full overflow-hidden bg-black ${
+        lite ? "globe-field--lite min-h-[220px]" : "min-h-[320px]"
+      }`}
+      aria-label={lite ? "Interactive globe of five guided incidents" : undefined}
+    >
       <div className="globe-map-stage" ref={stageRef}>
         {mapError ? (
           <ScenarioGlobeFallback
@@ -505,6 +524,7 @@ export function ScenarioGlobe() {
                 atmosphereColor="#607280"
                 atmosphereAltitude={0.1}
                 onPolygonClick={(item: object) => {
+                  if (lite) return;
                   if (
                     isSelectedCountry(
                       item as CountryFeature,
@@ -542,6 +562,7 @@ export function ScenarioGlobe() {
           </GlobeErrorBoundary>
         )}
 
+        {!lite && (
         <div className="absolute left-3 bottom-3 z-10 flex items-center gap-1">
           {!mapError && (
             <>
@@ -569,6 +590,8 @@ export function ScenarioGlobe() {
           )}
         </div>
 
+        )}
+        {!lite && (
         <div className="globe-map-mode-controls absolute right-3 top-3 z-10 flex flex-wrap justify-end items-center gap-2">
           <span className="rounded border border-white/15 bg-black/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
             {hotspots.length} cases ·{" "}
@@ -601,7 +624,8 @@ export function ScenarioGlobe() {
             </button>
           )}
         </div>
-        {satelliteUnavailable && !mapError && (
+        )}
+        {satelliteUnavailable && !mapError && !lite && (
           <p className="absolute right-3 top-12 z-10 bg-black/90 p-2 text-[10px] text-amber-200">
             Satellite image unavailable; charcoal globe retained.
           </p>
@@ -675,7 +699,7 @@ export function ScenarioGlobe() {
             </div>
           </aside>
         )}
-        {playbackEvent && (
+        {playbackEvent && !lite && (
           <div className="pointer-events-none absolute bottom-4 left-4 z-20 w-[min(28rem,calc(100%-2rem))] border border-rose-400/45 bg-black/90 px-4 py-3">
             <div className="flex items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.14em] text-rose-300/85">
               <span>
@@ -698,7 +722,7 @@ export function ScenarioGlobe() {
         )}
       </div>
 
-      {showPopup && selected && globeLesson ? (
+      {!lite && showPopup && selected && globeLesson ? (
         <CaseNotebook
           incident={selected}
           lesson={globeLesson}
@@ -706,7 +730,7 @@ export function ScenarioGlobe() {
           onSizeChange={setNotebookSize}
           onClose={() => setShowPopup(false)}
         />
-      ) : selected ? (
+      ) : !lite && selected ? (
         <button
           type="button"
           className="notebook-reopen"
