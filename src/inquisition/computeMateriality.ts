@@ -158,9 +158,11 @@ export function computeMateriality(
         mostLikelyMultiplier: 1.0,
         maxMultiplier: 2.2,
       },
-      ["Tighten with cited record counts and sector cost curves."],
+      [
+        "Illustrative notification/response proxy only: IRIS Xtreme 2026 Figure 11 finds record count does not reliably predict total event loss. Verify itemized costs; this is NOT a calibrated loss distribution.",
+      ],
       {
-        hint: "This bucket combines the direct work of investigating affected data, notification and consumer support. Regulatory action and litigation belong in conditional external-reaction loss when they are not yet known.",
+        hint: "This is an illustrative notification/response component, NOT a predictor of total breach cost. IRIS Xtreme 2026 Figure 11 shows stolen record counts do not reliably predict reported total losses. Regulatory action and litigation belong in conditional external reaction when not already known.",
         controlQuestions: [
           "Loss-event: strong identity, entitlement reviews, and DLP/egress controls on sensitive data stores.",
           "Variance management: vulnerability and exposure management for apps touching PII/PHI/PCI.",

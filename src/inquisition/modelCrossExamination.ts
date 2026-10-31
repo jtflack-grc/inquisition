@@ -102,6 +102,32 @@ export function interrogateModel(params: {
         "Replace the unit-rate proxy with relevant itemized case evidence, actual response costs, or a clearly sourced peer estimate. Avoid interpreting the output as filed loss.",
     });
   }
+  if (
+    incident.taxonomyTags.includes("financial_theft") ||
+    incident.taxonomyTags.includes("crypto")
+  ) {
+    add({
+      id: "unmodeled-direct-theft",
+      status: "structural",
+      question:
+        "Does the current loss taxonomy even include the principal loss?",
+      observed:
+        "This incident involves direct asset theft, but the five-category teaching bridge has no direct financial theft bucket. Its default simulated loss is not an estimate of stolen or retained assets.",
+      resolveBy:
+        "Source gross stolen assets, recoveries, customer liabilities and retained loss separately. Do not force direct theft into privacy, ransom, response, or reputational categories.",
+    });
+  }
+  if (inputs.recordsMillions !== null && inputs.recordsMillions > 0) {
+    add({
+      id: "iris-xtreme-records-not-severity",
+      status: "needs-evidence",
+      question: "Is a record count being used to predict total event loss?",
+      observed:
+        "Cyentia IRIS Xtreme 2026 Figure 11 finds stolen record counts have negligible predictive relationship with total reported losses for its extreme non-crypto breaches. The app's $2.4M-per-million assumption is only an illustrative component.",
+      resolveBy:
+        "Check specific notification, investigation and recovery unit costs. Use actual incident costs or defensible peer data before making total-loss claims. See https://www.cyentia.com/publication/iris-xtreme-2026/.",
+    });
+  }
   if ((inputs.insuranceOffsetUSDm ?? 0) > 0) {
     add({
       id: "insurance-response",

@@ -3,6 +3,8 @@ import { computeMateriality } from "../inquisition/computeMateriality";
 import { seedForIncident } from "../inquisition/lossExceedance";
 import type { AppliedTefCalibration } from "../inquisition/tefCalibration";
 import { ModelCrossExamination } from "./ModelCrossExamination";
+import { IRISResearchContext } from "./IRISResearchContext";
+import { GoldenInvestigations } from "./GoldenInvestigations";
 import {
   buildMaterialityExportPayload,
   insuranceOffsetUSDmFromInputs,
@@ -125,6 +127,9 @@ function InputBasis({ label }: { label: ReturnType<typeof inputBasis> }) {
 
 export function MaterialityDashboard() {
   const selected = useIncidentStore(selectSelectedIncident);
+  const setSelectedIncidentId = useIncidentStore(
+    (state) => state.setSelectedIncidentId
+  );
   const overrides = useIncidentStore((s) =>
     selected ? s.materialityOverridesByIncidentId[selected.id] : undefined
   );
@@ -346,6 +351,12 @@ export function MaterialityDashboard() {
       <ModelLimitsStrip />
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-transparent px-6 pb-6 pt-4">
+        <GoldenInvestigations
+          selectedId={selected.id}
+          onSelectCase={setSelectedIncidentId}
+          onNavigate={setTab}
+        />
+        <IRISResearchContext incident={selected} />
         {tab === "advanced" && (
           <>
             <ModelCrossExamination

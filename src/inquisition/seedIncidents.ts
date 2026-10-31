@@ -1,6 +1,7 @@
 import { catalogEntryToIncident } from "./evidenceKit";
 import { BUILTIN_CATALOG_SEEDS } from "./catalog/builtInSeeds";
 import { MORE_CATALOG_SEEDS } from "./catalog/moreSeeds";
+import { XTREME_CONTEXT_CATALOG_SEEDS } from "./catalog/xtremeContextSeeds";
 import { enrichIncidentBreadth } from "./enrichIncidentBreadth";
 
 /**
@@ -11,6 +12,7 @@ import { enrichIncidentBreadth } from "./enrichIncidentBreadth";
 export const SEEDED_INCIDENTS = [
   ...BUILTIN_CATALOG_SEEDS,
   ...MORE_CATALOG_SEEDS,
+  ...XTREME_CONTEXT_CATALOG_SEEDS,
 ]
   .map(catalogEntryToIncident)
   .map(enrichIncidentBreadth);

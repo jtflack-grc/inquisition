@@ -4,7 +4,7 @@ import { SEEDED_INCIDENTS } from "./seedIncidents";
 
 describe("computeMateriality", () => {
   it("produces ordered, finite ranges for every seeded incident", () => {
-    expect(SEEDED_INCIDENTS).toHaveLength(34);
+    expect(SEEDED_INCIDENTS).toHaveLength(50);
 
     for (const incident of SEEDED_INCIDENTS) {
       const { outputs } = computeMateriality(incident);
