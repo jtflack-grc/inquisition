@@ -13,7 +13,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "Jaguar Land Rover Automotive plc",
-      type: "Public",
+      type: "Subsidiary",
       headquartersLabel: "Gaydon, Warwickshire, United Kingdom",
       hqLat: 52.19,
       hqLon: -1.47,
@@ -35,7 +35,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     governance: { lastVerified: "2026-10-31", notes: "Independent public-source case; IRIS Xtreme 2026 is comparative population context only, not the case's supporting source." },
     evidence: [{
       id: "inc_jaguar_land_rover_2025_primary",
-      type: "regulator",
+      type: "issuer",
       source: "seed",
       title: "JLR — statement on cyber incident",
       url: "https://media.jlr.com/corporate/news/2025/09/statement-cyber-incident",
@@ -80,7 +80,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     governance: { lastVerified: "2026-10-31", notes: "Independent public-source case; IRIS Xtreme 2026 is comparative population context only, not the case's supporting source." },
     evidence: [{
       id: "inc_marks_spencer_2025_primary",
-      type: "regulator",
+      type: "issuer",
       source: "seed",
       title: "Marks & Spencer — FY2025 results and cyber guidance",
       url: "https://corporate.marksandspencer.com/newsroom/press-releases/full-year-results-52-weeks-ended-29-march-2025",
@@ -103,7 +103,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "Co-operative Group Limited",
-      type: "Public",
+      type: "Private",
       headquartersLabel: "Manchester, England, United Kingdom",
       hqLat: 53.481,
       hqLon: -2.243,
@@ -125,7 +125,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     governance: { lastVerified: "2026-10-31", notes: "Independent public-source case; IRIS Xtreme 2026 is comparative population context only, not the case's supporting source." },
     evidence: [{
       id: "inc_coop_group_2025_primary",
-      type: "regulator",
+      type: "issuer",
       source: "seed",
       title: "Co-op — 2025 annual results",
       url: "https://www.co-operative.coop/annual-results",
@@ -193,7 +193,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "Bybit exchange",
-      type: "Unknown",
+      type: "Private",
       headquartersLabel: "Dubai, United Arab Emirates",
       hqLat: 25.205,
       hqLon: 55.27,
@@ -215,7 +215,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     governance: { lastVerified: "2026-10-31", notes: "Independent public-source case; IRIS Xtreme 2026 is comparative population context only, not the case's supporting source." },
     evidence: [{
       id: "inc_bybit_2025_primary",
-      type: "regulator",
+      type: "issuer",
       source: "seed",
       title: "FBI — Bybit $1.5B theft attribution",
       url: "https://www.fbi.gov/investigate/cyber/alerts/2025/north-korea-responsible-for-1-5-billion-bybit-hack",
@@ -238,7 +238,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "Synnovis LLP",
-      type: "Unknown",
+      type: "Private",
       headquartersLabel: "London, England, United Kingdom",
       hqLat: 51.5,
       hqLon: -0.11,
@@ -283,7 +283,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "Ascension",
-      type: "Public",
+      type: "Non-profit",
       headquartersLabel: "St. Louis, Missouri, USA",
       hqLat: 38.627,
       hqLon: -90.2,
@@ -328,7 +328,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "DMM Bitcoin Co., Ltd.",
-      type: "Public",
+      type: "Private",
       headquartersLabel: "Tokyo, Japan",
       hqLat: 35.676,
       hqLon: 139.65,
@@ -350,7 +350,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     governance: { lastVerified: "2026-10-31", notes: "Independent public-source case; IRIS Xtreme 2026 is comparative population context only, not the case's supporting source." },
     evidence: [{
       id: "inc_dmm_bitcoin_2024_primary",
-      type: "regulator",
+      type: "issuer",
       source: "seed",
       title: "FBI / Japan NPA — DMM Bitcoin $308M attribution",
       url: "https://www.fbi.gov/news/press-releases/fbi-dc3-and-npa-identification-of-north-korean-cyber-actors-tracked-as-tradertraitor-responsible-for-theft-of-308-million-from-bitcoindmmcom",
@@ -373,7 +373,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "WazirX",
-      type: "Unknown",
+      type: "Private",
       headquartersLabel: "Mumbai, Maharashtra, India",
       hqLat: 19.076,
       hqLon: 72.878,
@@ -598,7 +598,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "ICBC Financial Services LLC",
-      type: "Public",
+      type: "Subsidiary",
       headquartersLabel: "New York, New York, USA",
       hqLat: 40.713,
       hqLon: -74.006,
@@ -643,7 +643,7 @@ export const XTREME_CONTEXT_CATALOG_SEEDS: CatalogSeed[] = [
     manualEvidenceOnly: true,
     company: {
       name: "Ronin Network / Sky Mavis",
-      type: "Public",
+      type: "Private",
       headquartersLabel: "Ho Chi Minh City, Vietnam",
       hqLat: 10.824,
       hqLon: 106.63,
