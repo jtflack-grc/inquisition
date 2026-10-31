@@ -239,7 +239,6 @@ export function LiteWorkspace({
     overrides?: ReturnType<typeof liteOverrides>
   ) => void;
 }) {
-  const incidents = useIncidentStore((state) => state.incidents);
   const selected = useIncidentStore(selectSelectedIncident);
   const setSelectedId = useIncidentStore(
     (state) => state.setSelectedIncidentId
