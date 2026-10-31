@@ -30,7 +30,7 @@ const EVIDENCE_GROUP_ORDER: {
   key: "sec" | "lawsuit" | "regulator" | "news";
   label: string;
 }[] = [
-  { key: "sec", label: "SEC & filings" },
+  { key: "sec", label: "Issuer & filings" },
   { key: "lawsuit", label: "Litigation" },
   { key: "regulator", label: "Regulators" },
   { key: "news", label: "News & trade press" },
@@ -50,7 +50,7 @@ const STALE_RETRIEVED_DAYS = 365;
 function bucketForEvidence(
   e: EvidenceItem
 ): "sec" | "lawsuit" | "regulator" | "news" {
-  if (e.type === "sec_8k" || e.type === "sec_other") return "sec";
+  if (e.type === "sec_8k" || e.type === "sec_other" || e.type === "issuer") return "sec";
   if (e.type === "lawsuit") return "lawsuit";
   if (e.type === "regulator") return "regulator";
   return "news";
@@ -79,6 +79,8 @@ function typeBadge(type: EvidenceType): string {
       return "8-K";
     case "sec_other":
       return "SEC";
+    case "issuer":
+      return "Issuer";
     case "lawsuit":
       return "Docket";
     case "regulator":
