@@ -7,6 +7,8 @@ export interface IncidentState {
   selectedIncidentId: string | null;
   incidentQuery: string;
   materialityOverridesByIncidentId: Record<string, MaterialityOverrides>;
+  /** Visible provenance flag when fictional Lite inputs are transferred into the full model. */
+  liteScenarioTransfers: Record<string, boolean>;
   /** Shared scenario scale, so the case notebook and materiality rail always agree. */
   scenarioStressPct: number;
   setScenarioStressPct: (percent: number) => void;
@@ -19,6 +21,7 @@ export interface IncidentState {
     overrides: MaterialityOverrides
   ) => void;
   clearMaterialityOverridesForIncident: (incidentId: string) => void;
+  markLiteScenarioTransfer: (incidentId: string) => void;
   getMaterialityOverrides: (
     incidentId: string
   ) => MaterialityOverrides | undefined;
@@ -31,6 +34,7 @@ export const useIncidentStore = create<IncidentState>((set, get) => ({
   selectedIncidentId: firstId,
   incidentQuery: "",
   materialityOverridesByIncidentId: {},
+  liteScenarioTransfers: {},
   scenarioStressPct: 100,
   setScenarioStressPct: (percent) => {
     if (Number.isFinite(percent) && percent >= 50 && percent <= 150) {
@@ -62,9 +66,14 @@ export const useIncidentStore = create<IncidentState>((set, get) => ({
   clearMaterialityOverridesForIncident: (incidentId) =>
     set((s) => {
       const next = { ...s.materialityOverridesByIncidentId };
+      const liteTransfers = { ...s.liteScenarioTransfers };
       delete next[incidentId];
-      return { materialityOverridesByIncidentId: next };
+      delete liteTransfers[incidentId];
+      return { materialityOverridesByIncidentId: next, liteScenarioTransfers: liteTransfers };
     }),
+
+  markLiteScenarioTransfer: (incidentId) =>
+    set((s) => ({ liteScenarioTransfers: { ...s.liteScenarioTransfers, [incidentId]: true } })),
 
   getMaterialityOverrides: (incidentId) =>
     get().materialityOverridesByIncidentId[incidentId],
