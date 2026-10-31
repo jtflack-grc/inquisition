@@ -6,6 +6,8 @@ import {
   useState,
 } from "react";
 
+import { useIncidentStore } from "../store/incidentStore";
+
 const INTRO_VERSION = "3";
 const DISMISS_KEY = `inquisition-intro-dismissed-v${INTRO_VERSION}`;
 
@@ -29,6 +31,7 @@ function markIntroDismissed() {
 }
 
 export function WelcomePopup() {
+  const incidentCount = useIncidentStore((state) => state.incidents.length);
   const [isVisible, setIsVisible] = useState(false);
   const enterRef = useRef<HTMLButtonElement>(null);
 
@@ -98,8 +101,8 @@ export function WelcomePopup() {
             Interrogate the loss story.
           </h1>
           <p className="mt-5 max-w-lg text-sm leading-6 text-slate-300">
-            Reconstruct 34 public incidents from cited evidence, challenge the
-            loss assumptions, and watch the materiality range move.
+            Reconstruct {incidentCount} public incidents from cited evidence,
+            challenge the loss assumptions, and watch the materiality range move.
           </p>
 
           <div className="mt-8 grid gap-px border border-emerald-400/15 bg-emerald-400/15 sm:grid-cols-3">
